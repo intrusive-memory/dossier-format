@@ -23,6 +23,21 @@ characters/THE PRACTITIONER.dossier/
 > ([REQUIREMENTS.md](REQUIREMENTS.md)). The specification, schemas, page
 > template and conformance fixtures are not written yet.
 
+## Purpose
+
+A character's assets are made by several tools and read by several more: one
+writes the description, one renders the images, one builds the voice, and
+others use all of it to make scenes and audio. Without a shared definition,
+every tool has to know every other tool's layout, and a character can't leave
+the app that made it.
+
+dossier-format is that shared definition.
+
+## Goal
+
+A reader written from this repository alone, in any language, opens every
+valid bundle and rejects every invalid one.
+
 ## What this repository is
 
 The standard, and only the standard:
@@ -50,6 +65,12 @@ can conform to it.
   identity file a dossier carries in `voice/`.
 - `CAST.md` ([SwiftReparto](https://github.com/intrusive-memory/SwiftReparto)):
   the cast list. Dossiers are found through it, never by scanning directories.
+
+## Contributing
+
+Work lands on `development`, the default branch. `main` changes only by a pull
+request from `development`, and is what implementations pin to. See
+[AGENTS.md](AGENTS.md) for the rules.
 
 ## License
 
