@@ -74,4 +74,6 @@ request from `development`, and is what implementations pin to. See
 
 ## License
 
-Not chosen yet. Until a license file is added, all rights are reserved.
+[CC0 1.0 Universal](LICENSE): public domain, the same as vox-format. It covers
+the specification, schemas, data files, examples and the page template. Fonts
+embedded in the template keep their own license (SIL Open Font License).

@@ -63,9 +63,10 @@ The specification, schemas, data files, template and fixtures are not written.
 1. **This repository is public.** Nothing from a private repository goes in:
    no character images, descriptions, voices or screenplay text from a real
    production. Fixtures use invented characters (REQUIREMENTS Q2).
-2. **No license has been chosen** (REQUIREMENTS Q1). Don't add one, and don't
-   copy in third-party material, until it is. Fonts in the template must be
-   under the OFL.
+2. **Everything here is CC0 1.0** ([LICENSE](LICENSE)), the same as
+   vox-format. Don't copy in material that can't be released that way. The one
+   exception is fonts in the template, which must be under the OFL and keep
+   that license.
 3. **Language-agnostic.** No requirement may name a programming language, a
    framework or an API. "The implementation detects the largest face" is a
    rule; "use Vision" is not.

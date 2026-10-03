@@ -244,7 +244,7 @@ Nothing. The source text is already written (§1).
 
 | # | Question | Recommendation |
 |---|----------|----------------|
-| Q1 | **License.** The repository is public and has no license file, so all rights are reserved for now. vox-format is CC0. | CC0 for the specification, schemas and data; decide the template's separately, since it contains fonts under the OFL. |
+| Q1 | **License.** *Decided 2026-10-03:* CC0 1.0 Universal, the same as vox-format, for everything in the repository. Fonts embedded in the template keep the OFL. | — |
 | Q2 | **Fixtures.** The only real characters live in a private repository. Their images and descriptions can't go into this public one without a decision. | Make a synthetic character for the public fixtures. Keep the real ones as private fixtures in the implementation's tests. |
 | Q3 | **Tier requirement for `face`.** Version 1 had no face crop; the bundle draft doesn't give its row. | Required wherever `portrait` is required, since it is derived from the portrait at no cost. |
 | Q4 | **Do the template, field list and tokens belong here or in SwiftDossier?** Decided 2026-10-03: here, "for the moment". | Revisit once a second renderer exists or the first one finds the split awkward. |
