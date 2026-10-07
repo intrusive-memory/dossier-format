@@ -14,7 +14,7 @@ conforming dossier page contains. It has no implementation of its own.
 validator and page generator.
 
 This document is the requirements for the standard. The deliverables it asks
-for (§12) are a specification, schemas, data files, the page template and
+for (§13) are a specification, schemas, data files, the page template and
 conformance fixtures.
 
 ## 1. Where this text comes from
@@ -30,7 +30,7 @@ behind.
 | Personaje `docs/REQUIREMENTS-APP-UI.md` | §5.1 the seven tabs, §5.4 the shared field list, §6 the page rules | The SwiftUI edit widget (Personaje's) |
 
 Where the two sources disagree, the later one (the `.dossier` bundle, 2026-10-02)
-wins. The differences are listed in §11.
+wins. The differences are listed in §12.
 
 ## 2. Scope
 
@@ -174,7 +174,24 @@ characters/<CHARACTER>.dossier/
 | DF-52 | Only `selected` assets are shown. Missing required assets are listed by name. Integrity problems (a missing file, a hash mismatch, a stale selection, a name mismatch) appear as a banner at the top. Provenance is a line under each tab. |
 | DF-53 | A complete lead's page should be about 3 MB. A validator warns above 10 MB. |
 
-## 10. Validation
+## 10. Hosting
+
+A **host** is any application that shows a project's files and comes upon a
+bundle: a project browser, an editor's sidebar, a scene tool's cast view. A
+host is not a reader. It links one (SwiftDossier's `DossierCore`, or any
+conforming reader) and asks it; the rules below say what the host itself
+does and does not know.
+
+| ID | Requirement |
+|----|-------------|
+| DF-58 | **One item.** A host that scans directories presents `<CHARACTER>.dossier` as a single item, named for the directory, and never lists or offers its contents. The package type reserved in DF-19 is how the operating system tells the host it is a bundle; where the type isn't registered a host MAY recognize the `dossier` extension directly. |
+| DF-59 | **The manifest is the map.** A host locates the page, the face crop and every other asset through the manifest's `assets` entries (`kind: dossier`, `face`, …) by way of a reader, never by file name. A `<CHARACTER>-dossier.html` or a version 1 `dossier.html` found by listing the directory is not the page; the manifest says which file is. |
+| DF-60 | **Selecting the item shows the page.** The host renders the dossier page (§9) read-only in a web view, with the bundle directory as the page's base so a version 1 page's relative references still resolve. The host does not edit the bundle. A host that wants a character changed hands off to a writer (DF-30), for example through a URL scheme carrying the bundle path and a field key (DF-51). |
+| DF-61 | **The host shows what the validator finds, in place of the page.** A bundle with no page, an unknown `manifestVersion`, a name mismatch (DF-8) or an orphan (DF-10) is still one item; the host names the problem where the page would be, with the validator's code (DF-57), and never hides, deletes or repairs the bundle. |
+| DF-62 | **Hosts carry no format knowledge beyond the type.** Every rule above is answered by the reader the host links. A host that cannot link a reader shows the item and says a reader is needed. The reader MAY supply the item's icon (the selected `face` crop where there is one); the host's default icon is a person. |
+| DF-63 | **Discovery stays with `CAST.md`.** A host's scan is presentation only (DF-7). Finding a bundle on disk does not make it a cast member; a bundle no `CAST.md` member points at is an orphan (DF-10) and is shown as one. |
+
+## 11. Validation
 
 A validator never changes anything.
 
@@ -185,7 +202,7 @@ A validator never changes anything.
 | DF-56 | **Report:** completeness against the tier, listing missing required assets by name. |
 | DF-57 | Each error and warning has a stable code in the specification, so two validators report the same finding the same way. |
 
-## 11. Version 1 to version 2
+## 12. Version 1 to version 2
 
 What changed from the record as first drafted, and what a migrated bundle looks
 like. The migration tool is an implementation's.
@@ -203,11 +220,11 @@ like. The migration tool is an implementation's.
 | Candidates and rejected images inside `images/` | candidates in `.generations/`; the bundle holds what was selected or kept |
 | Free-form image file names | `<kind>[-<variant>]-<sha8>.<ext>` |
 
-## 12. Deliverables
+## 13. Deliverables
 
 | Path | Contents |
 |------|----------|
-| `docs/DOSSIER-FORMAT.md` | The specification: §3 to §11 of this document as normative text, with examples. |
+| `docs/DOSSIER-FORMAT.md` | The specification: §3 to §12 of this document as normative text, with examples. |
 | `schemas/` | JSON Schema for the manifest (versions 1 and 2), `samples.yaml`, and the embedded record. |
 | `data/tiers.json` | The requirements table (DF-36). |
 | `data/fields.json` | The field list (DF-47). |
@@ -220,7 +237,7 @@ like. The migration tool is an implementation's.
 own version. A change that makes an existing valid bundle invalid is a new
 format version.
 
-## 13. Acceptance
+## 14. Acceptance
 
 1. A reader written from the specification alone, with no access to
    SwiftDossier, opens every valid fixture and rejects every invalid one with
@@ -231,16 +248,16 @@ format version.
 4. `data/fields.json` has every field the page shows, and nothing the page
    doesn't.
 
-## 14. Depends on
+## 15. Depends on
 
 Nothing. The source text is already written (§1).
 
-## 15. Blocks
+## 16. Blocks
 
 - **SwiftDossier:** implements this.
 - Through it: the podcast-granville migration, Personaje, and the Vinetas app.
 
-## 16. Open questions
+## 17. Open questions
 
 | # | Question | Recommendation |
 |---|----------|----------------|
