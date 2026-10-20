@@ -1,7 +1,7 @@
 ---
 type: requirements
 state: draft
-updated: 2026-10-03
+updated: 2026-10-19
 sequence: 1 — first on the critical path of the Personaje effort
 ---
 
@@ -263,8 +263,8 @@ Nothing. The source text is already written (§1).
 |---|----------|----------------|
 | Q1 | **License.** *Decided 2026-10-03:* CC0 1.0 Universal, the same as vox-format, for everything in the repository. Fonts embedded in the template keep the OFL. | — |
 | Q2 | **Fixtures.** The only real characters live in a private repository. Their images and descriptions can't go into this public one without a decision. | Make a synthetic character for the public fixtures. Keep the real ones as private fixtures in the implementation's tests. |
-| Q3 | **Tier requirement for `face`.** Version 1 had no face crop; the bundle draft doesn't give its row. | Required wherever `portrait` is required, since it is derived from the portrait at no cost. |
+| Q3 | *Decided 2026-10-19 (DOSSIER-FORMAT §8.3, `data/tiers.json`): required wherever `portrait` is.* **Tier requirement for `face`.** Version 1 had no face crop; the bundle draft doesn't give its row. | Required wherever `portrait` is required, since it is derived from the portrait at no cost. |
 | Q4 | **Do the template, field list and tokens belong here or in SwiftDossier?** Decided 2026-10-03: here, "for the moment". | Revisit once a second renderer exists or the first one finds the split awkward. |
-| Q5 | **Canon facts.** The Profile tab shows facts with a source (Stated, Inferred, Author) and marks generated values. Where and how `CHARACTER.md` stores them is defined in Personaje's CHARACTER_CREATION.md and isn't carried into this document yet. | Bring the storage rule into §8 before the specification is written. |
+| Q5 | *Decided 2026-10-19 (D9; DOSSIER-FORMAT §9.3): footnoted claims with the classes Stated, Inferred, Author; generated values listed in `draft.generated`.* **Canon facts.** The Profile tab shows facts with a source (Stated, Inferred, Author) and marks generated values. Where and how `CHARACTER.md` stores them is defined in Personaje's CHARACTER_CREATION.md and isn't carried into this document yet. | Bring the storage rule into §8 before the specification is written. |
 | Q6 | **The type identifier.** The draft uses `io.intrusive-memory.dossier`. A vendor-neutral standard may want a neutral one. | Keep the draft identifier until someone outside the organization implements the format. |
 | Q7 | **Version 1 in the specification.** Only two version 1 records exist. | Describe version 1 in an appendix for readers; give it a schema; don't write fixtures beyond those two. |
