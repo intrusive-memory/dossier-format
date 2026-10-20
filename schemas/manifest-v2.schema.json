@@ -335,6 +335,9 @@
               },
               "notes": {
                 "type": "string"
+              },
+              "artStyle": {
+                "type": "string"
               }
             }
           },

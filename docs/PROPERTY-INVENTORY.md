@@ -113,7 +113,8 @@ required by a step ("enough to recreate it exactly", CC 4.4).
 | `models` | vox | echada | G (Qwen3 repo ids) | gap → add for `vox` (the sizes the file holds). |
 | `prompt` | images, vox (`voicePrompt`) | all | DF-28; G | in DF (the text actually sent, before style). |
 | `composedPrompt` | images | SwiftVinetas | G (42 sidecars) | gap → add (style + prompt as the engine received it). |
-| `style` | images | SwiftVinetas, `--style` | G | gap → add. Needed for staleness (PR §2 rule 2: changing the style marks images stale). |
+| `style` | images | SwiftVinetas, `--style` | G | gap → add (the full string sent). Staleness uses `artStyle` (below). |
+| `artStyle` | images | Personaje | UD20 | gap → add: the character's art style at generation; changing the character's `artStyle` makes the image stale. |
 | `negative`, `negativeApplied` | images | SwiftVinetas `PanelMetadata`; G (ARCHER, by hand) | — | gap → add both; FLUX ignores the negative, so `negativeApplied` is what tells a reader. |
 | `seed`, `steps`, `guidance`, `width`, `height` | images | SwiftVinetas | G; CC 4.4 | `seed` in DF; others gap → add. |
 | `engine`, `mode` | images | SwiftVinetas (`flux2`, `imageToImage`) | G | gap → add. |
@@ -188,7 +189,7 @@ validator implements each check ID as the spec defines it.
 | Front matter `type`, `character`, `role`, `age`, `pronouns`, `occupation` | DF-39; S; G | renderer, Vinetas, cast page | in DF. **gap:** `age` is int or string in G (`39`, `late 20s`, `unknown`). → string. `role: unconfirmed` in G (5/9). → CAST.md wins; front-matter `role` is a copy, may be absent. |
 | `aliases` (list), `languages` (list, BCP 47), `sampleLine` | CC; G (9/9) | Personaje, renderer, EC-28 (`sampleLine`) | **gap** → add. |
 | `draft: {generatedBy, generatedAt, sources[], reviewedAt}` | CC; G (9/9; `reviewedAt` 4/9) | Personaje gates | **gap** → add as optional; dates as quoted strings (G writes unquoted YAML dates). |
-| `artStyle` | Vinetas integration (:64) | Vinetas | **conflict:** SwiftProyecto `style.artStyle`, Personaje `personaje.artStyle` (project-wide). → not a character field; project-wide (Vinetas Q6 already leans this way). |
+| `artStyle` | Vinetas integration (:64); Personaje APP-UI UD20 (2026-10-18) | Vinetas, Personaje | *Decided by the user 2026-10-18 (UD20, BUNDLE D15):* a CHARACTER.md front-matter key; `personaje.artStyle` is the default for new characters. Images record it as `provenance.artStyle` for staleness. (This row first proposed project-wide; corrected 2026-10-19.) |
 | Body sections in order: Logline, Appearance, Personality, Backstory, Arc, Relationships, Voice & Speech, Pronunciation, Wardrobe | DF-39; S; G | renderer, flipbook (Appearance, Wardrobe), cast page (Logline) | in DF. **gap:** heading matching (G: `## Arc (Season 1)`). → a section matches by its name, optionally followed by a parenthetical. |
 | `## Canon & Guardrails` | CC; G (9/9) | flipbook, renderer | **gap** → add as a standard section after Wardrobe. |
 | `## Open Questions` with `### Needed before Portrait / Views`, `### Needed for Voice`, `### Optional`, `### Deferred` | CC; G (plus `Tier` 5/9, `Continuity` 5/9) | Personaje gates | **gap** → add, with the four standard groups; other groups allowed. |

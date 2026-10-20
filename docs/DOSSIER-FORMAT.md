@@ -87,6 +87,8 @@ bundle's only by case.
   reported, never loaded, never deleted. A writer's *refresh* MAY adopt an
   orphan whose name equals a member that has no `manifest:`, by setting the
   pointer. It never adopts on a near match.
+- Everything for a character lives in its bundle: description, art style
+  (§9.1), images, voice and LoRA (§8.4). No copy elsewhere is the authority.
 - Where bundles go is the producing tool's setting (conventionally
   `characters/`); the format only requires that `manifest:` points there.
 
@@ -248,7 +250,8 @@ Unknown keys are preserved.
 | `models` | `vox` | array of string | The models the `.vox` holds, as the tool reports them. |
 | `prompt` | images | string | The prompt sent, before style is applied. |
 | `composedPrompt` | images | string | Style and prompt as the engine received them. |
-| `style` | images | string | The style string sent. |
+| `style` | images | string | The full style string sent. |
+| `artStyle` | images | string | The character's `artStyle` (§9.1) when the image was made: the staleness key (§7). |
 | `negative` | images | string | |
 | `negativeApplied` | images | boolean | `false` when the engine ignored `negative`. |
 | `seed`, `steps` | images | integer | |
@@ -298,8 +301,9 @@ Unknown keys are preserved.
 
 An asset is **stale** when any input's `sha256` differs from the current
 selected asset of that role (or the current member, bundle, template).
-Changing the project's art style also makes images stale: a reader compares
-`provenance.style` with the current style when it knows it. Stale assets are
+Changing the character's `artStyle` (§9.1) also makes its images stale: an
+image whose `provenance.artStyle` differs from the current front-matter
+`artStyle` is stale. No other character is affected. Stale assets are
 flagged (`W-STALE`), never deleted or demoted.
 
 ## 8. Kinds
@@ -409,6 +413,7 @@ UTF-8 Markdown with YAML front matter.
 | `pronouns` | no | string | |
 | `occupation` | no | string | |
 | `languages` | no | array of BCP 47 | First is primary. |
+| `artStyle` | no | string | The character's art style, sent with every image prompt for this character. A producing tool starts a new character with the project default; a character may differ from the rest of the cast (Personaje APP-UI UD20). |
 | `sampleLine` | no | string | One of the character's own lines, word for word: the neutral sample's text. |
 | `draft` | no | object | `generatedBy`, `generatedAt` (timestamp or date string), `sources` (array), `reviewedAt` (date string), `generated` (array of section names or front-matter keys still as generated; a writer removes an entry when a person edits it). |
 
