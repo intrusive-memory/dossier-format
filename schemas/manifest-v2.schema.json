@@ -593,26 +593,6 @@
                 "lora"
               ]
             }
-          },
-          {
-            "if": {
-              "properties": {
-                "kind": {
-                  "const": "view"
-                }
-              }
-            },
-            "then": {
-              "properties": {
-                "variant": {
-                  "enum": [
-                    "front",
-                    "profile",
-                    "back"
-                  ]
-                }
-              }
-            }
           }
         ]
       }

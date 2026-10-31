@@ -2,7 +2,7 @@
 type: specification
 state: draft
 formatVersion: 2
-updated: 2026-10-19
+updated: 2026-10-31
 ---
 
 # The dossier format, version 2
@@ -201,7 +201,7 @@ list. An asset whose `path` has no `files` entry is `E-ASSET-NO-FILE`.
 |-----|----------|------|---------|
 | `path` | yes | path | The file. |
 | `kind` | yes | kind (§8) | What it is. |
-| `status` | yes | `selected` \| `candidate` \| `rejected` | At most one `selected` per `kind` + `variant` (`E-MULTI-SELECTED`). Selecting one demotes the previous selection to `candidate`. Nothing is ever deleted implicitly. [DF-26] |
+| `status` | yes | `selected` \| `candidate` \| `rejected` | At most one `selected` per `kind` + `variant`, and for `voiceSample` per `kind` + `variant` + `model` (`E-MULTI-SELECTED`). Selecting one demotes the previous selection of that same combination to `candidate`. Nothing is ever deleted implicitly. [DF-26] |
 | `variant` | when the kind has variants | string | §8.1. |
 | `label` | no | string | Display text. Never a key; never parsed. |
 | `createdAt` | yes | timestamp | When the file was made (a generator's own time where known), not when it was added. |
@@ -262,7 +262,7 @@ Unknown keys are preserved.
 | `loras` | images | `[{path, scale, activationKeyword}]` | `path` is a bundle path when it is this character's `lora` asset. |
 | `references` | images | array (below) | Every reference image sent. |
 | `round` | `portrait` | string | The prompt round (`v3`, `v3-ref`), which a content-hash file name no longer carries. |
-| `box` | `face` | `{x, y, width, height}` | A hand-set crop box in source pixels, origin top-left. Absent when detected. |
+| `box` | `face` | `{x, y, width, height}` | A hand-set **face** box (§8.5), not the crop, in source pixels, origin top-left. Absent when detected. |
 | `voicePrompt` | `vox` | string | The voice-design prompt. |
 | `copiedFrom` | `vox` | project-relative path | Set when an existing `.vox` was brought in unchanged. |
 | `instruct` | `voiceSample` | string | The delivery instruction sent. |
@@ -287,7 +287,7 @@ Unknown keys are preserved.
 | Shape | Used for |
 |-------|----------|
 | `{"role": "<role>", "path": "<bundle path>", "sha256": "<hash>"}` | An asset in the bundle. Roles: `portrait`, `face`, `vox`, `description`. |
-| `{"role": "castMember", "sha256": "<hash>"}` | The `CAST.md` member, hashed as its canonical JSON (keys sorted, no whitespace). |
+| `{"role": "castMember", "sha256": "<hash>"}` | The `CAST.md` member, hashed as its canonical JSON (below). |
 | `{"role": "bundle", "sha256": "<hash>"}` | The `manifestChecksum` computed over every file except the page itself. |
 | `{"role": "template", "version": "<v>", "sha256": "<hash>"}` | The page template. |
 
@@ -298,6 +298,13 @@ Unknown keys are preserved.
 | `expression` | `face`, `portrait` |
 | `voiceSample` | `vox` |
 | `dossier` | `description`, `castMember`, `bundle`, `template` |
+
+**Canonical JSON** of a member: every key the member has in `CAST.md`, as JSON
+in UTF-8, with object keys sorted at every level by the byte order of their
+UTF-8 form and no whitespace outside strings. Inside strings only `"`, `\` and
+the control characters below U+0020 are escaped; `/` and non-ASCII characters
+are written as themselves. `{"character":"INÉS","manifest":"characters/INÉS.dossier/manifest.json"}`
+is already canonical.
 
 An asset is **stale** when any input's `sha256` differs from the current
 selected asset of that role (or the current member, bundle, template).
@@ -338,7 +345,8 @@ that `kind`, that `variant` (or no `variant`, when none is asked for) and
 ### 8.2 Voice [DF-38, D5]
 
 - **Which voice to play** is `CAST.md` `voices.voxalta`: every audio tool
-  reads it. **What's in the bundle** is the manifest. When the member's
+  reads it; its paths are relative to the directory holding `CAST.md`. **What's
+  in the bundle** is the manifest. When the member's
   `voices.voxalta` doesn't name the bundle's selected `vox`, the validator
   reports `W-VOICE-ELSEWHERE`; when `voicePrompt` differs from the selected
   vox's `provenance.voicePrompt`, `W-VOICE-PROMPT`.
@@ -366,7 +374,7 @@ restate it.
 | `description.full` | `CHARACTER.md` is selected and has every full section (§9.2). |
 | `description.short` | `CHARACTER.md` is selected and has Logline, Appearance, Voice & Speech. |
 | `voicePrompt` | The `CAST.md` member has a non-empty `voicePrompt`. |
-| `vox.1.7b`, `vox.0.6b` | The selected `vox` holds that size. |
+| `vox.1.7b`, `vox.0.6b` | The selected `vox` holds that size: an entry of its `provenance.models` contains the size, compared case-insensitively (`Qwen3-TTS-12Hz-1.7B-Base-bf16` holds `1.7b`). |
 | `sample.neutral.1.7b`, `sample.neutral.0.6b` | A selected `voiceSample` with variant `neutral` and that `model`. |
 | `sample.range` | Three or more selected `voiceSample`s with variants other than `neutral`. |
 | `pronunciation` | `CHARACTER.md` has a non-empty Pronunciation section. |
@@ -391,11 +399,23 @@ is the character's adapter. Its `lora` object:
 
 ### 8.5 The face crop [DF-41]
 
-A square centred on the largest detected face in the selected portrait, with
-a side 1.8 times the larger dimension of the face box, clamped to the image,
-never upscaled past the source, saved as PNG. A hand-set box replaces the
-detected one and is recorded as `provenance.box`. How a face is detected is
-the implementation's.
+A square centred on the largest detected face in the selected portrait, never
+upscaled, saved as PNG. A hand-set face box replaces the detected one and is
+recorded as `provenance.box`. How a face is detected is the implementation's.
+
+For a face box `(x, y, w, h)` in an image `W` × `H`, origin top-left, with
+values rounded half away from zero:
+
+1. `side` = round(min(1.8 × max(w, h), W, H))
+2. `left` = round(min(max(x + w/2 − side/2, 0), W − side))
+3. `top` = round(min(max(y + h/2 − side/2, 0), H − side))
+
+A crop that would pass an edge moves inward; it shrinks only when it is larger
+than the image.
+
+Worked example. Face box `(50, 60, 80, 100)` in a 180 × 320 portrait:
+`side` = min(180, 180, 320) = 180, `left` = min(max(0, 0), 0) = 0,
+`top` = min(max(20, 0), 140) = 20. The crop is 180 × 180 at (0, 20).
 
 ## 9. CHARACTER.md [DF-39, DF-40, D9]
 
@@ -496,6 +516,13 @@ registered as `kind: dossier`.
   `<script type="application/json" id="character-record">`, matching
   [`schemas/record.schema.json`](../schemas/record.schema.json):
   `{formatVersion, character, castMember, frontMatter, body, manifest}`.
+  Every `<` in the JSON is written `\u003c`, so the text can't close the script.
+- **The embedded manifest is the manifest without the page,** since a file
+  can't contain its own hash: no `files` or `assets` entry for the page, and
+  `manifestChecksum` computed over the remaining files, which is the value of
+  the page's `bundle` input (§7). Its `updatedAt` is the latest `createdAt` of
+  its assets, not the last write, so rendering twice gives the same bytes. It
+  otherwise matches `manifest.json`.
 - **Template:** `<meta name="dossier-template" content="<version> <sha256>">`.
   A newer template makes the page stale.
 - **Stable output:** the same inputs and template give the same bytes, per
@@ -505,7 +532,8 @@ registered as `kind: dossier`.
   tab; the footnotes as a sources list in citation order. Other characters
   are plain text. The tabs and fields are `data/fields.json` (to be written
   with the template; REQUIREMENTS §13).
-- A complete lead's page should be about 3 MB; over 10 MB is `W-PAGE-SIZE`.
+- A complete lead's page should be about 3 MB; over 10,000,000 bytes is
+  `W-PAGE-SIZE`.
 
 ## 12. Hosting [DF-58 to DF-63]
 
@@ -525,14 +553,16 @@ recording its references) records their `sha256`, and finds them again by
 
 ## 14. Validation [DF-54 to DF-57]
 
-A validator never changes anything. Each finding has a stable code.
+A validator never changes anything. Each finding has a stable code. A fault
+that a specific code below names may also break the schema; the specific code
+MUST be reported and `E-SCHEMA` MAY be reported with it.
 
 | Code | Level | Finding |
 |------|-------|---------|
 | `E-VERSION` | error | Unknown `manifestVersion` |
 | `E-NAME` | error | Name invalid (§2) |
 | `E-NAME-MISMATCH` | error | Bundle name, manifest `character` and `CAST.md` member disagree |
-| `E-NOT-BUNDLE` | error | Character directory without `.dossier` |
+| `E-NOT-BUNDLE` | error | A version 2 manifest in a directory without `.dossier` |
 | `E-PATH` | error | A path is absolute, escapes the bundle, or has an empty, `.` or `..` segment |
 | `E-FILE-MISSING` | error | A `files` entry has no file |
 | `E-FILE-HASH` | error | A file's hash or size doesn't match its entry |
@@ -540,7 +570,7 @@ A validator never changes anything. Each finding has a stable code.
 | `E-CHECKSUM` | error | `manifestChecksum` doesn't match |
 | `E-ASSET-NO-FILE` | error | An asset with no `files` entry |
 | `E-ASSET-DUPLICATE` | error | Two assets with the same `path` |
-| `E-MULTI-SELECTED` | error | More than one `selected` for a `kind` + `variant` |
+| `E-MULTI-SELECTED` | error | More than one `selected` for a `kind` + `variant` (`voiceSample`: + `model`) |
 | `E-KIND-RETIRED` | error | A retired kind in a version 2 manifest |
 | `E-SCHEMA` | error | The manifest fails its schema |
 | `W-UNCLASSIFIED` | warning | A file with no asset entry |
@@ -554,7 +584,7 @@ A validator never changes anything. Each finding has a stable code.
 | `W-VOICE-ELSEWHERE` | warning | `voices.voxalta` doesn't name the selected `vox` |
 | `W-VOICE-PROMPT` | warning | `voicePrompt` differs from the vox's |
 | `W-FOOTNOTE` | warning | An undefined or unused footnote |
-| `W-PAGE-SIZE` | warning | The page is over 10 MB |
+| `W-PAGE-SIZE` | warning | The page is over 10,000,000 bytes |
 | `W-PAGE-EXTERNAL` | warning | The page references something outside itself |
 | `W-INCOMPLETE` | warning | A required tier row is missing (listed by row ID) |
 | `W-V1` | warning | A version 1 manifest (readable; migrate it) |

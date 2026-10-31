@@ -1,0 +1,74 @@
+{
+  "assets": [
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "kind": "description",
+      "path": "CHARACTER.md",
+      "provenance": {
+        "provider": "manual"
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "derivedFrom": [
+        {
+          "path": "images/portrait-8286cf12.png",
+          "role": "portrait",
+          "sha256": "8286cf12760a8e53ce40883a30b2430c750fb29654fda0dbf029b62156aeb58b"
+        }
+      ],
+      "kind": "face",
+      "path": "images/face-40a2858e.png",
+      "provenance": {
+        "artStyle": "flat placeholder shapes",
+        "box": {
+          "height": 100,
+          "width": 80,
+          "x": 50,
+          "y": 60
+        },
+        "engine": "fixture",
+        "provider": "personaje"
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "kind": "portrait",
+      "path": "images/portrait-8286cf12.png",
+      "provenance": {
+        "artStyle": "flat placeholder shapes",
+        "engine": "fixture",
+        "provider": "vinetas"
+      },
+      "status": "selected"
+    }
+  ],
+  "character": "STRAY VISITOR",
+  "files": [
+    {
+      "path": "CHARACTER.md",
+      "sha256": "9104caad09979db2f72d6bafb8964e312d12e3091d64406e413b79d224c65ba1",
+      "sizeBytes": 437
+    },
+    {
+      "path": "images/face-40a2858e.png",
+      "sha256": "40a2858e0fb3167ceeec190490d9ebb9fcbc197d7ca27fead3935670279b9fe1",
+      "sizeBytes": 704
+    },
+    {
+      "path": "images/portrait-8286cf12.png",
+      "sha256": "8286cf12760a8e53ce40883a30b2430c750fb29654fda0dbf029b62156aeb58b",
+      "sizeBytes": 939
+    }
+  ],
+  "generator": {
+    "name": "dossier-format fixtures",
+    "version": "1"
+  },
+  "manifestChecksum": "1b811ed4381db868c90613744d3a3524cb73a2be6dd706f1306cd5d13641982e",
+  "manifestVersion": 2,
+  "role": "background",
+  "updatedAt": "2026-10-31T12:00:00Z"
+}

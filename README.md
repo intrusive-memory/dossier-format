@@ -1,6 +1,6 @@
 ---
 type: doc
-updated: 2026-10-19
+updated: 2026-10-31
 status: draft
 ---
 
@@ -22,10 +22,11 @@ characters/THE PRACTITIONER.dossier/
 > **Status: draft.** The specification is
 > [docs/DOSSIER-FORMAT.md](docs/DOSSIER-FORMAT.md) (format version 2), with
 > JSON Schemas in [schemas/](schemas) and the tier table in
-> [data/tiers.json](data/tiers.json). Every property and the decision behind
-> it is in [docs/PROPERTY-INVENTORY.md](docs/PROPERTY-INVENTORY.md). The page
-> template, field list, design tokens and conformance fixtures are not
-> written yet. Requirements: [REQUIREMENTS.md](REQUIREMENTS.md).
+> [data/tiers.json](data/tiers.json). Conformance fixtures are in
+> [examples/](examples). Every property and the decision behind it is in
+> [docs/PROPERTY-INVENTORY.md](docs/PROPERTY-INVENTORY.md). The page template,
+> field list and design tokens are not written yet. Requirements:
+> [REQUIREMENTS.md](REQUIREMENTS.md).
 
 ## Purpose
 

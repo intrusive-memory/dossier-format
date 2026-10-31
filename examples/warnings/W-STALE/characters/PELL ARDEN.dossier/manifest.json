@@ -1,0 +1,90 @@
+{
+  "assets": [
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "kind": "description",
+      "path": "CHARACTER.md",
+      "provenance": {
+        "provider": "manual"
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "derivedFrom": [
+        {
+          "path": "images/portrait-39132fc3.png",
+          "role": "portrait",
+          "sha256": "39132fc36c548a824fc57fa5eb06ef1231e9b9d235eb6d2a1979adcd3fde11b3"
+        }
+      ],
+      "kind": "face",
+      "path": "images/face-2fee944a.png",
+      "provenance": {
+        "artStyle": "flat placeholder shapes",
+        "box": {
+          "height": 100,
+          "width": 80,
+          "x": 50,
+          "y": 60
+        },
+        "engine": "fixture",
+        "provider": "personaje"
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "kind": "portrait",
+      "path": "images/portrait-39132fc3.png",
+      "provenance": {
+        "artStyle": "flat placeholder shapes",
+        "engine": "fixture",
+        "provider": "vinetas"
+      },
+      "status": "candidate"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "kind": "portrait",
+      "path": "images/portrait-572923c8.png",
+      "provenance": {
+        "artStyle": "flat placeholder shapes",
+        "engine": "fixture",
+        "provider": "vinetas"
+      },
+      "status": "selected"
+    }
+  ],
+  "character": "PELL ARDEN",
+  "files": [
+    {
+      "path": "CHARACTER.md",
+      "sha256": "68977816de73c9862cfa1dbf9db62346221ec1c10eff5269d22073f34e480d5c",
+      "sizeBytes": 431
+    },
+    {
+      "path": "images/face-2fee944a.png",
+      "sha256": "2fee944af5ba35b27bef8966bfc4398c54d109b7eb0f25bd8289775b59601f94",
+      "sizeBytes": 702
+    },
+    {
+      "path": "images/portrait-39132fc3.png",
+      "sha256": "39132fc36c548a824fc57fa5eb06ef1231e9b9d235eb6d2a1979adcd3fde11b3",
+      "sizeBytes": 938
+    },
+    {
+      "path": "images/portrait-572923c8.png",
+      "sha256": "572923c84b9f513cf0588e56de944cc04c5e3118857aa8dbeb0af094d192f47a",
+      "sizeBytes": 941
+    }
+  ],
+  "generator": {
+    "name": "dossier-format fixtures",
+    "version": "1"
+  },
+  "manifestChecksum": "2862a90f57657cda47cd4bb654cdd00034a9bb5bfd70d52fa4627ca636cb5118",
+  "manifestVersion": 2,
+  "role": "background",
+  "updatedAt": "2026-10-31T12:00:00Z"
+}

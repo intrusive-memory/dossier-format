@@ -1,0 +1,188 @@
+{
+  "assets": [
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "kind": "description",
+      "path": "CHARACTER.md",
+      "provenance": {
+        "provider": "manual"
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T12:00:00Z",
+      "derivedFrom": [
+        {
+          "path": "CHARACTER.md",
+          "role": "description",
+          "sha256": "7931a5dc76e078b13776db0e96b2f3dd67db557571063ad4a7bc261c192db81e"
+        },
+        {
+          "role": "castMember",
+          "sha256": "b731581b97e173f88644fc833c35d2679d93fb674d14c33aa931a8074a655523"
+        },
+        {
+          "role": "bundle",
+          "sha256": "46c69dc0b3a2a68dc33ed4f99b8fc9191b864f8e82a1db46b99d3a9a81b3c34d"
+        },
+        {
+          "role": "template",
+          "sha256": "ed1841cb886f585f2bed11a600dd9955510659e84b76cd52200d3343d9712cd4",
+          "version": "0.0.0-fixture"
+        }
+      ],
+      "kind": "dossier",
+      "path": "THE LAMPLIGHTER-dossier.html",
+      "provenance": {
+        "notes": "Hand-made for the fixtures.",
+        "provider": "manual"
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "derivedFrom": [
+        {
+          "path": "images/portrait-068caa53.png",
+          "role": "portrait",
+          "sha256": "068caa53e09e56721fb5bff79b092979c76a559dbe407f3dd7e8ba6c8dedee68"
+        }
+      ],
+      "kind": "face",
+      "path": "images/face-afc3211a.png",
+      "provenance": {
+        "artStyle": "flat placeholder shapes",
+        "box": {
+          "height": 100,
+          "width": 80,
+          "x": 50,
+          "y": 60
+        },
+        "engine": "fixture",
+        "provider": "personaje"
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "kind": "portrait",
+      "path": "images/portrait-068caa53.png",
+      "provenance": {
+        "artStyle": "flat placeholder shapes",
+        "engine": "fixture",
+        "height": 320,
+        "prompt": "A tall woman in a grey coat.",
+        "provider": "vinetas",
+        "round": "v1",
+        "seed": 7,
+        "steps": 4,
+        "width": 180
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "kind": "vox",
+      "path": "voice/THE LAMPLIGHTER.vox",
+      "provenance": {
+        "models": [
+          "Qwen3-TTS-12Hz-1.7B-Base-bf16",
+          "Qwen3-TTS-12Hz-0.6B-Base-bf16"
+        ],
+        "provider": "echada",
+        "voicePrompt": "A clear, unhurried alto with a dry edge."
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "derivedFrom": [
+        {
+          "path": "voice/THE LAMPLIGHTER.vox",
+          "role": "vox",
+          "sha256": "727d94b4664c58ec677cbc5e829219797acedce3bbc1b739e70cdb713a822759"
+        }
+      ],
+      "kind": "voiceSample",
+      "language": "en-US",
+      "model": "0.6b",
+      "path": "voice/sample-neutral-0.6b.m4a",
+      "provenance": {
+        "instructApplied": "unverified",
+        "provider": "diga",
+        "source": "sampleLine"
+      },
+      "sampleText": "The light goes on at dusk.",
+      "status": "selected",
+      "variant": "neutral"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "derivedFrom": [
+        {
+          "path": "voice/THE LAMPLIGHTER.vox",
+          "role": "vox",
+          "sha256": "727d94b4664c58ec677cbc5e829219797acedce3bbc1b739e70cdb713a822759"
+        }
+      ],
+      "kind": "voiceSample",
+      "language": "en-US",
+      "model": "1.7b",
+      "path": "voice/sample-neutral.m4a",
+      "provenance": {
+        "instructApplied": "unverified",
+        "provider": "diga",
+        "source": "sampleLine"
+      },
+      "sampleText": "The light goes on at dusk.",
+      "status": "selected",
+      "variant": "neutral"
+    }
+  ],
+  "character": "THE LAMPLIGHTER",
+  "files": [
+    {
+      "path": "CHARACTER.md",
+      "sha256": "7931a5dc76e078b13776db0e96b2f3dd67db557571063ad4a7bc261c192db81e",
+      "sizeBytes": 437
+    },
+    {
+      "path": "THE LAMPLIGHTER-dossier.html",
+      "sha256": "6da3e4c4503baa771768fcca9d30a1632763b74c47fa9955c42c6cfb6eee48c2",
+      "sizeBytes": 49966
+    },
+    {
+      "path": "images/face-afc3211a.png",
+      "sha256": "afc3211a22fe71f0936073658d0a7e2116e9793882525244b8cf3717555ccd02",
+      "sizeBytes": 704
+    },
+    {
+      "path": "images/portrait-068caa53.png",
+      "sha256": "068caa53e09e56721fb5bff79b092979c76a559dbe407f3dd7e8ba6c8dedee68",
+      "sizeBytes": 941
+    },
+    {
+      "path": "voice/THE LAMPLIGHTER.vox",
+      "sha256": "727d94b4664c58ec677cbc5e829219797acedce3bbc1b739e70cdb713a822759",
+      "sizeBytes": 1280
+    },
+    {
+      "path": "voice/sample-neutral-0.6b.m4a",
+      "sha256": "4174c9e12dcb15013aa749afedabe4668548c0f6da3250e5c7f8f649ec8f7b36",
+      "sizeBytes": 4124
+    },
+    {
+      "path": "voice/sample-neutral.m4a",
+      "sha256": "4174c9e12dcb15013aa749afedabe4668548c0f6da3250e5c7f8f649ec8f7b36",
+      "sizeBytes": 4124
+    }
+  ],
+  "generator": {
+    "name": "dossier-format fixtures",
+    "version": "1"
+  },
+  "manifestChecksum": "0ed11b097399cb5a3bf33be141e9f6f5781adda20cca1e69626b6b8517fb7e68",
+  "manifestVersion": 2,
+  "role": "costar",
+  "updatedAt": "2026-10-31T12:00:00Z"
+}

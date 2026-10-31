@@ -1,0 +1,61 @@
+{
+  "formatVersion": 2,
+  "names": [
+    {
+      "input": "Mitch",
+      "canonical": "MITCH"
+    },
+    {
+      "input": "@McCowley",
+      "canonical": "MCCOWLEY"
+    },
+    {
+      "input": "BILLY (V.O.)",
+      "canonical": "BILLY"
+    },
+    {
+      "input": "BILLY (CONT'D) (O.S.)",
+      "canonical": "BILLY"
+    },
+    {
+      "input": "Aunt   Stanley",
+      "canonical": "AUNT STANLEY"
+    },
+    {
+      "input": "mccowley's wife",
+      "canonical": "MCCOWLEY'S WIFE"
+    },
+    {
+      "input": "CB#1",
+      "canonical": "CB#1"
+    },
+    {
+      "input": "josé",
+      "canonical": "JOSÉ"
+    },
+    {
+      "input": "josé",
+      "canonical": "JOSÉ"
+    },
+    {
+      "input": "DUKE^",
+      "canonical": "DUKE"
+    },
+    {
+      "input": "AC/DC",
+      "error": "E-NAME"
+    },
+    {
+      "input": ".HIDDEN",
+      "error": "E-NAME"
+    },
+    {
+      "input": "(V.O.)",
+      "error": "E-NAME"
+    },
+    {
+      "input": "A:B",
+      "error": "E-NAME"
+    }
+  ]
+}

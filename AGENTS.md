@@ -1,7 +1,7 @@
 ---
 type: doc
 title: dossier-format — Agent Instructions
-updated: 2026-10-03
+updated: 2026-10-31
 ---
 
 # AGENTS.md
@@ -46,6 +46,9 @@ The standard, and only the standard:
 - **Not an implementation.** No reader, writer, validator or renderer lives
   here. The Swift implementation is SwiftDossier. Reference code in any
   language goes in that language's own repository.
+  `tools/build_examples.py` is the one script here: it regenerates the fixtures,
+  broken ones included, so that rule 9 can be met. It isn't an implementation,
+  and nothing should depend on it.
 - **Not a generator.** How an image or a voice is made, and by which model, is
   outside the standard.
 - **Not the owner of neighbouring formats.** `CAST.md` belongs to SwiftReparto
@@ -54,9 +57,11 @@ The standard, and only the standard:
 
 ## Status
 
-Draft. [REQUIREMENTS.md](REQUIREMENTS.md) is the only content so far: what the
-standard must say (DF-1 to DF-57), the deliverables, and the open questions.
-The specification, schemas, data files, template and fixtures are not written.
+Draft. Written: the specification (`docs/DOSSIER-FORMAT.md`), the schemas,
+`data/tiers.json`, `data/review.json` and the conformance fixtures
+(`examples/`). Not written: the page template, `data/fields.json` and
+`data/tokens.json`. [REQUIREMENTS.md](REQUIREMENTS.md) is what the standard must
+say (DF-1 to DF-63), with the deliverables and the open questions.
 
 ## Rules for working here
 
