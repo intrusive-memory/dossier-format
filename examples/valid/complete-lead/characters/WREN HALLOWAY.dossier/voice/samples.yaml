@@ -1,0 +1,9 @@
+- variant: neutral
+  text: Say it once, say it slowly, and I'll write it down.
+  source: sampleLine
+- variant: wry
+  text: The storm has been very punctual.
+  model: 1.7b
+  language: en-US
+  instruct: Dry.
+  source: episodes/fixture.fountain:30

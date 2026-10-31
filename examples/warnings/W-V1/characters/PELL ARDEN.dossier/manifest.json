@@ -1,0 +1,62 @@
+{
+  "assets": [
+    {
+      "kind": "description",
+      "path": "CHARACTER.md",
+      "status": "selected"
+    },
+    {
+      "kind": "faceSheet",
+      "path": "images/face.png",
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "kind": "portrait",
+      "path": "images/portrait-v3-photo-s133.png",
+      "provenance": {
+        "references": [],
+        "tool": "fixture"
+      },
+      "status": "selected"
+    },
+    {
+      "kind": "turnaround",
+      "label": "front",
+      "path": "images/turnaround-front-s21.png",
+      "status": "selected"
+    }
+  ],
+  "character": "PELL ARDEN",
+  "files": [
+    {
+      "path": "CHARACTER.md",
+      "sha256": "68977816de73c9862cfa1dbf9db62346221ec1c10eff5269d22073f34e480d5c",
+      "sizeBytes": 431
+    },
+    {
+      "path": "images/face.png",
+      "sha256": "50608428b128b7fc1e111f0de8bbb8324707ebc1c4a6d2b87c4097bf21e7bcd1",
+      "sizeBytes": 544
+    },
+    {
+      "path": "images/portrait-v3-photo-s133.png",
+      "sha256": "82ba81d716e077803499e089b3a53cca5db971b45cf6aa0aaaa8f26fccb54006",
+      "sizeBytes": 940
+    },
+    {
+      "path": "images/turnaround-front-s21.json",
+      "sha256": "7f9a2db763b367841ded9c14b42c59f171a028d33e16d2b01263a504ce19ba7d",
+      "sizeBytes": 13
+    },
+    {
+      "path": "images/turnaround-front-s21.png",
+      "sha256": "9e6b63dbcf52d831fced145c5978b2219114a6fa2ad1dff51f556710ae8eb420",
+      "sizeBytes": 942
+    }
+  ],
+  "manifestChecksum": "50d4065fbc8e1e407253d5b82a62035cbbc3f481c8072a183019b467d80e0dad",
+  "manifestVersion": 1,
+  "role": "background",
+  "updatedAt": "2026-10-31T12:00:00Z"
+}

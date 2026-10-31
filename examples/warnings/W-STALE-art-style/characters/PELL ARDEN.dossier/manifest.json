@@ -1,0 +1,74 @@
+{
+  "assets": [
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "kind": "description",
+      "path": "CHARACTER.md",
+      "provenance": {
+        "provider": "manual"
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "derivedFrom": [
+        {
+          "path": "images/portrait-b4ea7922.png",
+          "role": "portrait",
+          "sha256": "b4ea7922e4584d539d0db374f8380c3ee7ba42b3f070f080fe296a262d959bfb"
+        }
+      ],
+      "kind": "face",
+      "path": "images/face-199a72c5.png",
+      "provenance": {
+        "artStyle": "flat placeholder shapes",
+        "box": {
+          "height": 100,
+          "width": 80,
+          "x": 50,
+          "y": 60
+        },
+        "engine": "fixture",
+        "provider": "personaje"
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "kind": "portrait",
+      "path": "images/portrait-b4ea7922.png",
+      "provenance": {
+        "artStyle": "flat placeholder shapes",
+        "engine": "fixture",
+        "provider": "vinetas"
+      },
+      "status": "selected"
+    }
+  ],
+  "character": "PELL ARDEN",
+  "files": [
+    {
+      "path": "CHARACTER.md",
+      "sha256": "a9f8afc36e5b6bf9d7523d704f5a98cc2d2037c3431905aca45eef83036a05c3",
+      "sizeBytes": 415
+    },
+    {
+      "path": "images/face-199a72c5.png",
+      "sha256": "199a72c5bce7e5df914c0db81b70230843f9eb809d8fde10aca00bb58b13db27",
+      "sizeBytes": 704
+    },
+    {
+      "path": "images/portrait-b4ea7922.png",
+      "sha256": "b4ea7922e4584d539d0db374f8380c3ee7ba42b3f070f080fe296a262d959bfb",
+      "sizeBytes": 940
+    }
+  ],
+  "generator": {
+    "name": "dossier-format fixtures",
+    "version": "1"
+  },
+  "manifestChecksum": "80b65e16f6ddd770a73ff4ba4cd110c3d00292cf6acc2eff76aa4a7a21db9a56",
+  "manifestVersion": 2,
+  "role": "background",
+  "updatedAt": "2026-10-31T12:00:00Z"
+}

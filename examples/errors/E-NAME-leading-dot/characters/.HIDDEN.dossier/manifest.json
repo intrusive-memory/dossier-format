@@ -1,0 +1,74 @@
+{
+  "assets": [
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "kind": "description",
+      "path": "CHARACTER.md",
+      "provenance": {
+        "provider": "manual"
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "derivedFrom": [
+        {
+          "path": "images/portrait-82ce5354.png",
+          "role": "portrait",
+          "sha256": "82ce53547218d47e709d21798ef3a7c57e9cd067b437df6f6d062ea4e3bf27bd"
+        }
+      ],
+      "kind": "face",
+      "path": "images/face-a5d8d426.png",
+      "provenance": {
+        "artStyle": "flat placeholder shapes",
+        "box": {
+          "height": 100,
+          "width": 80,
+          "x": 50,
+          "y": 60
+        },
+        "engine": "fixture",
+        "provider": "personaje"
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "kind": "portrait",
+      "path": "images/portrait-82ce5354.png",
+      "provenance": {
+        "artStyle": "flat placeholder shapes",
+        "engine": "fixture",
+        "provider": "vinetas"
+      },
+      "status": "selected"
+    }
+  ],
+  "character": ".HIDDEN",
+  "files": [
+    {
+      "path": "CHARACTER.md",
+      "sha256": "551cc41d235b8acf70bd5436aafc695e05a65e0ca3ed9570a38f034f0aa02101",
+      "sizeBytes": 425
+    },
+    {
+      "path": "images/face-a5d8d426.png",
+      "sha256": "a5d8d42635d19d5a707fb18c066d7803e1f1494672398f8015b29fb0ab879eff",
+      "sizeBytes": 705
+    },
+    {
+      "path": "images/portrait-82ce5354.png",
+      "sha256": "82ce53547218d47e709d21798ef3a7c57e9cd067b437df6f6d062ea4e3bf27bd",
+      "sizeBytes": 940
+    }
+  ],
+  "generator": {
+    "name": "dossier-format fixtures",
+    "version": "1"
+  },
+  "manifestChecksum": "19c0163bcd00ba71301528da10349ecbe28bb60225dd79f107e4b669e4481e13",
+  "manifestVersion": 2,
+  "role": "background",
+  "updatedAt": "2026-10-31T12:00:00Z"
+}

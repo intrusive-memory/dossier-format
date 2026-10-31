@@ -1,0 +1,109 @@
+{
+  "assets": [
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "kind": "description",
+      "path": "CHARACTER.md",
+      "provenance": {
+        "provider": "manual"
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T12:00:00Z",
+      "derivedFrom": [
+        {
+          "path": "CHARACTER.md",
+          "role": "description",
+          "sha256": "c5bea262fddd848aaf366e4b66a6a687fd462c881502f6ee3387de2c80bb31f3"
+        },
+        {
+          "role": "castMember",
+          "sha256": "d0771676fd99a25d3fbf206672d5db7cd408df9e7da516bd25156ea92b1708bc"
+        },
+        {
+          "role": "bundle",
+          "sha256": "6afa828a257d064f4996893c92505b94979ad09fa04ed0685779318acdb59595"
+        },
+        {
+          "role": "template",
+          "sha256": "ed1841cb886f585f2bed11a600dd9955510659e84b76cd52200d3343d9712cd4",
+          "version": "0.0.0-fixture"
+        }
+      ],
+      "kind": "dossier",
+      "path": "INÉS-dossier.html",
+      "provenance": {
+        "notes": "Hand-made for the fixtures.",
+        "provider": "manual"
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "kind": "vox",
+      "path": "voice/INÉS.vox",
+      "provenance": {
+        "models": [
+          "Qwen3-TTS-12Hz-1.7B-Base-bf16"
+        ],
+        "provider": "echada",
+        "voicePrompt": "A clear, unhurried alto with a dry edge."
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "derivedFrom": [
+        {
+          "path": "voice/INÉS.vox",
+          "role": "vox",
+          "sha256": "79d27ddd897e3853c61967880347f87a656939d4f7f45657b858a13091b9b1d6"
+        }
+      ],
+      "kind": "voiceSample",
+      "language": "en-US",
+      "model": "1.7b",
+      "path": "voice/sample-neutral.m4a",
+      "provenance": {
+        "instructApplied": "unverified",
+        "provider": "diga",
+        "source": "sampleLine"
+      },
+      "sampleText": "Por aquí.",
+      "status": "selected",
+      "variant": "neutral"
+    }
+  ],
+  "character": "INÉS",
+  "files": [
+    {
+      "path": "CHARACTER.md",
+      "sha256": "c5bea262fddd848aaf366e4b66a6a687fd462c881502f6ee3387de2c80bb31f3",
+      "sizeBytes": 420
+    },
+    {
+      "path": "INÉS-dossier.html",
+      "sha256": "118c1a4ea4e0a27938d3a59b1cb3706c57eb9799839f79926f23c7a1b37cc2dc",
+      "sizeBytes": 8025
+    },
+    {
+      "path": "voice/INÉS.vox",
+      "sha256": "79d27ddd897e3853c61967880347f87a656939d4f7f45657b858a13091b9b1d6",
+      "sizeBytes": 892
+    },
+    {
+      "path": "voice/sample-neutral.m4a",
+      "sha256": "4174c9e12dcb15013aa749afedabe4668548c0f6da3250e5c7f8f649ec8f7b36",
+      "sizeBytes": 4124
+    }
+  ],
+  "generator": {
+    "name": "dossier-format fixtures",
+    "version": "1"
+  },
+  "manifestChecksum": "5976a72efbf42b89f75fe60fb1d6818b4db9a9c172203ca66a8471cfe407da53",
+  "manifestVersion": 2,
+  "role": "underfive",
+  "updatedAt": "2026-10-31T12:00:00Z"
+}

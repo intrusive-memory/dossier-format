@@ -1,7 +1,7 @@
 ---
 type: requirements
 state: draft
-updated: 2026-10-03
+updated: 2026-10-31
 sequence: 1 — first on the critical path of the Personaje effort
 ---
 
@@ -116,7 +116,7 @@ characters/<CHARACTER>.dossier/
 | DF-23 | **`assets`**: the semantic layer, keyed by `path`. Each entry has `kind`, `status`, and where they apply `variant`, `label`, `createdAt`, `provenance`, `review`, `derivedFrom`, and kind-specific data (`lora`, `sampleText`). Every asset has a `files` entry. A file with no asset entry is **unclassified**: allowed, and reported. |
 | DF-24 | Top-level fields: `manifestVersion` (required), `character` (required), `role` (a copy of the `CAST.md` tier; `CAST.md` wins), `updatedAt` (required, ISO 8601), `generator` (name and version of the writing tool), `files` (required), `assets` (required, may be empty), `manifestChecksum` (required). |
 | DF-25 | **`manifestVersion` is 2.** A reader MUST reject an unknown version. A reader MAY read version 1; a writer MUST NOT write it. |
-| DF-26 | **`status`** is `selected`, `candidate` or `rejected`. At most one `selected` per `kind` + `variant`. Selecting one demotes the previous selection to `candidate`. Nothing is ever deleted implicitly. |
+| DF-26 | **`status`** is `selected`, `candidate` or `rejected`. At most one `selected` per `kind` + `variant` (for `voiceSample`, per `kind` + `variant` + `model`, because DF-38 asks for a neutral read on each model size). Selecting one demotes the previous selection of that combination to `candidate`. Nothing is ever deleted implicitly. |
 | DF-27 | **`derivedFrom`** on `face`, `view`, `expression` and `dossier` records the SHA-256 of every input. When an input's selected file changes, the derived asset is **stale**: flagged, never deleted. |
 | DF-28 | **`provenance`** records `provider`, `model`, `prompt` (the prompt actually sent), `seed`, and `references`: `{path, sha256}` for every reference image sent. An imported file has `provider: "import"`. A hand-set face-crop box is recorded here. |
 | DF-29 | **Writes are atomic and verified:** write to a temporary file, replace, re-read, and check. Output is pretty-printed with sorted keys. |
@@ -197,7 +197,7 @@ A validator never changes anything.
 
 | ID | Requirement |
 |----|-------------|
-| DF-54 | **Errors:** the bundle name and `character` don't match; unknown `manifestVersion`; a file is missing, or its hash or size doesn't match; `manifestChecksum` doesn't match; an asset has no `files` entry; more than one `selected` for a `kind` + `variant`; a path escapes the bundle. |
+| DF-54 | **Errors:** the bundle name and `character` don't match; unknown `manifestVersion`; a file is missing, or its hash or size doesn't match; `manifestChecksum` doesn't match; an asset has no `files` entry; more than one `selected` for a `kind` + `variant` (`voiceSample`: + `model`); a path escapes the bundle. |
 | DF-55 | **Warnings:** unclassified files; stale derived assets; the page is over 10 MB or references anything outside itself; wrong shape (`portrait` or `view` not 9:16, `face` or `expression` not square); a required expression missing for the tier; a sidecar `.json` in the bundle; `CAST.md` `manifest:` doesn't point at this bundle; an orphan bundle. |
 | DF-56 | **Report:** completeness against the tier, listing missing required assets by name. |
 | DF-57 | Each error and warning has a stable code in the specification, so two validators report the same finding the same way. |
@@ -262,9 +262,9 @@ Nothing. The source text is already written (§1).
 | # | Question | Recommendation |
 |---|----------|----------------|
 | Q1 | **License.** *Decided 2026-10-03:* CC0 1.0 Universal, the same as vox-format, for everything in the repository. Fonts embedded in the template keep the OFL. | — |
-| Q2 | **Fixtures.** The only real characters live in a private repository. Their images and descriptions can't go into this public one without a decision. | Make a synthetic character for the public fixtures. Keep the real ones as private fixtures in the implementation's tests. |
-| Q3 | **Tier requirement for `face`.** Version 1 had no face crop; the bundle draft doesn't give its row. | Required wherever `portrait` is required, since it is derived from the portrait at no cost. |
+| Q2 | **Fixtures.** The only real characters live in a private repository. Their images and descriptions can't go into this public one without a decision. | Make a synthetic character for the public fixtures. **Updated 2026-10-20:** the implementations (SwiftDossier, SwiftPersonaje) are public too, so real characters go in no repository's tests; they are checked only by local acceptance runs against the private project checkout. |
+| Q3 | *Decided 2026-10-19 (DOSSIER-FORMAT §8.3, `data/tiers.json`): required wherever `portrait` is.* **Tier requirement for `face`.** Version 1 had no face crop; the bundle draft doesn't give its row. | Required wherever `portrait` is required, since it is derived from the portrait at no cost. |
 | Q4 | **Do the template, field list and tokens belong here or in SwiftDossier?** Decided 2026-10-03: here, "for the moment". | Revisit once a second renderer exists or the first one finds the split awkward. |
-| Q5 | **Canon facts.** The Profile tab shows facts with a source (Stated, Inferred, Author) and marks generated values. Where and how `CHARACTER.md` stores them is defined in Personaje's CHARACTER_CREATION.md and isn't carried into this document yet. | Bring the storage rule into §8 before the specification is written. |
+| Q5 | *Decided 2026-10-19 (D9; DOSSIER-FORMAT §9.3): footnoted claims with the classes Stated, Inferred, Author; generated values listed in `draft.generated`.* **Canon facts.** The Profile tab shows facts with a source (Stated, Inferred, Author) and marks generated values. Where and how `CHARACTER.md` stores them is defined in Personaje's CHARACTER_CREATION.md and isn't carried into this document yet. | Bring the storage rule into §8 before the specification is written. |
 | Q6 | **The type identifier.** The draft uses `io.intrusive-memory.dossier`. A vendor-neutral standard may want a neutral one. | Keep the draft identifier until someone outside the organization implements the format. |
 | Q7 | **Version 1 in the specification.** Only two version 1 records exist. | Describe version 1 in an appendix for readers; give it a schema; don't write fixtures beyond those two. |
