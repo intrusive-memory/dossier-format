@@ -57,7 +57,9 @@ or found in `CAST.md`:
 4. Normalize to NFC. Punctuation, digits and accents are kept.
 
 A name that is empty after canonicalization, contains `/` or `:`, or starts
-with `.` is an **error** (`E-NAME`). Nothing is silently substituted. A
+with `.` is an **error** (`E-NAME`). So is a bundle whose manifest `character`
+isn't already canonical, which is to say canonicalizing changes it. A `CAST.md`
+member without a dossier isn't checked. Nothing is silently substituted. A
 writer MUST refuse to create a bundle whose name differs from an existing
 bundle's only by case.
 
@@ -78,6 +80,9 @@ bundle's only by case.
 
 ## 3. Discovery [DF-7 to DF-12, DF-63]
 
+- **`CAST.md`** is a Markdown file. Its YAML front matter, between `---` lines at
+  the top, has `type: cast`, `schemaVersion: 1` and a `cast` list, and each entry
+  of the list is a **member**.
 - Discovery starts at `CAST.md`. A member with a dossier has a `manifest:`
   path, relative to the directory holding `CAST.md`. Nothing is found by
   scanning directories.
@@ -88,14 +93,23 @@ bundle's only by case.
   `.` segments, and let each `..` remove the segment before it, without reading
   the disk or following links. Compare the result with the bundle manifest's
   path relative to the same directory, as NFC strings, case-sensitively. A
-  member **points at** a bundle when they are equal. A member whose `character`
-  equals the bundle's name and whose `manifest:` points anywhere else is
-  `W-POINTER`.
+  member **points at** a bundle when they are equal.
+- **`W-POINTER`:** a member's `manifest:` doesn't lead to a manifest: its last
+  segment isn't `manifest.json`, or neither that file nor its directory exists.
+  Where the directory exists but the manifest is missing or unreadable, it is
+  `E-MANIFEST`. A pointer that reaches a manifest is never `W-POINTER`, and any other
+  fault has its own code: names that disagree are `E-NAME-MISMATCH`, a version 2
+  manifest outside a `.dossier` directory is `E-NOT-BUNDLE`, and version 1 is `W-V1`.
+- **Names compare exactly,** as NFC strings. `E-NAME-MISMATCH` covers the
+  directory name, the manifest's `character`, the `CAST.md` member's `character`
+  and `CHARACTER.md`'s `character`.
 - A member with no `manifest:` has no dossier; that is valid.
 - A `.dossier` directory no member points at is an **orphan** (`W-ORPHAN`):
-  reported, never loaded, never deleted. A writer's *refresh* MAY adopt an
-  orphan whose name equals a member that has no `manifest:`, by setting the
-  pointer. It never adopts on a near match.
+  reported, never loaded, never deleted. A validator looks for orphans only in
+  `characters/` beside `CAST.md` and in each directory holding a bundle a member
+  points at, not recursively. This is the only directory listing the format
+  uses. A writer's *refresh* MAY adopt an orphan whose name equals a member that
+  has no `manifest:`, by setting the pointer. It never adopts on a near match.
 - Everything for a character lives in its bundle: description, art style
   (§9.1), images, voice and LoRA (§8.4). No copy elsewhere is the authority.
 - Where bundles go is the producing tool's setting (conventionally
@@ -165,7 +179,7 @@ keys sorted, ending in a newline. Schema: [`schemas/manifest-v2.schema.json`](..
 | `character` | yes | string | The canonical name (§2). |
 | `role` | no | tier (§8.3) | A copy of the `CAST.md` role. `CAST.md` wins. |
 | `updatedAt` | yes | timestamp | The last write. |
-| `generator` | no | `{name, version}` | The writing tool. |
+| `generator` | no | `{name, version?}` | The writing tool. |
 | `prompts` | no | object (§5.5) | The prompts images are built from. |
 | `files` | yes | array (§5.2) | The integrity layer. |
 | `assets` | yes | array (§5.4), may be empty | The semantic layer. |
@@ -181,6 +195,12 @@ path segment starting with `.`) and symlinks. Each entry has exactly `path`,
 `sha256`, `sizeBytes`. Entries are sorted by `path` (byte order of the UTF-8
 string). A zero-byte file is refused: a writer MUST NOT write it and a
 validator reports `E-ZERO-BYTE`.
+
+This inventory is of the disk, not of `files`. A validator walks the bundle:
+`W-UNCLASSIFIED` and `E-ZERO-BYTE` apply to a file in the inventory whether or not
+`files` lists it, and neither applies to a hidden file. A file on disk that
+`files` doesn't list doesn't change `manifestChecksum`, which is computed from
+`files`.
 
 **Bundle paths.** Every path recorded in a manifest (`files`, `assets`,
 `derivedFrom`, `provenance.references`) is relative to the bundle, with `/` as
@@ -228,7 +248,7 @@ list. An asset whose `path` has no `files` entry is `E-ASSET-NO-FILE`.
 | `derivedFrom` | on derived kinds | array (§7) | Its inputs. |
 | `review` | no | object | `{passed: [id], failed: [id], notes, reviewedAt}`; IDs from [`data/review.json`](../data/review.json). Advisory: never blocks selection. |
 | `model` | `voiceSample` | `1.7b`, `0.6b`, … | The model size the sample was rendered with. |
-| `language` | `voiceSample` | BCP 47 | Default: the character's first `languages` entry. |
+| `language` | no | BCP 47 | On a `voiceSample`. Default: the character's first `languages` entry. |
 | `sampleText` | `voiceSample` | string | The words spoken. |
 | `lora` | `lora` | object | §8.4. |
 | `training` | `training` | object | §8.4. |
@@ -252,8 +272,18 @@ Write to a temporary file in the bundle, replace `manifest.json` with it,
 re-read it, and verify it parses and matches what was written. Only a
 conforming writer changes `manifest.json`. Other tools MAY put files in the
 bundle (a voice tool writing `voice/<CHARACTER>.vox`); they are unclassified
-until a writer's *refresh* adopts them by these rules: `voice/<CHARACTER>.vox`
-→ `vox`; `voice/sample-<variant>[-<model>].m4a` → `voiceSample`.
+until a writer's *refresh* adopts them by these rules. An adopted asset has
+`status: candidate`.
+
+- `voice/<CHARACTER>.vox` → `vox`.
+- `voice/sample-<name>.m4a` → `voiceSample`. If `<name>` ends in `-` followed by a
+  size the selected `vox` holds (§8.3), that is the `model` and the rest is the
+  `variant`. Otherwise `<name>` is the `variant`, and `model` is the first size in
+  the selected `vox`'s `provenance.models`, as a lowercase size (`1.7b`).
+- A sample is adopted only when there is a selected `vox`, which gives its
+  `derivedFrom`, and `voice/samples.yaml` has an entry for that `variant` and
+  `model` (an entry with no `model` matches any), which gives its `sampleText`.
+  Otherwise the file stays unclassified and the writer reports why.
 
 ## 6. Provenance [DF-28]
 
@@ -264,7 +294,7 @@ Unknown keys are preserved.
 | Key | Kinds | Type | Meaning |
 |-----|-------|------|---------|
 | `provider` | all | string | `vinetas`, `echada`, `diga`, `personaje`, `manual`, `import`, … `import` means an existing file brought in. |
-| `tool` | all | `{name, version, binary?}` | The program actually run. `binary` is informational and MUST NOT be relied on. |
+| `tool` | all | `{name, version?, binary?}` | The program actually run. `binary` is informational and MUST NOT be relied on. |
 | `model` | generated | string | As the tool reports it. Not normalized. |
 | `models` | `vox` | array of string | The models the `.vox` holds, as the tool reports them. |
 | `prompt` | images | string | The prompt sent, before style is applied. |
@@ -324,20 +354,32 @@ normalizes the file.
 
 **Normal form** of a member:
 
-- A legacy `voiceDescription` becomes `voicePrompt`. If both are present,
-  `voicePrompt` is kept and `voiceDescription` is dropped.
+- A legacy `voiceDescription` is dropped. If `voicePrompt` is absent or null, its
+  value first becomes `voicePrompt`.
 - `voices` is always present, `{}` when the member has none. Provider keys are
   lowercased. A single string becomes a one-element array. A value that is
   neither a string nor an array of strings is dropped.
 - `character`, `role`, `actor`, `gender`, `language`, `voicePrompt` and `manifest`
   are absent when their value is null.
 - Every other key is kept with its value, including null.
+- **Values.** `character`, `role`, `actor`, `gender`, `language`, `voicePrompt`,
+  `manifest` and everything in `voices` are strings, written as their text in
+  `CAST.md` (`language: no` is `"no"`). In any other key, at any depth, a plain
+  (unquoted) YAML scalar is:
+  - null when it is empty, `~`, or `null`, `Null` or `NULL`;
+  - a boolean when it is `true`, `True`, `TRUE`, `false`, `False` or `FALSE`;
+  - an integer when it matches `-?(0|[1-9][0-9]*)` and fits in a signed 64-bit
+    integer;
+  - otherwise a string, as written (`1.5`, `0755`, `yes`, `2026-08-01`).
+
+  A quoted scalar is always a string. A writer that keeps these values keeps the
+  hash.
 
 **Canonical JSON:** UTF-8, with object keys sorted at every level by the byte
-order of their UTF-8 form and no whitespace outside strings. Inside strings only
-`"`, `\` and the control characters below U+0020 are escaped; `/` and non-ASCII
-characters are written as themselves. An integer is written in decimal; any other
-number in the shortest form that reads back as the same 64-bit float.
+order of their UTF-8 form and no whitespace outside strings. Inside strings the
+only escapes are `\"`, `\\`, `\b`, `\t`, `\n`, `\f` and `\r`, and for any other
+character below U+0020, `\u00` and two lowercase hex digits. `/` and non-ASCII
+characters are written as themselves. An integer is written in decimal.
 
 ```yaml
 - character: INÉS
@@ -354,11 +396,13 @@ has the canonical JSON
 
 and the hash `bf956f8fe4278f30b800f8899b3a634ef1ac15ad101796b31e9d592fa0b73168`.
 
-An asset is **stale** when any input's `sha256` differs from the current
-selected asset of that role (or the current member, bundle, template).
-The current template is defined in §11. Changing the character's `artStyle` (§9.1) also makes its images stale: an
-image whose `provenance.artStyle` differs from the current front-matter
-`artStyle` is stale. No other character is affected. Stale assets are
+A `selected` asset is **stale** when any input's `sha256` differs from the current
+selected asset of that role, read from its `files` entry (or the current member,
+bundle, template), or when that role has no selected asset. A `candidate` or `rejected` asset is never reported.
+The current template is defined in §11. Changing the character's `artStyle` (§9.1)
+also makes its images stale: a selected image with a `provenance.artStyle` that differs from the current
+front-matter `artStyle` is stale. An image with no `provenance.artStyle` isn't
+compared. No other character is affected. Stale assets are
 flagged (`W-STALE`), never deleted or demoted.
 
 ## 8. Kinds
@@ -382,8 +426,9 @@ flagged (`W-STALE`), never deleted or demoted.
 
 **Shapes** are width to height, in pixels as stored in the file. For each
 `selected` `portrait`, `view`, `face` and `expression`, let *r* be width ÷ height
-and *t* be 9 ÷ 16 or 1. It is `W-SHAPE` when |*r* − *t*| ÷ *t* is over 0.01, or when
-the file has no readable dimensions. 179×320 passes and 178×320 doesn't.
+and *t* be 9 ÷ 16 or 1. It is `W-SHAPE` when |*r* − *t*| ÷ *t* is over 0.01, computed
+in exact or 64-bit arithmetic, or when a file that exists has no readable
+dimensions. A missing file is only `E-FILE-MISSING`. 179×320 passes and 178×320 doesn't.
 
 **Retired kinds** (`turnaround`, `faceSheet`, `expressions`, `wardrobe`,
 `palette`): a version 1 reader recognizes them; a writer MUST NOT produce
@@ -398,15 +443,16 @@ that `kind`, that `variant` (or no `variant`, when none is asked for) and
 - **Which voice to play** is `CAST.md` `voices.voxalta`: every audio tool
   reads it; its paths are relative to the directory holding `CAST.md`. **What's
   in the bundle** is the manifest. When the member's
-  `voices.voxalta` doesn't name the bundle's selected `vox`, the validator
+  `voices.voxalta` has no entry that resolves as in §3 to the bundle's selected
+  `vox`, the validator
   reports `W-VOICE-ELSEWHERE`; when `voicePrompt` differs from the selected
   vox's `provenance.voicePrompt`, `W-VOICE-PROMPT`.
 - The sizes a `.vox` holds are in `provenance.models`; the file itself
   (vox-format) is authoritative.
 - **Samples:** a `neutral` read for each model size the tier requires, plus
   three or more range samples from the character's own lines. Range variants
-  are any names except `neutral`. Each sample records `model`, `language`
-  and `sampleText`.
+  are any names except `neutral`. Each sample records `model` and `sampleText`,
+  and `language` when it isn't the default (§5.4).
 
 ### 8.3 Tiers [DF-35 to DF-37]
 
@@ -419,6 +465,10 @@ variants) or a **check** row (a named test, defined below). Each cell is
 `required`, `recommended` or `none`. **Complete** means every `required` row
 for the tier is satisfied. Implementations read the table; they don't
 restate it.
+
+A character's tier is its `CAST.md` member's `role`. The manifest's `role` is only
+a copy and doesn't supply one: a member with no `role` is `W-ROLE`, and its
+completeness isn't defined.
 
 | Check ID | Satisfied when |
 |----------|----------------|
@@ -594,7 +644,8 @@ registered as `kind: dossier`.
 **`W-PAGE-EXTERNAL`.** A validator reads the page as HTML. Comments, text and the
 contents of `<script>` elements are not searched. The page's references are:
 
-- the attributes `src`, `srcset` (each candidate), `href`, `xlink:href`, `poster`,
+- the attributes `src`, `srcset` (each candidate, parsed as HTML parses it, so a
+  comma inside a `data:` URI doesn't split one), `href`, `xlink:href`, `poster`,
   `data`, `action`, `formaction` and `background`, on any element;
 - every `url(...)` and `@import` in `<style>` elements and `style` attributes.
 
@@ -631,7 +682,9 @@ MUST be reported and `E-SCHEMA` MAY be reported with it.
 |------|-------|---------|
 | `E-VERSION` | error | Unknown `manifestVersion` |
 | `E-NAME` | error | Name invalid (§2) |
-| `E-NAME-MISMATCH` | error | Bundle name, manifest `character` and `CAST.md` member disagree |
+| `E-NAME-MISMATCH` | error | Bundle name, manifest `character`, `CAST.md` member and `CHARACTER.md` disagree (§3) |
+| `E-CAST` | error | `CAST.md` can't be read: its YAML doesn't parse, or a member has no `character`, a `role` that isn't a tier (§8.3), a `gender` other than `M`, `F`, `NB` or `NS`, or a `voices` that isn't a map. No other check is possible. |
+| `E-MANIFEST` | error | A directory a member points at has no `manifest.json`, or it isn't a JSON object. No other check of that bundle is possible. |
 | `E-NOT-BUNDLE` | error | A version 2 manifest in a directory without `.dossier` |
 | `E-PATH` | error | A path in the manifest breaks §5.2's rules |
 | `E-FILE-MISSING` | error | A `files` entry has no file |
@@ -650,7 +703,7 @@ MUST be reported and `E-SCHEMA` MAY be reported with it.
 | `W-SIDECAR` | warning | A `.json` sidecar in `images/` |
 | `W-ORPHAN` | warning | No `CAST.md` member points at the bundle |
 | `W-POINTER` | warning | The member's `manifest:` doesn't point at this bundle (§3) |
-| `W-ROLE` | warning | The member has no `role` |
+| `W-ROLE` | warning | A member with a `manifest:` has no `role` |
 | `W-VOICE-ELSEWHERE` | warning | `voices.voxalta` doesn't name the selected `vox` |
 | `W-VOICE-PROMPT` | warning | `voicePrompt` differs from the vox's |
 | `W-FOOTNOTE` | warning | An undefined or unused footnote |
@@ -682,6 +735,8 @@ A reader MAY read version 1; a writer MUST NOT write it. Two shapes exist:
    `<CHARACTER>.dossier/`. Valid as version 1, reported `W-V1`.
 
 Schema: [`schemas/manifest-v1.schema.json`](../schemas/manifest-v1.schema.json).
+A validator reports `W-V1` and doesn't apply what only version 2 requires: the
+differences below, completeness and staleness.
 Differences from version 2:
 
 | Version 1 | Version 2 |

@@ -1,0 +1,74 @@
+{
+  "assets": [
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "kind": "description",
+      "path": "CHARACTER.md",
+      "provenance": {
+        "provider": "manual"
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "derivedFrom": [
+        {
+          "path": "images/portrait-e2f5f18a.png",
+          "role": "portrait",
+          "sha256": "e2f5f18ab5e48ee8419004d2381b84cc13eea0d8d2d692986b72cfea3ae04f9a"
+        }
+      ],
+      "kind": "face",
+      "path": "images/face-d6eb5c82.png",
+      "provenance": {
+        "artStyle": "flat placeholder shapes",
+        "box": {
+          "height": 100,
+          "width": 80,
+          "x": 50,
+          "y": 60
+        },
+        "engine": "fixture",
+        "provider": "personaje"
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "kind": "portrait",
+      "path": "images/portrait-e2f5f18a.png",
+      "provenance": {
+        "artStyle": "flat placeholder shapes",
+        "engine": "fixture",
+        "provider": "vinetas"
+      },
+      "status": "selected"
+    }
+  ],
+  "character": "INÉS",
+  "files": [
+    {
+      "path": "CHARACTER.md",
+      "sha256": "de36360abd43d4cfe7944c933bb4c56021997e103453f49de87d28a71d9b2ab1",
+      "sizeBytes": 423
+    },
+    {
+      "path": "images/face-d6eb5c82.png",
+      "sha256": "d6eb5c824cdf0fc48cdbd313e7d17bda1a853ad374c0daeb84e3dd1002202e96",
+      "sizeBytes": 705
+    },
+    {
+      "path": "images/portrait-e2f5f18a.png",
+      "sha256": "e2f5f18ab5e48ee8419004d2381b84cc13eea0d8d2d692986b72cfea3ae04f9a",
+      "sizeBytes": 940
+    }
+  ],
+  "generator": {
+    "name": "dossier-format fixtures",
+    "version": "1"
+  },
+  "manifestChecksum": "748c54e866c30c48e252a975bf284becad7cbb4c94168d44b22af6ade9a74ce3",
+  "manifestVersion": 2,
+  "role": "background",
+  "updatedAt": "2026-10-31T12:00:00Z"
+}

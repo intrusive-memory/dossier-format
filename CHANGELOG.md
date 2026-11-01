@@ -5,6 +5,40 @@ updated: 2026-10-31
 
 # Changelog
 
+## Format 2, release candidate 3 (2026-10-31)
+
+An independent read of rc.2 found rules with two readings on real input, and two
+faults rc.2 introduced. A validator then written blind from this text found more:
+the layout of `CAST.md` was nowhere stated. Each change has fixtures (96 in all). No
+fixture changed its expected result except as noted.
+
+- **§5.4, §8.2, §5.1, §6, schema:** the text and schema agree. `language` on a sample
+  and `version` in `tool` and `generator` are optional. `training` is required on
+  `kind: training`, in the schema as well as the text.
+- **§7:** how a member's YAML is read, so the hash doesn't depend on the YAML library
+  or change when a writer normalizes the file. The exact escapes. Fixed: a null
+  `voicePrompt` no longer hides `voiceDescription`.
+- **§7:** `W-STALE` applies to selected assets. An input with no current selection is
+  stale. An image with no `provenance.artStyle` isn't compared.
+- **§8.3, §14:** a tier comes from `CAST.md`. `W-ROLE` applies to a member with a dossier.
+- **§14:** new codes `E-CAST` and `E-MANIFEST`.
+- **§3:** the layout of `CAST.md`. `gender` values for `E-CAST`.
+- **§3:** `W-POINTER` means a pointer that doesn't reach a manifest, including one to
+  nothing. Other faults keep their own codes. Orphans are looked for in named
+  directories, not recursively. Names compare exactly and `E-NAME-MISMATCH` covers
+  `CHARACTER.md`. A bundle whose name isn't canonical is `E-NAME`.
+- **§5.2:** `W-UNCLASSIFIED` and `E-ZERO-BYTE` apply to files on disk, whether or not
+  `files` lists them.
+- **§5.6:** what `refresh` may adopt. A sample is adopted only when its text and voice
+  are known.
+- **§8.1:** fixed: a missing file is only `E-FILE-MISSING`, not also `W-SHAPE`.
+- **Fixtures:** `E-VERSION` may also report `E-SCHEMA`, as §14 allows. `W-POINTER` must
+  report `W-ORPHAN` too. `W-PAGE-SIZE` is tested at 10,000,001 bytes, with a valid page at
+  exactly 10,000,000. `conformance.json` covers each `W-STALE` input and each check row
+  on its own.
+- **§8.2:** `voices.voxalta` names the vox when any entry resolves to it. **Appendix A:**
+  version 1 isn't held to version 2's rules.
+
 ## Format 2, release candidate 2 (2026-10-31)
 
 Reviewing a first implementation's requirements against rc.1 found rules a

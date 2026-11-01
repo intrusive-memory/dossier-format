@@ -1,0 +1,74 @@
+{
+  "assets": [
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "kind": "description",
+      "path": "CHARACTER.md",
+      "provenance": {
+        "provider": "manual"
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "derivedFrom": [
+        {
+          "path": "images/portrait-eafd389a.png",
+          "role": "portrait",
+          "sha256": "eafd389a8590e5da9d6118b4fd3fc75cb65768a5dd4ce28327c4f282c6c6ccaa"
+        }
+      ],
+      "kind": "face",
+      "path": "images/face-ad0ce962.png",
+      "provenance": {
+        "artStyle": "flat placeholder shapes",
+        "box": {
+          "height": 100,
+          "width": 80,
+          "x": 50,
+          "y": 60
+        },
+        "engine": "fixture",
+        "provider": "personaje"
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "kind": "portrait",
+      "path": "images/portrait-eafd389a.png",
+      "provenance": {
+        "artStyle": "flat placeholder shapes",
+        "engine": "fixture",
+        "provider": "vinetas"
+      },
+      "status": "selected"
+    }
+  ],
+  "character": "STORED AWAY",
+  "files": [
+    {
+      "path": "CHARACTER.md",
+      "sha256": "e3a3e03a0e75c6cccde5c9c101767efcf1956397a81ffb8391988d44ebf9b018",
+      "sizeBytes": 433
+    },
+    {
+      "path": "images/face-ad0ce962.png",
+      "sha256": "ad0ce9627d42a4208b9ddb9e5caa502a246bfdf67bee879ae8da7119153228a8",
+      "sizeBytes": 706
+    },
+    {
+      "path": "images/portrait-eafd389a.png",
+      "sha256": "eafd389a8590e5da9d6118b4fd3fc75cb65768a5dd4ce28327c4f282c6c6ccaa",
+      "sizeBytes": 942
+    }
+  ],
+  "generator": {
+    "name": "dossier-format fixtures",
+    "version": "1"
+  },
+  "manifestChecksum": "86e4ace3004dfd69c31f128d51bd77813ca7da9baab39cd1bcceadd485568955",
+  "manifestVersion": 2,
+  "role": "background",
+  "updatedAt": "2026-10-31T12:00:00Z"
+}

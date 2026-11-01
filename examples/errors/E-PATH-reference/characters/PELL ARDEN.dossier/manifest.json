@@ -1,0 +1,81 @@
+{
+  "assets": [
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "kind": "description",
+      "path": "CHARACTER.md",
+      "provenance": {
+        "provider": "manual"
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "derivedFrom": [
+        {
+          "path": "images/portrait-b4ea7922.png",
+          "role": "portrait",
+          "sha256": "b4ea7922e4584d539d0db374f8380c3ee7ba42b3f070f080fe296a262d959bfb"
+        }
+      ],
+      "kind": "face",
+      "path": "images/face-199a72c5.png",
+      "provenance": {
+        "artStyle": "flat placeholder shapes",
+        "box": {
+          "height": 100,
+          "width": 80,
+          "x": 50,
+          "y": 60
+        },
+        "engine": "fixture",
+        "provider": "personaje",
+        "references": [
+          {
+            "path": "../portrait.png",
+            "role": "portrait",
+            "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          }
+        ]
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "kind": "portrait",
+      "path": "images/portrait-b4ea7922.png",
+      "provenance": {
+        "artStyle": "flat placeholder shapes",
+        "engine": "fixture",
+        "provider": "vinetas"
+      },
+      "status": "selected"
+    }
+  ],
+  "character": "PELL ARDEN",
+  "files": [
+    {
+      "path": "CHARACTER.md",
+      "sha256": "68977816de73c9862cfa1dbf9db62346221ec1c10eff5269d22073f34e480d5c",
+      "sizeBytes": 431
+    },
+    {
+      "path": "images/face-199a72c5.png",
+      "sha256": "199a72c5bce7e5df914c0db81b70230843f9eb809d8fde10aca00bb58b13db27",
+      "sizeBytes": 704
+    },
+    {
+      "path": "images/portrait-b4ea7922.png",
+      "sha256": "b4ea7922e4584d539d0db374f8380c3ee7ba42b3f070f080fe296a262d959bfb",
+      "sizeBytes": 940
+    }
+  ],
+  "generator": {
+    "name": "dossier-format fixtures",
+    "version": "1"
+  },
+  "manifestChecksum": "a4279b12323f6c4b9103d51b81d823329587243d0dd1bd108e71f7b958bfe305",
+  "manifestVersion": 2,
+  "role": "background",
+  "updatedAt": "2026-10-31T12:00:00Z"
+}

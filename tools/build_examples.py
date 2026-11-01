@@ -210,6 +210,8 @@ class Bundle:
         self.missing = set()  # recorded in the manifest, never written
         self.loose = {}      # on disk, never recorded
         self.mutate = None
+        self.manifest_bytes = b""   # replaces manifest.json; set, with no_manifest, to break it
+        self.no_manifest = False
 
     def put(self, path, data, kind=None, status="selected", variant=None, provenance=None, created=MADE, **extra):
         self.files[path] = data
@@ -291,7 +293,7 @@ class Bundle:
                 + "\n".join(parts) + body_extra
                 + f'\n<script type="application/json" id="character-record">{record_json}</script>\n</body></html>\n').encode()
         if padding:
-            html += b"<!--" + b" " * (padding - len(html) - 7) + b"-->\n"
+            html += b"<!--" + b" " * (padding - len(html) - 8) + b"-->\n"
         derived = [self.input("description"),
                    {"role": "castMember", "sha256": sha(json.dumps(normal_form(member), sort_keys=True, ensure_ascii=False, separators=(",", ":")).encode())},
                    {"role": "bundle", "sha256": embedded["manifestChecksum"]},
@@ -307,6 +309,11 @@ class Bundle:
             target = root / path
             target.parent.mkdir(parents=True, exist_ok=True)
             target.write_bytes(data)
+        if self.no_manifest:
+            return
+        if self.manifest_bytes:
+            (root / "manifest.json").write_bytes(self.manifest_bytes)
+            return
         (root / "manifest.json").write_text(json.dumps(self.manifest(), indent=2, sort_keys=True, ensure_ascii=False) + "\n", encoding="utf-8")
 
 
@@ -346,14 +353,14 @@ def code_for(name):
     return next(code for code in CODES if name == code or name.startswith(code + "-"))
 
 
-def fixture(group, name, bundles, members, codes=(), may_also=(), complete=None, missing=None, note=""):
+def fixture(group, name, bundles, members, codes=(), may_also=(), complete=None, missing=None, note="", cast_text=None, bundle_path=None):
     project = OUT / group / name
     project.mkdir(parents=True)
-    cast = front_matter({"type": "cast", "schemaVersion": 1, "cast": members}) + "# Cast\n\nSynthetic data only.\n"
+    cast = cast_text or front_matter({"type": "cast", "schemaVersion": 1, "cast": members}) + "# Cast\n\nSynthetic data only.\n"
     (project / "CAST.md").write_text(cast, encoding="utf-8")
     for bundle in bundles:
         bundle.write(project)
-    entry = {"path": f"{group}/{name}", "bundle": bundles[0].dir, "verdict": {"valid": "valid", "warnings": "warnings", "errors": "invalid"}[group],
+    entry = {"path": f"{group}/{name}", "bundle": bundle_path or bundles[0].dir, "verdict": {"valid": "valid", "warnings": "warnings", "errors": "invalid"}[group],
              "codes": sorted(codes), "mayAlso": sorted(may_also)}
     if complete is not None:
         entry["complete"] = complete
@@ -489,9 +496,90 @@ def valid():
 <style>h1 { background: url(data:image/gif;base64,R0lGODlhAQABAAAAACw=); } h2 { mask: url(#shape); }</style>
 <!-- <img src="comment.png"> is not a reference -->
 <p style="background: URL('DATA:image/gif;base64,R0lGODlhAQABAAAAACw=')">src="text.png" is text.</p>
+<img alt="one candidate with a comma" srcset="data:image/gif;base64,R0lGODlhAQABAAAAACw= 1x">
 <a href="#sources">Sources</a> <a href="https://example.org/source">A cited source</a> <a href="mailto:author@example.org">The author</a>
 <script>const notAReference = '<img src="script.png">';</script>""")
     fixture("valid", "page-allowed-references", [b], [m], complete=True)
+
+    # voicePrompt: null doesn't hide the legacy key (§7).
+    b = base("THE BELL RINGER")
+    voice = add_voice(b)
+    m = {"character": b.name, "role": "background", "voicePrompt": None, "voiceDescription": VOICE_PROMPT, "voices": {"voxalta": [voice]},
+         "manifest": f"{b.dir}/manifest.json"}
+    b.page(m)
+    fixture("valid", "null-voice-prompt", [b], [m], complete=True)
+
+    # How each YAML scalar is read (§7), and a multi-line value (the escapes). Hand-written YAML.
+    b = base("THE ARCHIVIST")
+    read = {"character": b.name, "role": "background", "actor": "5", "language": "no", "voices": {},
+            "manifest": f"{b.dir}/manifest.json",
+            "aFloat": "1.5", "anOctal": "0755", "aDate": "2026-08-01", "aYes": "yes", "aTrue": True, "aFalse": False,
+            "anInt": 5, "aNegative": -5, "aZero": 0, "tooBig": "99999999999999999999", "leadingZero": "007", "plusSign": "+5",
+            "aTilde": None, "anEmpty": None, "aNull": None, "quotedInt": "5", "quotedTrue": "true",
+            "aList": [1, True, "x", None, "1.5"], "aMap": {"k": "1.5", "t": True},
+            "aBlock": "line one\nline\ttwo \"quoted\" back\\slash\n"}
+    b.page(read)
+    raw = f"""---
+type: cast
+schemaVersion: 1
+cast:
+- character: {b.name}
+  role: background
+  actor: 5
+  language: no
+  voices: {{}}
+  manifest: {b.dir}/manifest.json
+  aFloat: 1.5
+  anOctal: 0755
+  aDate: 2026-08-01
+  aYes: yes
+  aTrue: True
+  aFalse: FALSE
+  anInt: 5
+  aNegative: -5
+  aZero: 0
+  tooBig: 99999999999999999999
+  leadingZero: 007
+  plusSign: +5
+  aTilde: ~
+  anEmpty:
+  aNull: NULL
+  quotedInt: "5"
+  quotedTrue: 'true'
+  aList: [1, true, x, null, 1.5]
+  aMap: {{k: 1.5, t: true}}
+  aBlock: "line one\\nline\\ttwo \\"quoted\\" back\\\\slash\\n"
+---
+# Cast
+
+Synthetic data only.
+"""
+    fixture("valid", "member-scalars", [b], [], complete=True, cast_text=raw,
+            note="Read by §7's rules, the page's castMember input matches. Reading 1.5 as a number, 0755 as an octal or no as a boolean makes it stale.")
+
+    # What W-STALE and W-ROLE don't report (§7, §14), and what isn't scanned or inventoried (§3, §5.2).
+    b = Bundle("THE HARBORMASTER", "background")
+    b.put("CHARACTER.md", short_description(b.name, "background"), "description")
+    old = png(180, 320, b.name + "old")
+    b.image("portrait", old, status="candidate")
+    old_path = f"images/portrait-{sha(old)[:8]}.png"
+    b.image("portrait", png(180, 320, b.name + "new"))
+    del b.assets[-1]["provenance"]["artStyle"]
+    b.image("view", png(180, 320, b.name + "view"), "front", status="candidate", derivedFrom=[{"role": "portrait", "path": old_path, "sha256": sha(old)}])
+    b.image("portrait", png(180, 180, b.name + "square"), status="candidate")
+    b.loose[".gitkeep"] = b""
+    elsewhere = base("STORED AWAY", parent="characters/archive")
+    fixture("valid", "not-reported", [b, elsewhere], [member(b), {"character": "a passerby (V.O.)", "voices": {}}], complete=True,
+            note="A stale candidate; a wrong-shaped candidate; a selected image with no provenance.artStyle; a hidden zero-byte file; a member with no role, no dossier and a non-canonical name; a bundle below characters/, which isn't scanned.")
+
+    # voices.voxalta has several paths, and the bundle's vox isn't the first or written the short way (§8.2).
+    b = base("THE TUNER")
+    voice = add_voice(b)
+    fixture("valid", "voice-second-path", [b], [member(b, prompt=VOICE_PROMPT) | {"voices": {"voxalta": ["voices/other.vox", f"./{voice}"]}}], complete=True)
+
+    # Exactly at §11's limit.
+    b = base("THE PORTER"); m = member(b); b.page(m, padding=10_000_000)
+    fixture("valid", "page-at-size-limit", [b], [m], complete=True, note="10,000,000 bytes, nearly all of it a comment.")
 
 
 # --- errors ------------------------------------------------------------------
@@ -502,7 +590,31 @@ def errors():
         fixture("errors", name, [b], members or [member(b)], codes or [code_for(name)], may_also, note=note)
 
     b = base(); b.mutate = lambda m: m.update(manifestVersion=3)
-    err("E-VERSION", b)
+    err("E-VERSION", b, may_also=["E-SCHEMA"])
+
+    b = base(); b.no_manifest = True
+    err("E-MANIFEST-missing", b)
+    b = base(); b.manifest_bytes = b"{ not json\n"
+    err("E-MANIFEST-not-json", b)
+    b = base(); b.manifest_bytes = b"[]\n"
+    err("E-MANIFEST-not-object", b)
+
+    b = base()
+    fixture("errors", "E-CAST-unknown-role", [b], [], ["E-CAST"], cast_text=front_matter({"type": "cast", "schemaVersion": 1, "cast": [{**member(b), "role": "Lead"}]}))
+    b = base()
+    fixture("errors", "E-CAST-not-yaml", [b], [], ["E-CAST"], cast_text="---\ntype: cast\ncast: [unclosed\n---\n")
+    b = base()
+    fixture("errors", "E-CAST-voices-not-map", [b], [], ["E-CAST"], cast_text=front_matter({"type": "cast", "schemaVersion": 1, "cast": [{**member(b), "voices": "a.vox"}]}))
+
+    b = base("pell arden")
+    err("E-NAME-not-canonical", b, codes=["E-NAME"], note="Everything agrees, and the name isn't canonical.")
+    b = base("INE\u0301S", dirname="IN\u00c9S.dossier")
+    err("E-NAME-not-nfc", b, codes=["E-NAME"], note="The manifest and member are NFD and the directory NFC. They agree as NFC strings (§3), and the name isn't canonical.")
+
+    b = base()
+    fixture("errors", "E-CAST-no-character", [b], [], ["E-CAST"], cast_text=front_matter({"type": "cast", "schemaVersion": 1, "cast": [{"role": "background", "voices": {}}]}))
+    b = base()
+    fixture("errors", "E-CAST-unknown-gender", [b], [], ["E-CAST"], cast_text=front_matter({"type": "cast", "schemaVersion": 1, "cast": [{**member(b), "gender": "X"}]}))
 
     b = base("AC/DC", dirname="ACDC.dossier")
     err("E-NAME-slash", b, may_also=["E-NAME-MISMATCH", "E-SCHEMA"])
@@ -513,6 +625,11 @@ def errors():
     err("E-NAME-MISMATCH-directory", b, codes=["E-NAME-MISMATCH"])
     b = base()
     err("E-NAME-MISMATCH-member", b, members=[{**member(b), "character": "PELL"}], codes=["E-NAME-MISMATCH"])
+
+    b = base()
+    err("E-NAME-MISMATCH-case", b, members=[{**member(b), "character": "Pell Arden"}], codes=["E-NAME-MISMATCH"], note="Names compare exactly.")
+    b = base(description=short_description("SOMEONE ELSE", "background"))
+    err("E-NAME-MISMATCH-description", b, codes=["E-NAME-MISMATCH"])
 
     b = base(dirname=PELL)
     err("E-NOT-BUNDLE", b, note="A version 2 manifest in a directory with no .dossier extension.")
@@ -530,6 +647,10 @@ def errors():
     for label, path in (("backslash", "images\\outside.txt"), ("drive-letter", "C:/outside.txt"), ("url", "file:///tmp/outside.txt"), ("empty-segment", "images//outside.txt")):
         b = base(); b.mutate = bad_path(path)
         err(f"E-PATH-{label}", b, may_also=["E-SCHEMA", "E-FILE-MISSING", "W-UNCLASSIFIED"])
+    b = base(); b.assets[-1]["provenance"]["references"] = [{"sha256": "a" * 64, "path": "../portrait.png", "role": "portrait"}]
+    err("E-PATH-reference", b, may_also=["E-SCHEMA"])
+    b = base(); b.mutate = lambda m: m["assets"].append({"path": "../outside.png", "kind": "sourcePhoto", "status": "candidate", "createdAt": MADE, "provenance": {"provider": "manual"}})
+    err("E-PATH-asset-only", b, may_also=["E-SCHEMA", "E-ASSET-NO-FILE"])
     b = base(); b.assets[-1]["derivedFrom"][0]["path"] = "../portrait.png"
     err("E-PATH-derived-from", b, may_also=["E-SCHEMA"], note="A path outside files and assets.")
 
@@ -543,6 +664,14 @@ def errors():
 
     b = base(); b.put("source/empty.png", b"", "sourcePhoto", provenance={"provider": "import"})
     err("E-ZERO-BYTE", b, may_also=["E-SCHEMA"])
+
+    def wrong_size(m):
+        m["files"][0]["sizeBytes"] += 1
+    b = base(); b.mutate = wrong_size
+    err("E-FILE-HASH-size-only", b, note="The hash is right and sizeBytes isn't.")
+
+    b = base(); b.loose["notes.txt"] = b""
+    err("E-ZERO-BYTE-not-listed", b, codes=["E-ZERO-BYTE"], may_also=["W-UNCLASSIFIED"], note="On disk and not in files: §5.2's inventory is of the disk.")
 
     b = base(); b.mutate = lambda m: m.update(manifestChecksum="0" * 64)
     err("E-CHECKSUM", b)
@@ -583,6 +712,27 @@ def warnings():
     b = base(); b.put("notes.txt", b"Not an asset.\n")
     warn("W-UNCLASSIFIED", b)
 
+    b = base(); b.loose["notes.txt"] = b"A tool put this here.\n"
+    warn("W-UNCLASSIFIED-not-listed", b, note="On disk and not in files, as §5.6 allows.")
+
+    # Each input role alone (§7). Everything else about each bundle is current.
+    b = base(); b.image("expression", png(128, 128, "fixture happy", (30, 25, 68, 85)), "happy",
+                        derivedFrom=[{**b.input("face"), "sha256": "0" * 64}, b.input("portrait")])
+    warn("W-STALE-input-face", b, codes=["W-STALE"])
+    b = base(); add_voice(b); add_sample(b, "neutral", "1.7b", "One line."); b.assets[-1]["derivedFrom"][0]["sha256"] = "0" * 64
+    m = member(b, voice=f"{b.dir}/voice/{b.name}.vox", prompt=VOICE_PROMPT)
+    warn("W-STALE-input-vox", b, members=[m], codes=["W-STALE"])
+    b = base(); m = member(b); b.page(m); b.selected("dossier")["derivedFrom"][0]["sha256"] = "0" * 64
+    warn("W-STALE-input-description", b, members=[m], codes=["W-STALE"])
+    b = base(); m = member(b); b.page(m)
+    warn("W-STALE-input-member", b, members=[{**m, "bio": "Changed after the page was rendered."}], codes=["W-STALE"])
+    b = base(); m = member(b); b.page(m); b.selected("dossier")["derivedFrom"][2]["sha256"] = "0" * 64
+    warn("W-STALE-input-bundle", b, members=[m], codes=["W-STALE"])
+
+    # A portrait has been rejected and nothing replaces it.
+    b = base(); b.selected("portrait")["status"] = "rejected"
+    warn("W-STALE-no-selection", b, note="The face's portrait input has no current selection.")
+
     # The face was cut from a portrait that is no longer the selected one.
     b = Bundle(PELL, "background")
     b.put("CHARACTER.md", short_description(PELL, "background"), "description")
@@ -617,15 +767,23 @@ def warnings():
     b = base(); b.put(f"images/portrait-{sha(b.files[b.selected('portrait')['path']])[:8]}.json", b'{"seed": 7}\n')
     warn("W-SIDECAR", b, may_also=["W-UNCLASSIFIED"])
 
+    b = base(parent="people"); stray = base("STRAY VISITOR", parent="people")
+    warn("W-ORPHAN-beside-a-bundle", b, extra=[stray], codes=["W-ORPHAN"], note="Beside a pointed-at bundle, outside characters/.")
     b = base(); stray = base("STRAY VISITOR")
     warn("W-ORPHAN", b, extra=[stray], note="STRAY VISITOR is reported and not loaded.")
 
     b = base()
-    warn("W-POINTER", b, members=[{**member(b), "manifest": f"characters/archive/{PELL}.dossier/manifest.json"}], may_also=["W-ORPHAN"], complete=None,
-         note="The pointer leads nowhere, so the bundle isn't loaded and completeness isn't defined.")
+    warn("W-POINTER", b, members=[{**member(b), "manifest": f"characters/archive/{PELL}.dossier/manifest.json"}], codes=["W-POINTER", "W-ORPHAN"], complete=None,
+         note="The pointer leads nowhere, so the member's bundle is an orphan and isn't loaded. Completeness isn't defined.")
+    b = base()
+    warn("W-POINTER-directory", b, members=[{**member(b), "manifest": b.dir}], codes=["W-POINTER", "W-ORPHAN"], complete=None, note="The pointer names the bundle, not its manifest.")
+    fixture("warnings", "W-POINTER-nowhere", [], [{"character": PELL, "role": "background", "voices": {}, "manifest": f"characters/{PELL}.dossier/manifest.json"}],
+            ["W-POINTER"], bundle_path=f"characters/{PELL}.dossier", note="The member points at a bundle that doesn't exist at all.")
 
     b = base(role=None)
     warn("W-ROLE", b, complete=None, note="No tier, so completeness isn't defined.")
+    b = base(role=None); b.extra_top = {"role": "lead"}
+    warn("W-ROLE-manifest-has-one", b, codes=["W-ROLE"], complete=None, note="The manifest's role is a copy and doesn't supply a tier, so no W-INCOMPLETE.")
 
     b = base(); voice = add_voice(b); add_sample(b, "neutral", "1.7b", "One line.")
     warn("W-VOICE-ELSEWHERE", b, members=[member(b, voice=f"voices/{PELL}.vox", prompt=VOICE_PROMPT)])
@@ -637,14 +795,15 @@ def warnings():
     b = base(description=short_description(PELL, "background") + b"[^unused]: Author. Nothing refers to this, 2026-10-31.\n")
     warn("W-FOOTNOTE-unused", b)
 
-    b = base(); m = member(b); b.page(m, padding=11_000_000)
-    warn("W-PAGE-SIZE", b, members=[m], note="11,000,000 bytes, nearly all of it a comment, which git compresses.")
+    b = base(); m = member(b); b.page(m, padding=10_000_001)
+    warn("W-PAGE-SIZE", b, members=[m], note="10,000,001 bytes, nearly all of it a comment, which git compresses.")
     b = base(); m = member(b); b.page(m, body_extra=f'\n<img alt="linked" src="{b.selected("face")["path"]}">')
     warn("W-PAGE-EXTERNAL", b, members=[m])
     for label, html in (("css-url", '<style>body { font-family: x; src: url("fonts/x.woff2"); }</style>'),
                         ("css-import", '<style>@import "site.css";</style>'),
                         ("style-attribute", '<p style="background: url(https://example.org/x.png)">Text.</p>'),
                         ("srcset", '<img alt="set" srcset="data:image/gif;base64,R0lGODlhAQABAAAAACw= 1x, big.png 2x">'),
+                        ("link-element", '<link rel="stylesheet" href="https://example.org/site.css">'),
                         ("relative-link", '<a href="other-dossier.html">Another page</a>')):
         b = base(); m = member(b); b.page(m, body_extra="\n" + html)
         warn(f"W-PAGE-EXTERNAL-{label}", b, members=[m])
@@ -653,6 +812,27 @@ def warnings():
     b = Bundle(name, "lead")
     b.put("CHARACTER.md", full_description(name, "lead"), "description")
     warn("W-INCOMPLETE", b, complete=False, missing=["dossier", "expressions", "face", "portrait", "sample.neutral.0.6b", "sample.neutral.1.7b", "sample.range", "views", "voicePrompt", "vox.0.6b", "vox.1.7b"])
+
+    # One check row each, against what §8.3 says satisfies it.
+    b = Bundle(name, "lead")
+    b.put("CHARACTER.md", short_description(name, "lead"), "description")
+    warn("W-INCOMPLETE-short-on-a-lead", b, codes=["W-INCOMPLETE"], complete=False, missing=["description.full", "dossier", "expressions", "face", "portrait", "pronunciation", "sample.neutral.0.6b", "sample.neutral.1.7b", "sample.range", "views", "voicePrompt", "vox.0.6b", "vox.1.7b"])
+    b = Bundle(name, "lead")
+    b.put("CHARACTER.md", full_description(name, "lead").replace(b"Halloway: HAL-oh-way.[^a-backstory]\n", b""), "description")
+    warn("W-INCOMPLETE-empty-pronunciation", b, codes=["W-INCOMPLETE"], complete=False, missing=["dossier", "expressions", "face", "portrait", "pronunciation", "sample.neutral.0.6b", "sample.neutral.1.7b", "sample.range", "views", "voicePrompt", "vox.0.6b", "vox.1.7b"])
+    b = Bundle(name, "costar")
+    b.put("CHARACTER.md", short_description(name, "costar").replace(b"## Voice & Speech", b"## Notes"), "description")
+    warn("W-INCOMPLETE-no-voice-section", b, codes=["W-INCOMPLETE"], complete=False, missing=["description.short", "dossier", "face", "portrait", "sample.neutral.0.6b", "sample.neutral.1.7b", "voicePrompt", "vox.0.6b", "vox.1.7b"])
+    b = base(); b.put(f"lora/{PELL}-v1.safetensors", struct.pack("<Q", 2) + b"{}", "lora", provenance={"provider": "manual"},
+                      lora={"triggerWord": "pell", "baseModel": "fixture", "version": 1, "rank": 8, "steps": 1, "defaultScale": 0.8, "trainedAt": MADE, "compatibleEngines": ["fixture"]})
+    warn("W-INCOMPLETE-lora-no-training", b, codes=["W-INCOMPLETE"], complete=False, missing=["training.withLora"])
+    b = Bundle(name, "lead")
+    b.put("CHARACTER.md", full_description(name, "lead"), "description")
+    voice = add_voice(b)
+    for variant, model, suffix in (("neutral", "1.7b", False), ("neutral", "0.6b", True), ("wry", "1.7b", False), ("urgent", "1.7b", False)):
+        add_sample(b, variant, model, "One line.", suffix=suffix)
+    warn("W-INCOMPLETE-two-range-samples", b, members=[member(b, voice=voice, prompt=VOICE_PROMPT)], codes=["W-INCOMPLETE"], complete=False,
+         missing=["dossier", "expressions", "face", "portrait", "sample.range", "views"], note="Neutral reads don't count toward the range.")
 
     # Version 1, in both shapes Appendix A describes.
     def v1(dirname):
