@@ -1,6 +1,6 @@
 ---
 type: doc
-updated: 2026-10-31
+updated: 2026-11-01
 ---
 
 # Conformance fixtures
@@ -29,6 +29,7 @@ Validate it from its `CAST.md`.
 | `codes` | Codes a validator MUST report. |
 | `mayAlso` | Codes a validator MAY also report. Any other code is a failure. |
 | `complete`, `missingRequired` | The completeness result against the tier (§8.3). Absent where it isn't asserted. |
+| `updateStatus` | The update status of `bundle` (§5.7): `at` is the time to use as `now`, and `updating` is the answer. Absent where it isn't asserted. |
 | `note` | What the fixture is testing, where the name doesn't say. |
 
 ## Limits

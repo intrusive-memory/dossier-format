@@ -1,7 +1,7 @@
 ---
 type: requirements
 state: draft
-updated: 2026-10-31
+updated: 2026-11-01
 sequence: 1 — first on the critical path of the Personaje effort
 ---
 
@@ -190,6 +190,15 @@ does and does not know.
 | DF-61 | **The host shows what the validator finds, in place of the page.** A bundle with no page, an unknown `manifestVersion`, a name mismatch (DF-8) or an orphan (DF-10) is still one item; the host names the problem where the page would be, with the validator's code (DF-57), and never hides, deletes or repairs the bundle. |
 | DF-62 | **Hosts carry no format knowledge beyond the type.** Every rule above is answered by the reader the host links. A host that cannot link a reader shows the item and says a reader is needed. The reader MAY supply the item's icon (the selected `face` crop where there is one); the host's default icon is a person. |
 | DF-63 | **Discovery stays with `CAST.md`.** A host's scan is presentation only (DF-7). Finding a bundle on disk does not make it a cast member; a bundle no `CAST.md` member points at is an orphan (DF-10) and is shown as one. |
+
+**Update status.** A read-only application needs to know that a bundle is being updated, whichever tool or language is updating it, and whether or not the application was running when the update began.
+
+| ID | Requirement |
+|----|-------------|
+| DF-64 | **A marker says a bundle is being updated.** It is a hidden file in the bundle's root, `.update-<id>.json`, and so is outside `files` and `manifestChecksum`. It is a signal, not a lock, and DF-30 still applies. Several may exist at once. |
+| DF-65 | **A writer holds a marker for the whole update.** It writes and renews the marker atomically, sets `expiresAt` no more than 3600 seconds ahead, and removes the marker only after its last replacement of `manifest.json`, including when the update fails. |
+| DF-66 | **A marker can't report an update forever.** A reader counts a marker only when `now < expiresAt <= now + 3600 seconds`. Any other marker, unreadable ones included, doesn't count. |
+| DF-67 | **A host keeps the last page during an update.** It indicates the update on the item, doesn't report a problem it finds during the update, and reads the bundle again once when no marker is active. It never creates, renews or removes a marker (DF-60). |
 
 ## 11. Validation
 
