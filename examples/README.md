@@ -34,11 +34,26 @@ Validate it from its `CAST.md`.
 
 ## Limits
 
-- **The pages are hand-made,** because the template doesn't exist yet. They meet
-  §11's structure and carry the template version `0.0.0-fixture`, whose hash is
-  the SHA-256 of `dossier-format fixture template\n`. Treat that as the current
-  template: it's `templateVersion` and `templateSha256` in `conformance.json`. These pages are test input for readers and validators, not a model
-  for a renderer's output. They will be regenerated when the template ships.
+- **The pages are the shipped template, filled.** `templateVersion` and
+  `templateSha256` in `conformance.json` are `template/VERSION.json`'s: treat that as
+  the current template. The tool fills only what these pages need, so its banner is
+  always empty and it refuses a footnote that isn't both cited and defined. A page that
+  tests a fault has it added afterwards: `W-PAGE-EXTERNAL` markup goes before the
+  record, `W-PAGE-SIZE` and `valid/page-at-size-limit` get a comment after `</html>`,
+  and `W-STALE-template` claims another hash. These pages are test input, not a
+  reference for a renderer, though `valid/complete-lead`'s is the same bytes as
+  `template/example/`.
+- **Stripping metadata (§4) has no fixture.** It happens as a file is copied in, and a
+  fixture holds only the result, which is an ordinary PNG with its own hash. Nor can a
+  fixture show that an original wasn't changed later. §4 has a worked example. Adoption
+  by *refresh* (§5.6) has no fixture for the same reason.
+- **Check findings (§14) aren't asserted.** `C-` codes are outside validation results,
+  so they aren't in `codes` or `mayAlso`. `valid/empty-background` and
+  `valid/description-no-character-key` say in their notes which one a check reports.
+- **`valid/name-on-disk-nfd` depends on the checkout.** Its file's name on disk is NFD.
+  Linux and APFS keep that, and HFS+ doesn't. Git on a Mac stores such a name as NFC unless
+  it's added with `git -c core.precomposeunicode=false add`, and reports it as untracked
+  in NFC form, which is why the repository's `.gitignore` names that form.
 - **Face detection has no fixture.** Images are shapes, not faces, so the face
   crops use `provenance.box`. §8.5's worked example is the portrait and box
   these fixtures use.
@@ -46,10 +61,11 @@ Validate it from its `CAST.md`.
   a writer's refusal (§2), and a fixture can't be created on a case-insensitive
   disk.
 - `warnings/W-PAGE-SIZE` and `valid/page-at-size-limit` are 10 MB on disk, nearly
-  all of it a comment. They compress to almost nothing in git.
+  all of it a comment. They compress to almost nothing in git. Each other page carries
+  the template's fonts, stylesheet and script, about 220 KB, which git packs as deltas.
 
 ## Regenerating
 
 `tools/build_examples.py` writes this directory, except this file. Run it after
-any change to the standard (AGENTS.md rule 9). Output is byte-stable for the
-pinned versions in `tools/requirements.txt`.
+any change to the standard or the template (AGENTS.md rule 9). Output is byte-stable
+for the pinned versions in `tools/requirements.txt`.

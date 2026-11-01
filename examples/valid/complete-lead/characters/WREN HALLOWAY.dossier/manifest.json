@@ -28,15 +28,15 @@
         },
         {
           "role": "template",
-          "sha256": "ed1841cb886f585f2bed11a600dd9955510659e84b76cd52200d3343d9712cd4",
-          "version": "0.0.0-fixture"
+          "sha256": "1bc7363767e2bbd2a165d8455ecc5b5fdf989ba2cde0dc449d9bd800a1e414cc",
+          "version": "0.1.0"
         }
       ],
       "kind": "dossier",
       "path": "WREN HALLOWAY-dossier.html",
       "provenance": {
-        "notes": "Hand-made for the fixtures.",
-        "provider": "manual"
+        "notes": "Filled from template/ by tools/build_examples.py.",
+        "provider": "dossier-format fixtures"
       },
       "status": "selected"
     },
@@ -507,8 +507,8 @@
     },
     {
       "path": "WREN HALLOWAY-dossier.html",
-      "sha256": "f7e68f00926e0e83c857863b2c7a2d097af291b12a7a417a6dce2cd520650991",
-      "sizeBytes": 189500
+      "sha256": "530765c01b999c6e716e31162b3b46fc692ebd1b55aafddaeab2c81fda8eec36",
+      "sizeBytes": 498809
     },
     {
       "path": "images/expression-frightened-350a34f2.png",
@@ -620,7 +620,7 @@
     "name": "dossier-format fixtures",
     "version": "1"
   },
-  "manifestChecksum": "1e9a61ed8eaed933f6f3b96891efc2f682818627171f5b695477964e989c38b0",
+  "manifestChecksum": "837e37bae9aebf31fd6b5abb6ef770466befbf708ff079145a9cfbd6a08d316e",
   "manifestVersion": 2,
   "prompts": {
     "identity": "A tall woman, grey eyes, long grey coat, no jewelry, no glasses.",

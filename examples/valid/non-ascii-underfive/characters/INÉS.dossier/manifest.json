@@ -27,15 +27,15 @@
         },
         {
           "role": "template",
-          "sha256": "ed1841cb886f585f2bed11a600dd9955510659e84b76cd52200d3343d9712cd4",
-          "version": "0.0.0-fixture"
+          "sha256": "1bc7363767e2bbd2a165d8455ecc5b5fdf989ba2cde0dc449d9bd800a1e414cc",
+          "version": "0.1.0"
         }
       ],
       "kind": "dossier",
       "path": "INÉS-dossier.html",
       "provenance": {
-        "notes": "Hand-made for the fixtures.",
-        "provider": "manual"
+        "notes": "Filled from template/ by tools/build_examples.py.",
+        "provider": "dossier-format fixtures"
       },
       "status": "selected"
     },
@@ -84,8 +84,8 @@
     },
     {
       "path": "INÉS-dossier.html",
-      "sha256": "118c1a4ea4e0a27938d3a59b1cb3706c57eb9799839f79926f23c7a1b37cc2dc",
-      "sizeBytes": 8025
+      "sha256": "9ab4cd825d01905b85fd1eda9af727964791a5944acd4a02ffce252245286d4b",
+      "sizeBytes": 242362
     },
     {
       "path": "voice/INÉS.vox",
@@ -102,7 +102,7 @@
     "name": "dossier-format fixtures",
     "version": "1"
   },
-  "manifestChecksum": "5976a72efbf42b89f75fe60fb1d6818b4db9a9c172203ca66a8471cfe407da53",
+  "manifestChecksum": "caf4b96baafd1a1fdbd5191426618dccd44023eab5069197667edca5575ea38e",
   "manifestVersion": 2,
   "role": "underfive",
   "updatedAt": "2026-10-31T12:00:00Z"

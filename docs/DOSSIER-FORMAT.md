@@ -29,7 +29,10 @@ the schema is a bug.
 - **Timestamps** are RFC 3339 in UTC with a `Z` suffix and whole seconds:
   `2026-10-19T17:04:00Z`.
 - **Hashes** are SHA-256, written as 64 lowercase hexadecimal characters.
-  `<sha8>` is the first 8 of them.
+  `<sha8>` is the first 8 of them. A file's hash is of its bytes as stored.
+- **Metadata** in a PNG means the chunks of type `tEXt`, `zTXt`, `iTXt`, `eXIf` and
+  `tIME`. No other chunk is metadata, and those that affect rendering, such as
+  `iCCP`, `gAMA` and `sRGB`, are kept. §4 says when it may be removed. [DF-18]
 - **Paths** inside the bundle are relative to the bundle directory, use `/`,
   and are stored unencoded (spaces as spaces). A path MUST NOT be empty,
   start with `/`, or contain an empty, `.` or `..` segment. [DF-5, DF-21]
@@ -102,7 +105,8 @@ bundle's only by case.
   manifest outside a `.dossier` directory is `E-NOT-BUNDLE`, and version 1 is `W-V1`.
 - **Names compare exactly,** as NFC strings. `E-NAME-MISMATCH` covers the
   directory name, the manifest's `character`, the `CAST.md` member's `character`
-  and `CHARACTER.md`'s `character`.
+  and `CHARACTER.md`'s `character`. A `CHARACTER.md` with no `character` key has
+  nothing to compare, so it isn't `E-NAME-MISMATCH`; a check reports it (§14).
 - A member with no `manifest:` has no dossier; that is valid.
 - A `.dossier` directory no member points at is an **orphan** (`W-ORPHAN`):
   reported, never loaded, never deleted. A validator looks for orphans only in
@@ -156,7 +160,39 @@ The format writes none of them except through a `CAST.md` writer.
   A file enters the bundle when it is selected or explicitly kept. Names in
   `.generations/` that aren't a character name (lowercase, e.g. `scenes`) are
   reserved for other tools. [DF-17]
-- **Originals are never modified** and never embedded in the page. [DF-18]
+- **Originals are never modified** once they are in the bundle, and never embedded
+  in the page. [DF-18]
+- **Stripping metadata.** A writer MAY remove metadata (§1) from an image when it
+  copies the image in, and at no other time. [DF-18]
+  1. It reads any record embedded in the image, for `provenance` (§6), before
+     removing anything.
+  2. It removes the metadata chunks and keeps every other chunk, its bytes and their
+     order. Pixel data is untouched: an image is never decoded and encoded again for
+     this.
+  3. It takes the `sha256`, `sizeBytes` and the file name's `<sha8>` from the
+     stripped bytes.
+
+  A validator doesn't look for metadata, and an image that keeps it is valid. A tool
+  sending a reference SHOULD send the bundle's copy, because a hash taken from an
+  unstripped copy won't match the file in the bundle (§6, §7).
+
+  Worked example. A 1×1 PNG of 131 bytes, with this signature and these chunks:
+
+  | Chunk | Bytes, in hexadecimal | Kept |
+  |-------|-----------------------|------|
+  | signature | `89504e470d0a1a0a` | yes |
+  | `IHDR` | `0000000d49484452000000010000000108000000003a7e9b55` | yes |
+  | `gAMA` | `0000000467414d410000b18f0bfc6105` | yes |
+  | `tEXt` | `0000001174455874436f6d6d656e740073796e746865746963f780bf96` | no |
+  | `tIME` | `0000000774494d4507ea0b010c0000bd7d3d54` | no |
+  | `IDAT` | `0000000a4944415478da6368000000820081da45083b` | yes |
+  | `IEND` | `0000000049454e44ae426082` | yes |
+
+  Its hash before is `01cecee74026f0dbcd8435b35b0eb97344413c711d8b1cf727e4e9b493e30f4c`.
+  The kept parts are 83 bytes, which hash to
+  `6f07d7ae91a541bf681d1acb69834e2f12342c0558b2999d6e7893463c6ce778`. Stored as a
+  portrait, the file is `images/portrait-6f07d7ae.png`, and that second hash is what
+  `files` records and a reference to it sends.
 - **One home for the character's adapter:** `lora/`. A tool that keeps
   adapters elsewhere treats the bundle's as authoritative. [DF-20]
 - **Type identifier:** `io.intrusive-memory.dossier`, conforming to
@@ -201,6 +237,13 @@ This inventory is of the disk, not of `files`. A validator walks the bundle:
 `files` lists it, and neither applies to a hidden file. A file on disk that
 `files` doesn't list doesn't change `manifestChecksum`, which is computed from
 `files`.
+
+**Matching an entry to the disk.** A manifest path compares with a name on disk as
+NFC strings, case-sensitively, whatever the file system would open. So an entry in
+NFC finds a file whose name on disk is NFD, and an entry that differs from the name
+only by case is `E-FILE-MISSING`. A `files` entry for a symlink or for `manifest.json`
+is `E-FILE-MISSING`, since neither is in the inventory. A listed hidden file is
+checked as any other entry is, for `E-FILE-MISSING` and `E-FILE-HASH`.
 
 **Bundle paths.** Every path recorded in a manifest (`files`, `assets`,
 `derivedFrom`, `provenance.references`) is relative to the bundle, with `/` as
@@ -273,7 +316,7 @@ re-read it, and verify it parses and matches what was written. Only a
 conforming writer changes `manifest.json`. Other tools MAY put files in the
 bundle (a voice tool writing `voice/<CHARACTER>.vox`); they are unclassified
 until a writer's *refresh* adopts them by these rules. An adopted asset has
-`status: candidate`.
+`status: candidate`, and its `provenance` has `provider: import`.
 
 - `voice/<CHARACTER>.vox` → `vox`.
 - `voice/sample-<name>.m4a` → `voiceSample`. If `<name>` ends in `-` followed by a
@@ -389,7 +432,7 @@ Unknown keys are preserved.
 | Key | Required | Meaning |
 |-----|----------|---------|
 | `sha256` | yes | The bytes sent. |
-| `path` | when known | The bundle path of the asset with that `sha256` at the time of writing. Never an absolute path. |
+| `path` | when known | The bundle path of the asset with that `sha256` at the time of writing; when none has it and the reference's `role` has a current selection, that selection's path (§7). A reader MUST NOT assume the file at `path` has that `sha256`. Never an absolute path. |
 | `role` | no | Why it was sent: `portrait`, `face`, `view:<variant>`, `expression:<variant>`, or a tool's own word. |
 | `originalWidth`, `originalHeight`, `effectiveWidth`, `effectiveHeight` | no | As the engine reports them. |
 
@@ -399,7 +442,7 @@ Unknown keys are preserved.
 
 | Shape | Used for |
 |-------|----------|
-| `{"role": "<role>", "path": "<bundle path>", "sha256": "<hash>"}` | An asset in the bundle. Roles: `portrait`, `face`, `vox`, `description`. |
+| `{"role": "<role>", "path": "<bundle path>", "sha256": "<hash>"}` | An asset in the bundle, or one that has left it (below). Roles: `portrait`, `face`, `vox`, `description`. |
 | `{"role": "castMember", "sha256": "<hash>"}` | The `CAST.md` member, hashed as its canonical JSON (below). |
 | `{"role": "bundle", "sha256": "<hash>"}` | The `manifestChecksum` computed over every file except the page itself. |
 | `{"role": "template", "version": "<v>", "sha256": "<hash>"}` | The page template. |
@@ -468,6 +511,26 @@ also makes its images stale: a selected image with a `provenance.artStyle` that 
 front-matter `artStyle` is stale. An image with no `provenance.artStyle` isn't
 compared. No other character is affected. Stale assets are
 flagged (`W-STALE`), never deleted or demoted.
+
+**An input that has left the bundle.** An input's `sha256`, and a reference's (§6), is
+the hash of the bytes actually sent. When a required input's bytes are no longer in
+the bundle, a writer records that hash, with the path of the current selection for
+that role, so a selected asset reads `W-STALE`. A reader MUST NOT assume the file at
+`path` has that `sha256`: the hash says what was used, and the path says what holds
+that role now.
+
+Worked example (`examples/warnings/W-STALE-input-left-bundle`). A front view was made
+from a portrait hashing to `d379657057035f271a8a801d8e5615ab941d4723a3388407b96af712c0d0928a`,
+whose file is gone. The selected portrait is now `images/portrait-b4ea7922.png`. The
+view records
+
+```json
+{"role": "portrait", "path": "images/portrait-b4ea7922.png", "sha256": "d379657057035f271a8a801d8e5615ab941d4723a3388407b96af712c0d0928a"}
+```
+
+The selected portrait's `files` entry has the hash
+`b4ea7922e4584d539d0db374f8380c3ee7ba42b3f070f080fe296a262d959bfb`. It differs from the
+input's, so the view is stale.
 
 ## 8. Kinds
 
@@ -602,6 +665,9 @@ UTF-8 Markdown with YAML front matter.
 | `sampleLine` | no | string | One of the character's own lines, word for word: the neutral sample's text. |
 | `draft` | no | object | `generatedBy`, `generatedAt` (timestamp or date string), `sources` (array), `reviewedAt` (date string), `generated` (array of section names or front-matter keys still as generated; a writer removes an entry when a person edits it). |
 
+A missing required key is for a check to report (§14). It isn't a validation result,
+and a missing `character` isn't `E-NAME-MISMATCH` (§3).
+
 Dates in front matter are quoted strings. Unknown keys are preserved, and a
 writer preserves the text of keys it doesn't change. **No data lives in
 YAML comments;** comments may be lost by any writer.
@@ -691,7 +757,8 @@ registered as `kind: dossier`.
 - **Template:** `<meta name="dossier-template" content="<version> <sha256>">`,
   with the same values as the page's `template` input (§7). The **current
   template** is the one the validator or renderer carries, by the version and
-  `sha256` published with it. The page is stale (`W-STALE`) when the `sha256` in
+  `sha256` published with it, a hash that `template/README.md` rule 1 defines. The
+  page is stale (`W-STALE`) when the `sha256` in
   either place differs from the current template's; versions aren't ordered, so
   an older template is stale too. A validator that carries no template makes no
   template comparison.
@@ -700,8 +767,10 @@ registered as `kind: dossier`.
 - **Content:** only `selected` assets; missing required rows listed by name;
   an integrity banner for errors and stale selections; a provenance line per
   tab; the footnotes as a sources list in citation order. Other characters
-  are plain text. The tabs and fields are `data/fields.json` (to be written
-  with the template; REQUIREMENTS §13).
+  are plain text. The tabs and fields are `data/fields.json`.
+- **Filling the template:** the sections "Template rules" and "Field rules" of
+  [`template/README.md`](../template/README.md) are normative, as part of this
+  section.
 - A complete lead's page should be about 3 MB; over 10,000,000 bytes is
   `W-PAGE-SIZE`.
 
@@ -764,13 +833,13 @@ MUST be reported and `E-SCHEMA` MAY be reported with it.
 | `E-MANIFEST` | error | A directory a member points at has no `manifest.json`, or it isn't a JSON object. No other check of that bundle is possible. |
 | `E-NOT-BUNDLE` | error | A version 2 manifest in a directory without `.dossier` |
 | `E-PATH` | error | A path in the manifest breaks §5.2's rules |
-| `E-FILE-MISSING` | error | A `files` entry has no file |
+| `E-FILE-MISSING` | error | A `files` entry has no file, or names a symlink or `manifest.json` (§5.2) |
 | `E-FILE-HASH` | error | A file's hash or size doesn't match its entry |
 | `E-ZERO-BYTE` | error | A zero-byte file |
 | `E-CHECKSUM` | error | `manifestChecksum` doesn't match |
 | `E-ASSET-NO-FILE` | error | An asset with no `files` entry |
 | `E-ASSET-DUPLICATE` | error | Two assets with the same `path` |
-| `E-MULTI-SELECTED` | error | More than one `selected` for a `kind` + `variant` (`voiceSample`: + `model`) |
+| `E-MULTI-SELECTED` | error | In a version 2 manifest, more than one `selected` for a `kind` + `variant` (`voiceSample`: + `model`) |
 | `E-KIND-RETIRED` | error | A retired kind in a version 2 manifest |
 | `E-SCHEMA` | error | The manifest fails its schema |
 | `W-UNCLASSIFIED` | warning | A file with no asset entry |
@@ -791,6 +860,16 @@ MUST be reported and `E-SCHEMA` MAY be reported with it.
 
 **Report:** the findings, and completeness against the tier: every row with
 its state.
+
+**Check findings.** A *check* is a read-only report on a bundle's `CHARACTER.md` that
+a tool MAY offer beside validation. These codes are for a check only, and are outside
+validation results: a validator doesn't report them, and they change no verdict. A
+bundle with either can be valid.
+
+| Code | Finding |
+|------|---------|
+| `C-NO-DESCRIPTION` | The bundle has no `CHARACTER.md`. |
+| `C-KEY-MISSING` | `CHARACTER.md` lacks a key §9.1 requires: `type` or `character`. |
 
 ## 15. Versions
 
@@ -813,7 +892,7 @@ A reader MAY read version 1; a writer MUST NOT write it. Two shapes exist:
 
 Schema: [`schemas/manifest-v1.schema.json`](../schemas/manifest-v1.schema.json).
 A validator reports `W-V1` and doesn't apply what only version 2 requires: the
-differences below, completeness and staleness.
+differences below, completeness, staleness and `E-MULTI-SELECTED`.
 Differences from version 2:
 
 | Version 1 | Version 2 |

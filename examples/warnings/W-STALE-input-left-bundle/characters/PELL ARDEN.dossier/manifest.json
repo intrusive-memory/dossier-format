@@ -1,0 +1,105 @@
+{
+  "assets": [
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "kind": "description",
+      "path": "CHARACTER.md",
+      "provenance": {
+        "provider": "manual"
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "derivedFrom": [
+        {
+          "path": "images/portrait-b4ea7922.png",
+          "role": "portrait",
+          "sha256": "b4ea7922e4584d539d0db374f8380c3ee7ba42b3f070f080fe296a262d959bfb"
+        }
+      ],
+      "kind": "face",
+      "path": "images/face-199a72c5.png",
+      "provenance": {
+        "artStyle": "flat placeholder shapes",
+        "box": {
+          "height": 100,
+          "width": 80,
+          "x": 50,
+          "y": 60
+        },
+        "engine": "fixture",
+        "provider": "personaje"
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "kind": "portrait",
+      "path": "images/portrait-b4ea7922.png",
+      "provenance": {
+        "artStyle": "flat placeholder shapes",
+        "engine": "fixture",
+        "provider": "vinetas"
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "derivedFrom": [
+        {
+          "path": "images/portrait-b4ea7922.png",
+          "role": "portrait",
+          "sha256": "d379657057035f271a8a801d8e5615ab941d4723a3388407b96af712c0d0928a"
+        }
+      ],
+      "kind": "view",
+      "path": "images/view-front-b31b46b8.png",
+      "provenance": {
+        "artStyle": "flat placeholder shapes",
+        "engine": "fixture",
+        "provider": "vinetas",
+        "references": [
+          {
+            "path": "images/portrait-b4ea7922.png",
+            "role": "portrait",
+            "sha256": "d379657057035f271a8a801d8e5615ab941d4723a3388407b96af712c0d0928a"
+          }
+        ]
+      },
+      "status": "selected",
+      "variant": "front"
+    }
+  ],
+  "character": "PELL ARDEN",
+  "files": [
+    {
+      "path": "CHARACTER.md",
+      "sha256": "68977816de73c9862cfa1dbf9db62346221ec1c10eff5269d22073f34e480d5c",
+      "sizeBytes": 431
+    },
+    {
+      "path": "images/face-199a72c5.png",
+      "sha256": "199a72c5bce7e5df914c0db81b70230843f9eb809d8fde10aca00bb58b13db27",
+      "sizeBytes": 704
+    },
+    {
+      "path": "images/portrait-b4ea7922.png",
+      "sha256": "b4ea7922e4584d539d0db374f8380c3ee7ba42b3f070f080fe296a262d959bfb",
+      "sizeBytes": 940
+    },
+    {
+      "path": "images/view-front-b31b46b8.png",
+      "sha256": "b31b46b8f43dc5e3fb5c49e2204321e0017659b7e3942c448770ce1f46bda11c",
+      "sizeBytes": 939
+    }
+  ],
+  "generator": {
+    "name": "dossier-format fixtures",
+    "version": "1"
+  },
+  "manifestChecksum": "7c5e8683dc1aedaaedacf8c48018f20aefab5427a5eecb0b2085b4c29996a134",
+  "manifestVersion": 2,
+  "role": "background",
+  "updatedAt": "2026-10-31T12:00:00Z"
+}

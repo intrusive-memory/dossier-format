@@ -1,7 +1,7 @@
 {
   "formatVersion": 2,
-  "templateVersion": "0.0.0-fixture",
-  "templateSha256": "ed1841cb886f585f2bed11a600dd9955510659e84b76cd52200d3343d9712cd4",
+  "templateVersion": "0.1.0",
+  "templateSha256": "1bc7363767e2bbd2a165d8455ecc5b5fdf989ba2cde0dc449d9bd800a1e414cc",
   "fixtures": [
     {
       "path": "valid/complete-lead",
@@ -40,7 +40,7 @@
       "mayAlso": [],
       "complete": true,
       "missingRequired": [],
-      "note": "No files and no assets; manifestChecksum is the SHA-256 of the empty string."
+      "note": "No files and no assets; manifestChecksum is the SHA-256 of the empty string. A check reports C-NO-DESCRIPTION (§14), outside these results."
     },
     {
       "path": "valid/update-active",
@@ -145,6 +145,26 @@
       "mayAlso": [],
       "complete": true,
       "missingRequired": []
+    },
+    {
+      "path": "valid/name-on-disk-nfd",
+      "bundle": "characters/THE GLAZIER.dossier",
+      "verdict": "valid",
+      "codes": [],
+      "mayAlso": [],
+      "complete": true,
+      "missingRequired": [],
+      "note": "The manifest's path is NFC and the file's name on disk is NFD. They compare equal (§5.2)."
+    },
+    {
+      "path": "valid/description-no-character-key",
+      "bundle": "characters/THE CHANDLER.dossier",
+      "verdict": "valid",
+      "codes": [],
+      "mayAlso": [],
+      "complete": true,
+      "missingRequired": [],
+      "note": "CHARACTER.md has no character key, which isn't E-NAME-MISMATCH (§3). A check reports C-KEY-MISSING (§14), outside these results."
     },
     {
       "path": "valid/page-at-size-limit",
@@ -452,6 +472,26 @@
       "mayAlso": []
     },
     {
+      "path": "errors/E-FILE-MISSING-symlink",
+      "bundle": "characters/PELL ARDEN.dossier",
+      "verdict": "invalid",
+      "codes": [
+        "E-FILE-MISSING"
+      ],
+      "mayAlso": [],
+      "note": "The entry's hash and size are the target's. A symlink isn't followed, and it isn't W-UNCLASSIFIED either."
+    },
+    {
+      "path": "errors/E-FILE-MISSING-manifest",
+      "bundle": "characters/PELL ARDEN.dossier",
+      "verdict": "invalid",
+      "codes": [
+        "E-FILE-MISSING"
+      ],
+      "mayAlso": [],
+      "note": "A file can't hold its own hash, so this is never compared: only E-FILE-MISSING, not E-FILE-HASH."
+    },
+    {
       "path": "errors/E-FILE-HASH",
       "bundle": "characters/PELL ARDEN.dossier",
       "verdict": "invalid",
@@ -672,6 +712,18 @@
       "mayAlso": [],
       "complete": true,
       "missingRequired": []
+    },
+    {
+      "path": "warnings/W-STALE-input-left-bundle",
+      "bundle": "characters/PELL ARDEN.dossier",
+      "verdict": "warnings",
+      "codes": [
+        "W-STALE"
+      ],
+      "mayAlso": [],
+      "complete": true,
+      "missingRequired": [],
+      "note": "No asset has the input's hash, and path is the current selection's. The file at path doesn't have that hash."
     },
     {
       "path": "warnings/W-STALE-art-style",
@@ -1116,6 +1168,20 @@
         "W-UNCLASSIFIED"
       ],
       "note": "Version 1 as first specified: no .dossier extension, and not E-NOT-BUNDLE."
+    },
+    {
+      "path": "warnings/W-V1-two-selected",
+      "bundle": "characters/PELL ARDEN.dossier",
+      "verdict": "warnings",
+      "codes": [
+        "W-V1"
+      ],
+      "mayAlso": [
+        "W-SHAPE",
+        "W-SIDECAR",
+        "W-UNCLASSIFIED"
+      ],
+      "note": "Two selected portraits. E-MULTI-SELECTED applies only to version 2 (Appendix A)."
     }
   ]
 }
