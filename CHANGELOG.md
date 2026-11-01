@@ -5,6 +5,22 @@ updated: 2026-11-01
 
 # Changelog
 
+## Template 0.1.0 (2026-11-01)
+
+The first page template. A template version, not a format version: no bundle's validity
+changes, and `manifestVersion` stays 2.
+
+- **`template/`:** skeleton, fragments, stylesheet generated from `data/tokens.json`, the
+  custom elements `<dossier-tabs>`, `<dossier-field>`, `<dossier-image-set>` and
+  `<dossier-audio>`, DF-43's sizes in `page-copies.json`, and fonts under the OFL.
+- **`template/VERSION.json`:** the version and its `sha256`. What the hash covers is
+  proposed in `template/README.md`, since §11 doesn't say.
+- **`template/example/`:** a page filled by hand for acceptance 3 and 4.
+- **`tools/`:** `build_template_css.py`, `template_version.py` and `check_template.py`.
+- **Fixtures:** unchanged. Their pages still carry `0.0.0-fixture`, and
+  `examples/README.md` says they are regenerated when the template ships. That hasn't
+  been done.
+
 ## Format 2, release candidate 4 (2026-11-01)
 
 Read-only applications had no way to tell that a bundle was being updated. No bundle
