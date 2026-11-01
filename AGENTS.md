@@ -1,7 +1,7 @@
 ---
 type: doc
 title: dossier-format — Agent Instructions
-updated: 2026-10-31
+updated: 2026-11-01
 ---
 
 # AGENTS.md
@@ -46,9 +46,11 @@ The standard, and only the standard:
 - **Not an implementation.** No reader, writer, validator or renderer lives
   here. The Swift implementation is SwiftDossier. Reference code in any
   language goes in that language's own repository.
-  `tools/build_examples.py` is the one script here: it regenerates the fixtures,
-  broken ones included, so that rule 9 can be met. It isn't an implementation,
-  and nothing should depend on it.
+  `tools/build_examples.py` regenerates the fixtures, broken ones included, so
+  that rule 9 can be met; it fills the template for those fixtures' own pages and
+  for nothing else. `tools/build_template_css.py`, `template_version.py` and
+  `check_template.py` generate and check `template/`. None is an implementation,
+  and nothing should depend on them.
 - **Not a generator.** How an image or a voice is made, and by which model, is
   outside the standard.
 - **Not the owner of neighbouring formats.** `CAST.md` belongs to SwiftReparto
@@ -57,10 +59,10 @@ The standard, and only the standard:
 
 ## Status
 
-Draft. Written: the specification (`docs/DOSSIER-FORMAT.md`), the schemas,
-`data/tiers.json`, `data/review.json` and the conformance fixtures
-(`examples/`). Not written: the page template, `data/fields.json` and
-`data/tokens.json`. [REQUIREMENTS.md](REQUIREMENTS.md) is what the standard must
+Draft. Written: the specification (`docs/DOSSIER-FORMAT.md`), the schemas, the
+data files (`data/`), the conformance fixtures (`examples/`) and the page template
+(`template/`, version 0.1.0), whose rules §11 makes normative. The fixture pages are
+filled from that template. [REQUIREMENTS.md](REQUIREMENTS.md) is what the standard must
 say (DF-1 to DF-67), with the deliverables and the open questions.
 
 ## Rules for working here

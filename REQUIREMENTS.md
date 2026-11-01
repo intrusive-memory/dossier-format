@@ -101,7 +101,7 @@ characters/<CHARACTER>.dossier/
 | DF-15 | Voice files keep the names their producer gives them: `voice/<CHARACTER>.vox`, `voice/sample-<variant>.m4a`. |
 | DF-16 | **No sidecar files.** A generator's sidecar metadata is folded into the asset's `provenance`. A `.json` sidecar inside a bundle is a validation warning. |
 | DF-17 | **Candidates live outside the bundle,** in `<charactersDir>/.generations/<CHARACTER>/`. A render enters the bundle when it is selected or explicitly kept. The standard defines this location and nothing about its contents. |
-| DF-18 | Originals in `images/` are never modified, and never embedded in the page (§9). |
+| DF-18 | Originals in `images/` are never modified once they are in the bundle, and never embedded in the page (§9). A writer MAY strip metadata when it copies an image in: pixel data is untouched, embedded records are read for provenance first, and the stored hash and file name come from the stripped bytes. In a PNG, metadata means the chunks `tEXt`, `zTXt`, `iTXt`, `eXIf` and `tIME`; chunks such as `iCCP`, `gAMA` and `sRGB` are kept. |
 | DF-19 | The standard reserves a uniform type identifier and extension for the bundle (`dossier`, conforming to a package type) so an application can register it. A bundle shown as a plain folder is still valid. |
 | DF-20 | **One home for a character's trained adapter:** the bundle's `lora/`. A tool that keeps adapters elsewhere treats the bundle's as the authority for a character that has a dossier. |
 

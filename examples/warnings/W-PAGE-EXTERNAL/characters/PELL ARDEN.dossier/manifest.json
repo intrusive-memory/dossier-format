@@ -27,15 +27,15 @@
         },
         {
           "role": "template",
-          "sha256": "ed1841cb886f585f2bed11a600dd9955510659e84b76cd52200d3343d9712cd4",
-          "version": "0.0.0-fixture"
+          "sha256": "1bc7363767e2bbd2a165d8455ecc5b5fdf989ba2cde0dc449d9bd800a1e414cc",
+          "version": "0.1.0"
         }
       ],
       "kind": "dossier",
       "path": "PELL ARDEN-dossier.html",
       "provenance": {
-        "notes": "Hand-made for the fixtures.",
-        "provider": "manual"
+        "notes": "Filled from template/ by tools/build_examples.py.",
+        "provider": "dossier-format fixtures"
       },
       "status": "selected"
     },
@@ -84,8 +84,8 @@
     },
     {
       "path": "PELL ARDEN-dossier.html",
-      "sha256": "f2b88b9941f3deb1557cd4a46e5c3f211bab37e34f75075da14342064a7a2396",
-      "sizeBytes": 37462
+      "sha256": "8f14db5537cc1eb83c247fcd3602b376c0ce0ec7e335d0c944531e1faf395d37",
+      "sizeBytes": 341906
     },
     {
       "path": "images/face-199a72c5.png",
@@ -102,7 +102,7 @@
     "name": "dossier-format fixtures",
     "version": "1"
   },
-  "manifestChecksum": "269fd562407b7df52e400d738d6228b4574ea78eb3ee21627eff9422aad0866d",
+  "manifestChecksum": "84a9125e17d23dfd2c2b40c66e229879a0122c6d4e2c121d0482b7315ad222df",
   "manifestVersion": 2,
   "role": "background",
   "updatedAt": "2026-10-31T12:00:00Z"

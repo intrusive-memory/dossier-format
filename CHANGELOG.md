@@ -5,6 +5,52 @@ updated: 2026-11-01
 
 # Changelog
 
+## Format 2, release candidate 5 (2026-11-01)
+
+Template 0.1.0. No valid bundle becomes invalid, so `manifestVersion` stays 2. The
+rules in the last item state what a validator already had to do.
+
+- **§6, §7:** when a required input's bytes have left the bundle, a writer records the
+  hash actually sent, with the path of the current selection for that role, so a
+  selected asset reads `W-STALE`. A reader MUST NOT assume the file at `path` has that
+  `sha256`.
+- **§1, §4, DF-18:** a writer MAY strip metadata as it copies an image in. Pixel data is
+  untouched, an original isn't modified once it's in the bundle, embedded records are
+  read first, and the hash and file name come from the stripped bytes. The PNG chunks
+  that count are listed. A tool sending a reference should send the bundle's copy.
+- **§11, `template/README.md`:** the template's rules 1 to 11 are adopted, and the readings
+  of `data/fields.json` are stated as field rules. §11 points to both. `template/`'s hash
+  doesn't change.
+- **§14:** `C-NO-DESCRIPTION` and `C-KEY-MISSING`, for a check only, outside validation
+  results. No verdict changes.
+- **§5.6:** an adopted asset's `provenance` has `provider: import`.
+- **§5.2, §9.1, §3, Appendix A:** a manifest path compares with a name on disk as NFC
+  strings, case-sensitively. A `files` entry for a symlink or `manifest.json` is
+  `E-FILE-MISSING`. A listed hidden file is checked as normal. A `CHARACTER.md` with no
+  `character` key isn't `E-NAME-MISMATCH`. `E-MULTI-SELECTED` applies only to version 2.
+- **Fixtures (104):** new `valid/name-on-disk-nfd`, `valid/description-no-character-key`,
+  `errors/E-FILE-MISSING-symlink`, `errors/E-FILE-MISSING-manifest`,
+  `warnings/W-V1-two-selected` and `warnings/W-STALE-input-left-bundle`. No fixture's
+  expected result changed. Every page is now the shipped template, filled by
+  `tools/build_examples.py`, and `conformance.json`'s `templateVersion` and
+  `templateSha256` are `template/VERSION.json`'s.
+
+## Template 0.1.0 (2026-11-01)
+
+The first page template. A template version, not a format version: no bundle's validity
+changes, and `manifestVersion` stays 2.
+
+- **`template/`:** skeleton, fragments, stylesheet generated from `data/tokens.json`, the
+  custom elements `<dossier-tabs>`, `<dossier-field>`, `<dossier-image-set>` and
+  `<dossier-audio>`, DF-43's sizes in `page-copies.json`, and fonts under the OFL.
+- **`template/VERSION.json`:** the version and its `sha256`. What the hash covers is
+  proposed in `template/README.md`, since §11 doesn't say.
+- **`template/example/`:** a page filled by hand for acceptance 3 and 4.
+- **`tools/`:** `build_template_css.py`, `template_version.py` and `check_template.py`.
+- **Fixtures:** unchanged. Their pages still carry `0.0.0-fixture`, and
+  `examples/README.md` says they are regenerated when the template ships. That hasn't
+  been done.
+
 ## Format 2, release candidate 4 (2026-11-01)
 
 Read-only applications had no way to tell that a bundle was being updated. No bundle

@@ -3,7 +3,9 @@
 
 This builds test data. It is not a reader, writer, validator or renderer of
 the format, and no implementation may treat it as one: it deliberately writes
-broken bundles, and it hard-codes what each one should report.
+broken bundles, and it hard-codes what each one should report. It fills
+template/ for its own fixture pages, as far as those pages need and no further:
+it asserts on input they don't have, such as a footnote never cited.
 
     python3 -m venv /tmp/df && /tmp/df/bin/pip install -r tools/requirements.txt
     /tmp/df/bin/python tools/build_examples.py
@@ -14,11 +16,14 @@ real production (AGENTS.md rule 1).
 import base64
 import copy
 import hashlib
+import html as html_text
 import io
 import json
+import os
 import re
 import shutil
 import struct
+import unicodedata
 import uuid
 import zipfile
 from pathlib import Path
@@ -33,8 +38,16 @@ SILENCE = (ROOT / "tools/assets/silence.m4a").read_bytes()
 NOW = "2026-10-31T12:00:00Z"
 MADE = "2026-10-31T11:00:00Z"
 ART = "flat placeholder shapes"
-TEMPLATE_VERSION = "0.0.0-fixture"
-TEMPLATE_SHA = hashlib.sha256(b"dossier-format fixture template\n").hexdigest()
+TEMPLATE = ROOT / "template"
+_VERSION = json.loads((TEMPLATE / "VERSION.json").read_text(encoding="utf-8"))
+TEMPLATE_VERSION, TEMPLATE_SHA = _VERSION["version"], _VERSION["sha256"]
+FIELDS = json.loads((ROOT / "data/fields.json").read_text(encoding="utf-8"))
+TIERS = json.loads((ROOT / "data/tiers.json").read_text(encoding="utf-8"))
+COPIES = json.loads((TEMPLATE / "page-copies.json").read_text(encoding="utf-8"))
+FRAGMENTS = {chunk.split(" -->\n", 1)[0]: chunk.split(" -->\n", 1)[1].rstrip("\n")
+             for chunk in re.split(r"^<!-- fragment: ", (TEMPLATE / "fragments.html").read_text(encoding="utf-8"), flags=re.M)[1:]}
+FULL_SECTIONS = ("Logline", "Appearance", "Personality", "Backstory", "Arc", "Relationships", "Voice & Speech", "Pronunciation", "Wardrobe")
+SHORT_SECTIONS = ("Logline", "Appearance", "Voice & Speech")
 MODELS = ["Qwen3-TTS-12Hz-1.7B-Base-bf16", "Qwen3-TTS-12Hz-0.6B-Base-bf16"]
 VOICE_PROMPT = "A clear, unhurried alto with a dry edge."
 PELL = "PELL ARDEN"
@@ -68,9 +81,14 @@ def face_crop(portrait):
 
 
 def jpeg_copy(data, size):
-    image = Image.open(io.BytesIO(data)).convert("RGB").resize(size)
+    """The template's rule 5: scale to cover and crop the centre."""
+    image = Image.open(io.BytesIO(data)).convert("RGB")
+    scale = max(size[0] / image.width, size[1] / image.height)
+    width, height = size[0] / scale, size[1] / scale
+    left, top = (image.width - width) / 2, (image.height - height) / 2
+    image = image.resize(size, box=(left, top, left + width, top + height))
     buffer = io.BytesIO()
-    image.save(buffer, "JPEG", quality=80)
+    image.save(buffer, "JPEG", quality=COPIES["quality"], optimize=False)
     return buffer.getvalue()
 
 
@@ -212,6 +230,7 @@ class Bundle:
         self.mutate = None
         self.manifest_bytes = b""   # replaces manifest.json; set, with no_manifest, to break it
         self.no_manifest = False
+        self.links = {}      # symlinks: path to target
 
     def put(self, path, data, kind=None, status="selected", variant=None, provenance=None, created=MADE, **extra):
         self.files[path] = data
@@ -258,8 +277,12 @@ class Bundle:
             self.mutate(top)
         return top
 
-    def page(self, member, body_extra="", padding=0, template_sha=TEMPLATE_SHA):
-        """A hand-made page meeting §11, without the template, which doesn't exist yet."""
+    def page(self, member, body_extra="", padding=0, template_sha=TEMPLATE_SHA, findings=()):
+        """The template, filled for this bundle. `body_extra` and `padding` add the faults page fixtures test.
+
+        `findings` is what the banner lists. This isn't a validator, so a fixture says what its
+        bundle has without the page; none has anything yet, as every page fault is in the page.
+        """
         path = f"{self.name}-dossier.html"
         description = self.selected("description")
         embedded = {"manifestVersion": 2, "character": self.name,
@@ -271,34 +294,24 @@ class Bundle:
             embedded["role"] = self.role
         if self.prompts:
             embedded["prompts"] = self.prompts
+        embedded.update(self.extra_top)
         text = self.files[description["path"]].decode()
         _, fm, body = text.split("---\n", 2)
         record = {"formatVersion": 2, "character": self.name, "castMember": normal_form(member),
                   "frontMatter": yaml.safe_load(fm), "body": body, "manifest": embedded}
-        record_json = json.dumps(record, sort_keys=True, ensure_ascii=False, separators=(",", ":")).replace("<", "\\u003c")
-        parts = []
-        sizes = {"portrait": (720, 1280), "view": (720, 1280), "face": (512, 512), "expression": (512, 512)}
-        for asset in embedded["assets"]:
-            if asset["status"] != "selected":
-                continue
-            if asset["kind"] in sizes:
-                data = base64.b64encode(jpeg_copy(self.files[asset["path"]], sizes[asset["kind"]])).decode()
-                parts.append(f'<img alt="{asset["kind"]} {asset.get("variant", "")}" src="data:image/jpeg;base64,{data}">')
-            elif asset["kind"] == "voiceSample":
-                data = base64.b64encode(self.files[asset["path"]]).decode()
-                parts.append(f'<audio controls src="data:audio/mp4;base64,{data}"></audio>')
-        html = (f'<!DOCTYPE html>\n<html lang="en"><head><meta charset="utf-8">'
-                f'<meta name="dossier-template" content="{TEMPLATE_VERSION} {template_sha}">'
-                f"<title>{self.name}</title></head><body><h1>{self.name}</h1>\n"
-                + "\n".join(parts) + body_extra
-                + f'\n<script type="application/json" id="character-record">{record_json}</script>\n</body></html>\n').encode()
+        filled = FilledPage(self, record, findings).html(TEMPLATE_VERSION, template_sha)
+        if body_extra:
+            marker = '<script type="application/json" id="character-record">'
+            assert filled.count(marker) == 1
+            filled = filled.replace(marker, body_extra.lstrip("\n") + "\n" + marker)
+        html = filled.encode()
         if padding:
             html += b"<!--" + b" " * (padding - len(html) - 8) + b"-->\n"
         derived = [self.input("description"),
-                   {"role": "castMember", "sha256": sha(json.dumps(normal_form(member), sort_keys=True, ensure_ascii=False, separators=(",", ":")).encode())},
+                   {"role": "castMember", "sha256": sha(canonical_json(normal_form(member)).encode())},
                    {"role": "bundle", "sha256": embedded["manifestChecksum"]},
                    {"role": "template", "version": TEMPLATE_VERSION, "sha256": template_sha}]
-        self.put(path, html, "dossier", provenance={"provider": "manual", "notes": "Hand-made for the fixtures."}, created=NOW, derivedFrom=derived)
+        self.put(path, html, "dossier", provenance={"provider": "dossier-format fixtures", "notes": "Filled from template/ by tools/build_examples.py."}, created=NOW, derivedFrom=derived)
 
     def write(self, project):
         root = project / self.dir
@@ -309,6 +322,10 @@ class Bundle:
             target = root / path
             target.parent.mkdir(parents=True, exist_ok=True)
             target.write_bytes(data)
+        for path, link in self.links.items():
+            target = root / path
+            target.parent.mkdir(parents=True, exist_ok=True)
+            os.symlink(link, target)
         if self.no_manifest:
             return
         if self.manifest_bytes:
@@ -347,6 +364,346 @@ def normal_form(entry):
         if key in entry and entry[key] is None:
             del entry[key]
     return entry
+
+
+def canonical_json(value):
+    """§7."""
+    return json.dumps(value, sort_keys=True, ensure_ascii=False, separators=(",", ":"))
+
+
+# --- the page ----------------------------------------------------------------
+
+def substitute(text, values):
+    """template/README.md: one pass, left to right; replacement text isn't scanned again."""
+    return re.sub(r"\{\{([^{}]+)\}\}", lambda match: values[match.group(1)], text)
+
+
+def fragment(name, **values):
+    return substitute(FRAGMENTS[name], values)
+
+
+def esc(text):
+    return html_text.escape(str(text), quote=True)
+
+
+def plain(value):
+    """A value as text: lists joined by ', ', and empty as None."""
+    if isinstance(value, list):
+        value = ", ".join(str(item) for item in value)
+    return None if value is None or value == "" else str(value)
+
+
+class FilledPage:
+    """data/fields.json walked over one bundle, as template/README.md says, for these fixtures' pages."""
+
+    def __init__(self, bundle, record, findings):
+        self.bundle = bundle
+        self.record = record
+        self.findings = findings
+        self.front = record["frontMatter"]
+        self.member = record["castMember"] or {}
+        self.assets = record["manifest"]["assets"]
+        body = record["body"]
+        self.notes = dict(re.findall(r"^\[\^([^\]]+)\]: *(.*)$", body, re.M))
+        body = re.sub(r"^\[\^[^\]]+\]:.*$", "", body, flags=re.M)
+        self.sections = []  # (heading, lines)
+        for line in body.split("\n"):
+            if line.startswith("## "):
+                self.sections.append((line[3:].strip(), []))
+            elif self.sections:
+                self.sections[-1][1].append(line)
+        self.cited = list(dict.fromkeys(re.findall(r"\[\^([^\]]+)\]", body)))
+        assert sorted(self.cited) == sorted(self.notes), f"{bundle.name}: a fixture page needs every footnote cited and defined"
+
+    # What's selected, and what a row asks (§8.1, §8.3).
+
+    def selected(self, kind, variant=None):
+        return next((a for a in self.assets if a["kind"] == kind and a.get("variant") == variant and a["status"] == "selected"), None)
+
+    def matching(self, section):
+        """§9.2's rule: the name, optionally with a space and a parenthetical."""
+        return [(h, lines) for h, lines in self.sections if h == section or (h.startswith(section + " (") and h.endswith(")"))]
+
+    def satisfied(self, row):
+        name = row["id"]
+        if name == "dossier":
+            return True  # This page is that asset, and the embedded manifest leaves it out (§11).
+        if row["type"] == "asset":
+            return all(self.selected(row["kind"], v) for v in row["variants"]) if row.get("variants") else bool(self.selected(row["kind"]))
+        vox = self.selected("vox")
+        models = vox["provenance"].get("models", []) if vox else []
+        samples = [a for a in self.assets if a["kind"] == "voiceSample" and a["status"] == "selected"]
+        if name in ("description.full", "description.short"):
+            wanted = FULL_SECTIONS if name.endswith("full") else SHORT_SECTIONS
+            return bool(self.selected("description")) and all(self.matching(s) for s in wanted)
+        if name == "voicePrompt":
+            return bool(self.member.get("voicePrompt"))
+        if name.startswith("vox."):
+            return any(name[4:] in m.lower() for m in models)
+        if name.startswith("sample.neutral."):
+            return any(a["variant"] == "neutral" and a["model"] == name[15:] for a in samples)
+        if name == "sample.range":
+            return sum(a["variant"] != "neutral" for a in samples) >= 3
+        if name == "pronunciation":
+            return any("".join(lines).strip() for _, lines in self.matching("Pronunciation"))
+        if name == "training.withLora":
+            return not self.selected("lora") or any(a["kind"] == "training" for a in self.assets)
+        raise KeyError(name)
+
+    def required_rows(self):
+        role = self.member.get("role")
+        return [row for row in TIERS["rows"] if row["levels"][role] == "required"] if role else None
+
+    # Values.
+
+    def asset_value(self, asset, name):
+        if name.startswith("provenance."):
+            return asset["provenance"].get(name[11:])
+        return {"path": asset["path"], "file": asset["path"].rsplit("/", 1)[-1], "date": asset["createdAt"][:10],
+                "variant": asset.get("variant"), "model": asset.get("model"), "sampleText": asset.get("sampleText")}[name]
+
+    def front_value(self, dotted):
+        value = self.front
+        for key in dotted.split("."):
+            value = value.get(key) if isinstance(value, dict) else None
+        return value
+
+    def part(self, part, asset=None):
+        if "literal" in part:
+            return part["literal"]
+        if "whenPresent" in part:
+            return part["whenPresent"] if self.asset_value(asset, part["value"]) is not None else part["whenAbsent"]
+        if "derivedFrom" in part:
+            record = next((r for r in asset.get("derivedFrom", []) if r["role"] == part["derivedFrom"]), None)
+            value = record["path"].rsplit("/", 1)[-1] if record else None
+        elif "frontMatter" in part or part.get("from") == "frontMatter":
+            value = self.front_value(part.get("frontMatter") or part["key"])
+        else:
+            value = self.asset_value(asset, part["value"])
+        value = plain(value)
+        return part.get("prefix", "") + value if value is not None else None
+
+    def joined(self, parts, separator, asset=None):
+        return separator.join(p for p in (self.part(part, asset) for part in parts) if p is not None) or None
+
+    def source_asset(self, source):
+        return self.selected(source["kind"], source.get("variant"))
+
+    def raw(self, source):
+        """What a text, list or plain long-text field holds. None when it's empty."""
+        origin = source["from"]
+        if origin == "record":
+            return self.record.get(source["key"])
+        if origin == "frontMatter":
+            return self.front.get(source["key"])
+        if origin == "castMember":
+            return self.member.get(source["key"])
+        if origin == "asset":
+            asset = self.source_asset(source)
+            return self.asset_value(asset, source["value"]) if asset else None
+        if origin == "join":
+            return self.joined(source["parts"], source["separator"])
+        if origin == "provenance":
+            lines = [self.joined(source["parts"], " · ", a) for a in self.assets if a["kind"] in source["kinds"] and a["status"] == "selected"]
+            return "; ".join(line for line in lines if line) or None
+        if origin == "tiers":
+            rows = self.required_rows()
+            if rows is None:
+                return None
+            if source["show"] == "count":
+                return f"{sum(self.satisfied(row) for row in rows)}/{len(rows)}"
+            return [row["label"] for row in rows if not self.satisfied(row)] or None
+        if origin == "findings":
+            return list(self.findings) or None
+        if origin == "footnotes":
+            return [self.notes[label] for label in self.cited] or None
+        raise KeyError(origin)
+
+    # Markdown: the template's rule 3.
+
+    def inline(self, text):
+        text = esc(text)
+        text = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", text)
+        text = re.sub(r"\*(.+?)\*", r"<em>\1</em>", text)
+        return re.sub(r"\[\^([^\]]+)\]", lambda m: fragment("mark", number=str(self.cited.index(m.group(1)) + 1)), text)
+
+    @staticmethod
+    def blocks(lines):
+        """(kind, text) for each heading, list item and paragraph."""
+        found = []
+        paragraph = []
+
+        def flush():
+            if paragraph:
+                found.append(("p", "\n".join(paragraph)))
+                paragraph.clear()
+        for line in lines:
+            if line.startswith("### "):
+                flush()
+                found.append(("h4", line[4:].strip()))
+            elif line.startswith("- "):
+                flush()
+                found.append(("li", line[2:].strip()))
+            elif line.strip():
+                paragraph.append(line.strip())
+            else:
+                flush()
+        flush()
+        return found
+
+    def markdown(self, lines):
+        out = []
+        in_list = False
+        for kind, text in self.blocks(lines):
+            if kind == "li" and not in_list:
+                out.append("<ul>")
+            if kind != "li" and in_list:
+                out.append("</ul>")
+            in_list = kind == "li"
+            out.append(f"<{kind}>{self.inline(text)}</{kind}>")
+        if in_list:
+            out.append("</ul>")
+        return "".join(out)
+
+    def section_markup(self, section):
+        """Every matching heading, in body order, its parenthetical above its body."""
+        out = []
+        matched = self.matching(section)
+        if not any("".join(lines).strip() for _, lines in matched):
+            return None
+        for heading, lines in matched:
+            if heading != section:
+                out.append(fragment("parenthetical", text=esc(heading[len(section):].strip())))
+            out.append(self.markdown(lines))
+        return "".join(out)
+
+    def canon_items(self, source):
+        items = []
+        for _, lines in self.matching(source["section"]):
+            for kind, text in self.blocks(lines):
+                if kind in ("p", "li"):
+                    classes = [self.notes[label].split(".", 1)[0] for label in re.findall(r"\[\^([^\]]+)\]", text)]
+                    items.append(fragment("canonItem", text=self.inline(text), source=esc(", ".join(classes))))
+        return "".join(items) or None
+
+    # Stamping (template/README.md).
+
+    def media(self, asset, kind):
+        size = COPIES["sizes"][kind]
+        data = jpeg_copy(self.bundle.files[asset["path"]], (size["width"], size["height"]))
+        return f"data:image/jpeg;base64,{base64.b64encode(data).decode()}", size
+
+    def img(self, label, source):
+        asset = self.source_asset(source)
+        if not asset:
+            return None
+        src, size = self.media(asset, source["kind"])
+        return fragment("img", label=esc(label), src=src, width=str(size["width"]), height=str(size["height"]))
+
+    def overlay(self, field):
+        source = field["overlay"]["source"]
+        face = self.source_asset(source)
+        box = self.asset_value(face, source["value"]) if face else None
+        portrait = self.source_asset(field["source"])
+        if not box or not portrait:
+            return ""
+        width, height = Image.open(io.BytesIO(self.bundle.files[portrait["path"]])).size
+        half_up = lambda value: int(value + 0.5)  # Every value here is positive (§8.5).
+        side = half_up(min(1.8 * max(box["width"], box["height"]), width, height))
+        left = half_up(min(max(box["x"] + box["width"] / 2 - side / 2, 0), width - side))
+        top = half_up(min(max(box["y"] + box["height"] / 2 - side / 2, 0), height - side))
+        decimal = lambda value: f"{value:.4f}".rstrip("0").rstrip(".")
+        return fragment("overlay", left=decimal(100 * left / width), top=decimal(100 * top / height), size=decimal(100 * side / width))
+
+    def stamp(self, field):
+        kind = field["kind"]
+        empty = esc(field["emptyText"]) if field.get("emptyText") else ""
+        common = {"key": field["key"], "kind": kind, "label": esc(field["label"]), "labelStyle": field.get("labelStyle", "label"),
+                  "labelHidden": "" if field.get("labelVisible", True) else " is-hidden", "textStyle": field.get("textStyle", "body")}
+
+        def state(value):
+            return "filled" if value is not None else ("absent" if field.get("emptyText") is None else "empty")
+        if kind == "image":
+            value = self.img(field["label"], field["source"])
+            caption = ""
+            if value is not None:
+                if "overlay" in field:
+                    value += self.overlay(field)
+                if "caption" in field:
+                    text = self.joined(field["caption"]["parts"], field["caption"]["separator"], self.source_asset(field["source"]))
+                    caption = fragment("caption", text=esc(text)) if text else ""
+            shown = value if value is not None else (fragment("imageMissing", text=empty) if empty else "")
+            return fragment("image", **common, state=state(value), value=shown, caption=caption)
+        if kind == "imageSet":
+            items = []
+            for item in field["items"]:
+                value = self.img(item["label"], item["source"])
+                note = fragment("itemNote", text=esc(item["note"])) if item.get("note") else ""
+                items.append(fragment("imageItem", key=item["key"], label=esc(item["label"]), state="filled" if value is not None else "empty",
+                                      value=value if value is not None else fragment("imageMissing", text=esc(item["emptyText"])), note=note))
+            return fragment("imageSet", **common, state="filled", items="".join(items))
+        if kind == "audio":
+            value = self.audio_rows(field)
+            shown = value if value is not None else fragment("audioEmpty", text=empty)
+            return fragment("audio", **common, state=state(value), value=shown)
+        source = field["source"]
+        if kind == "longText":
+            if source["from"] == "section":
+                value = self.section_markup(source["section"])
+            else:
+                text = plain(self.raw(source))
+                value = f"<p>{esc(text)}</p>" if text is not None else None
+        elif kind == "list":
+            if source["from"] == "section":
+                items = self.canon_items(source)
+            else:
+                raw = self.raw(source)
+                items = "".join(fragment("listItem", text=esc(item)) for item in raw) if raw else None
+            value = fragment("list", items=items) if items else None
+        else:
+            text = plain(self.raw(source))
+            wrap = field.get("wrap", ("", ""))
+            value = esc(wrap[0] + text + wrap[1]) if text is not None else None
+        return fragment("field", **common, state=state(value), value=value if value is not None else empty)
+
+    def audio_rows(self, field):
+        samples = [a for a in self.assets if a["kind"] == field["source"]["kind"] and a["status"] == "selected"]
+        samples.sort(key=lambda a: a.get("variant") != "neutral")  # Stable: otherwise the manifest's order.
+        row = field["row"]
+        rows = []
+        for asset in samples:
+            note = self.joined(row["note"]["parts"], row["note"]["separator"], asset)
+            data = base64.b64encode(self.bundle.files[asset["path"]]).decode()
+            rows.append(fragment("audioRow", title=esc(self.asset_value(asset, row["title"])), note=esc("· " + (note or "")),
+                                 src=f"data:audio/mp4;base64,{data}", text=esc(self.asset_value(asset, row["text"]))))
+        return "".join(rows) or None
+
+    def stamp_fields(self, fields):
+        out = []
+        index = 0
+        while index < len(fields):
+            group = fields[index].get("group")
+            end = index + 1
+            while group and end < len(fields) and fields[end].get("group") == group:
+                end += 1
+            stamped = "".join(self.stamp(field) for field in fields[index:end])
+            out.append(fragment("group", group=group, fields=stamped) if group else stamped)
+            index = end
+        return "".join(out)
+
+    def html(self, version, template_sha):
+        languages = self.front.get("languages") or ["und"]
+        include = lambda name: (TEMPLATE / name).read_text(encoding="utf-8")
+        return substitute(include("skeleton.html"), {
+            "lang": esc(languages[0]), "character": esc(self.record["character"]),
+            "template.version": esc(version), "template.sha256": esc(template_sha),
+            "include:fonts.css": include("fonts.css"), "include:dossier.css": include("dossier.css"), "include:dossier.js": include("dossier.js"),
+            "page.before": "".join(self.stamp(field) for field in FIELDS["page"]["before"]),
+            "tab.links": "".join(fragment("tabLink", key=tab["key"], label=esc(tab["label"])) for tab in FIELDS["tabs"]),
+            "tab.panels": "\n".join(fragment("tab", key=tab["key"], label=esc(tab["label"]), fields=self.stamp_fields(tab["fields"])) for tab in FIELDS["tabs"]),
+            "page.after": "".join(self.stamp(field) for field in FIELDS["page"]["after"]),
+            "record": canonical_json(self.record).replace("<", "\\u003c"),
+        })
 
 
 def code_for(name):
@@ -470,7 +827,7 @@ def valid():
 
     # The smallest valid bundle: no files at all.
     b = Bundle("BYSTANDER #2", "background")
-    fixture("valid", "empty-background", [b], [member(b)], complete=True, note="No files and no assets; manifestChecksum is the SHA-256 of the empty string.")
+    fixture("valid", "empty-background", [b], [member(b)], complete=True, note="No files and no assets; manifestChecksum is the SHA-256 of the empty string. A check reports C-NO-DESCRIPTION (§14), outside these results.")
 
     # Update markers (5.7), all judged at the same fixed time.
     def marker(expires_at):
@@ -602,6 +959,21 @@ Synthetic data only.
     voice = add_voice(b)
     fixture("valid", "voice-second-path", [b], [member(b, prompt=VOICE_PROMPT) | {"voices": {"voxalta": ["voices/other.vox", f"./{voice}"]}}], complete=True)
 
+    # §5.2: a path compares with a name on disk as NFC strings. The manifest is NFC and the disk NFD.
+    # Git on a Mac stores this name as NFC unless told otherwise: see examples/README.md.
+    b = base("THE GLAZIER")
+    nfc = "source/caf\u00e9-sketch.png"
+    sketch = png(90, 90, b.name + "source", (20, 20, 50, 50))
+    b.put(nfc, sketch, "sourcePhoto", provenance={"provider": "import"})
+    b.missing.add(nfc)
+    b.loose[unicodedata.normalize("NFD", nfc)] = sketch
+    fixture("valid", "name-on-disk-nfd", [b], [member(b)], complete=True, note="The manifest's path is NFC and the file's name on disk is NFD. They compare equal (§5.2).")
+
+    # §9.1, §3: no character key isn't a mismatch.
+    b = base("THE CHANDLER", description=short_description("THE CHANDLER", "background").replace(b"character: THE CHANDLER\n", b""))
+    fixture("valid", "description-no-character-key", [b], [member(b)], complete=True,
+            note="CHARACTER.md has no character key, which isn't E-NAME-MISMATCH (§3). A check reports C-KEY-MISSING (§14), outside these results.")
+
     # Exactly at §11's limit.
     b = base("THE PORTER"); m = member(b); b.page(m, padding=10_000_000)
     fixture("valid", "page-at-size-limit", [b], [m], complete=True, note="10,000,000 bytes, nearly all of it a comment.")
@@ -681,6 +1053,17 @@ def errors():
 
     b = base(); b.missing.add(b.selected("portrait")["path"])
     err("E-FILE-MISSING", b)
+
+    # §5.2: neither a symlink nor manifest.json is in the inventory, so a files entry for one has no file.
+    b = base(); b.put("linked-notes.txt", b.files["CHARACTER.md"]); b.missing.add("linked-notes.txt"); b.links["linked-notes.txt"] = "CHARACTER.md"
+    err("E-FILE-MISSING-symlink", b, note="The entry's hash and size are the target's. A symlink isn't followed, and it isn't W-UNCLASSIFIED either.")
+
+    def lists_manifest(m):
+        m["files"].append({"path": "manifest.json", "sha256": "a" * 64, "sizeBytes": 1})
+        m["files"].sort(key=lambda e: e["path"].encode())
+        m["manifestChecksum"] = checksum(m["files"])
+    b = base(); b.mutate = lists_manifest
+    err("E-FILE-MISSING-manifest", b, note="A file can't hold its own hash, so this is never compared: only E-FILE-MISSING, not E-FILE-HASH.")
 
     b = base(); text = b.files["CHARACTER.md"]; b.disk["CHARACTER.md"] = text.replace(b"grey-eyed", b"gray-eyed")
     err("E-FILE-HASH", b, note="The same size, different bytes.")
@@ -768,6 +1151,14 @@ def warnings():
     b.image("face", face_crop(old), derivedFrom=[{"role": "portrait", "path": old_path, "sha256": sha(old)}],
             provenance={"provider": "personaje", "box": {"x": 50, "y": 60, "width": 80, "height": 100}})
     warn("W-STALE", b)
+
+    # §7: the portrait that was sent is no longer in the bundle, so the writer recorded the hash sent with the current selection's path.
+    b = base(); gone = sha(png(180, 320, PELL + "a portrait that left the bundle"))
+    current = b.selected("portrait")["path"]
+    assert all(entry["sha256"] != gone for entry in b.entries())
+    b.image("view", png(180, 320, PELL + "front"), "front", derivedFrom=[{"role": "portrait", "path": current, "sha256": gone}],
+            provenance={"references": [{"sha256": gone, "path": current, "role": "portrait"}]})
+    warn("W-STALE-input-left-bundle", b, codes=["W-STALE"], note="No asset has the input's hash, and path is the current selection's. The file at path doesn't have that hash.")
 
     b = base(description=short_description(PELL, "background", art="woodcut"))
     warn("W-STALE-art-style", b, note="The images' provenance.artStyle differs from the current front matter.")
@@ -860,13 +1251,15 @@ def warnings():
          missing=["dossier", "expressions", "face", "portrait", "sample.range", "views"], note="Neutral reads don't count toward the range.")
 
     # Version 1, in both shapes Appendix A describes.
-    def v1(dirname):
+    def v1(dirname, second_selected=False):
         b = Bundle(PELL, "background", dirname)
         b.put("CHARACTER.md", short_description(PELL, "background"))
         b.put("images/portrait-v3-photo-s133.png", png(180, 320, "v1 portrait"))
         b.put("images/turnaround-front-s21.png", png(180, 320, "v1 front"))
         b.put("images/face.png", png(128, 128, "v1 face", (30, 25, 68, 85)))
         b.put("images/turnaround-front-s21.json", b'{"seed": 21}\n')
+        if second_selected:
+            b.put("images/portrait-v2-photo-s99.png", png(180, 320, "v1 second portrait"))
         def downgrade(m):
             m["manifestVersion"] = 1
             m["assets"] = [
@@ -875,6 +1268,8 @@ def warnings():
                 {"path": "images/portrait-v3-photo-s133.png", "kind": "portrait", "status": "selected", "createdAt": MADE, "provenance": {"tool": "fixture", "references": []}},
                 {"path": "images/turnaround-front-s21.png", "kind": "turnaround", "status": "selected", "label": "front"},
             ]
+            if second_selected:
+                m["assets"].append({"path": "images/portrait-v2-photo-s99.png", "kind": "portrait", "status": "selected", "createdAt": MADE, "provenance": {"tool": "fixture", "references": []}})
             order = sha("".join(e["sha256"] for e in m["files"]).encode())
             assert order != checksum(m["files"]), "the v1 fixture needs path order to differ from hash order"
             m["manifestChecksum"] = order
@@ -885,6 +1280,8 @@ def warnings():
          note="Version 1 contents in a .dossier directory; the checksum is in path order. Its turnaround and faceSheet aren't E-KIND-RETIRED.")
     warn("W-V1-plain-directory", v1(PELL), may_also=["W-SIDECAR", "W-UNCLASSIFIED", "W-SHAPE"], complete=None,
          note="Version 1 as first specified: no .dossier extension, and not E-NOT-BUNDLE.")
+    warn("W-V1-two-selected", v1(None, second_selected=True), may_also=["W-SIDECAR", "W-UNCLASSIFIED", "W-SHAPE"], complete=None,
+         note="Two selected portraits. E-MULTI-SELECTED applies only to version 2 (Appendix A).")
 
 
 # --- data --------------------------------------------------------------------
