@@ -43,6 +43,34 @@
       "note": "No files and no assets; manifestChecksum is the SHA-256 of the empty string."
     },
     {
+      "path": "valid/update-active",
+      "bundle": "characters/BYSTANDER #3.dossier",
+      "verdict": "valid",
+      "codes": [],
+      "mayAlso": [],
+      "complete": true,
+      "missingRequired": [],
+      "updateStatus": {
+        "at": "2026-10-19T17:00:00Z",
+        "updating": true
+      },
+      "note": "One marker exactly at the 3600-second limit is enough, beside an expired one. A validator reports neither."
+    },
+    {
+      "path": "valid/update-not-active",
+      "bundle": "characters/BYSTANDER #4.dossier",
+      "verdict": "valid",
+      "codes": [],
+      "mayAlso": [],
+      "complete": true,
+      "missingRequired": [],
+      "updateStatus": {
+        "at": "2026-10-19T17:00:00Z",
+        "updating": false
+      },
+      "note": "Expired, too far ahead, a time zone offset, unreadable, a zero-byte hidden file, and names that aren't markers: none counts, and a validator reports none."
+    },
+    {
       "path": "valid/hand-edited-member",
       "bundle": "characters/THE FERRYMAN.dossier",
       "verdict": "valid",

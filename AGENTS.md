@@ -61,7 +61,7 @@ Draft. Written: the specification (`docs/DOSSIER-FORMAT.md`), the schemas,
 `data/tiers.json`, `data/review.json` and the conformance fixtures
 (`examples/`). Not written: the page template, `data/fields.json` and
 `data/tokens.json`. [REQUIREMENTS.md](REQUIREMENTS.md) is what the standard must
-say (DF-1 to DF-63), with the deliverables and the open questions.
+say (DF-1 to DF-67), with the deliverables and the open questions.
 
 ## Rules for working here
 

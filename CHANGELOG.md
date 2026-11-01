@@ -1,9 +1,23 @@
 ---
 type: changelog
-updated: 2026-10-31
+updated: 2026-11-01
 ---
 
 # Changelog
+
+## Format 2, release candidate 4 (2026-11-01)
+
+Read-only applications had no way to tell that a bundle was being updated. No bundle
+that was valid becomes invalid, so `manifestVersion` stays 2.
+
+- **§5.7, new:** update markers (DF-64 to DF-66). A writer holds a hidden
+  `.update-<id>.json` in the bundle's root for the length of an update. A marker
+  counts only when `now < expiresAt <= now + 3600 seconds`.
+- **§12:** what a host does during an update (DF-67).
+- **Schema:** `schemas/update-marker.schema.json`.
+- **Fixtures:** `valid/update-active` and `valid/update-not-active`. Fixtures that
+  test this carry the new `updateStatus` key in `conformance.json`. No existing
+  fixture changed.
 
 ## Format 2, release candidate 3 (2026-10-31)
 
