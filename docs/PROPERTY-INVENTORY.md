@@ -16,7 +16,7 @@ dropped without a decision.
 
 | Key | Source | What it is |
 |-----|--------|------------|
-| **DF** | `REQUIREMENTS.md` (this repo, `development`) | The intended standard, DF-1 to DF-63 |
+| **DF** | `REQUIREMENTS.md` (this repo, `development`) | The intended standard, DF-1 to DF-67 |
 | **B** | Personaje `docs/REQUIREMENTS-DOSSIER-BUNDLE.md` | The draft DF was split from |
 | **S** | SwiftSemblanzas `REQUIREMENTS.md` §5, worktree branch `requirements/personaje` (`739720b`, unpushed) | Version 1 of the record. Not on SwiftSemblanzas `main`. |
 | **SD** | SwiftDossier `REQUIREMENTS.md` §7 (draft, 2026-10-19) | Proposed additions FA-1 to FA-3 |

@@ -353,7 +353,7 @@ def code_for(name):
     return next(code for code in CODES if name == code or name.startswith(code + "-"))
 
 
-def fixture(group, name, bundles, members, codes=(), may_also=(), complete=None, missing=None, note="", cast_text=None, bundle_path=None):
+def fixture(group, name, bundles, members, codes=(), may_also=(), complete=None, missing=None, note="", cast_text=None, bundle_path=None, update_status=None):
     project = OUT / group / name
     project.mkdir(parents=True)
     cast = cast_text or front_matter({"type": "cast", "schemaVersion": 1, "cast": members}) + "# Cast\n\nSynthetic data only.\n"
@@ -365,6 +365,8 @@ def fixture(group, name, bundles, members, codes=(), may_also=(), complete=None,
     if complete is not None:
         entry["complete"] = complete
         entry["missingRequired"] = missing or []
+    if update_status is not None:
+        entry["updateStatus"] = update_status
     if note:
         entry["note"] = note
     FIXTURES.append(entry)
@@ -469,6 +471,29 @@ def valid():
     # The smallest valid bundle: no files at all.
     b = Bundle("BYSTANDER #2", "background")
     fixture("valid", "empty-background", [b], [member(b)], complete=True, note="No files and no assets; manifestChecksum is the SHA-256 of the empty string.")
+
+    # Update markers (5.7), all judged at the same fixed time.
+    def marker(expires_at):
+        return json.dumps({"writer": "fixture-writer", "startedAt": "2026-10-19T16:55:00Z", "expiresAt": expires_at}, indent=2).encode() + b"\n"
+
+    update_at = "2026-10-19T17:00:00Z"
+    b = Bundle("BYSTANDER #3", "background")
+    b.loose[".update-old.json"] = marker("2026-10-19T16:59:59Z")
+    b.loose[".update-live.json"] = marker("2026-10-19T18:00:00Z")
+    fixture("valid", "update-active", [b], [member(b)], complete=True, update_status={"at": update_at, "updating": True},
+            note="One marker exactly at the 3600-second limit is enough, beside an expired one. A validator reports neither.")
+
+    b = Bundle("BYSTANDER #4", "background")
+    b.loose[".update-expired.json"] = marker("2026-10-19T17:00:00Z")
+    b.loose[".update-too-far.json"] = marker("2026-10-19T18:00:01Z")
+    b.loose[".update-offset.json"] = marker("2026-10-19T12:30:00+05:00")
+    b.loose[".update-not-json.json"] = b"{ not json\n"
+    b.loose[".update-not-object.json"] = b"[]\n"
+    b.loose[".update-empty.json"] = b""
+    b.loose[".update-temp.json.tmp"] = marker("2026-10-19T17:05:00Z")
+    b.loose[".update-bad_id.json"] = marker("2026-10-19T17:05:00Z")
+    fixture("valid", "update-not-active", [b], [member(b)], complete=True, update_status={"at": update_at, "updating": False},
+            note="Expired, too far ahead, a time zone offset, unreadable, a zero-byte hidden file, and names that aren't markers: none counts, and a validator reports none.")
 
     # A hand-edited member: the hash is over its normal form (§7), so it isn't stale.
     b = base("THE FERRYMAN")

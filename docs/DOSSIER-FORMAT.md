@@ -2,7 +2,7 @@
 type: specification
 state: draft
 formatVersion: 2
-updated: 2026-10-31
+updated: 2026-11-01
 ---
 
 # The dossier format, version 2
@@ -12,7 +12,7 @@ holding the character's description, images, voice and a self-contained HTML
 page, inventoried by `manifest.json`.
 
 This document is normative. It implements [REQUIREMENTS.md](../REQUIREMENTS.md)
-(DF-1 to DF-63); the requirement each section satisfies is cited in brackets.
+(DF-1 to DF-67); the requirement each section satisfies is cited in brackets.
 Decisions D1–D10 and the evidence behind every property are in
 [PROPERTY-INVENTORY.md](PROPERTY-INVENTORY.md).
 
@@ -284,6 +284,70 @@ until a writer's *refresh* adopts them by these rules. An adopted asset has
   `derivedFrom`, and `voice/samples.yaml` has an entry for that `variant` and
   `model` (an entry with no `model` matches any), which gives its `sampleText`.
   Otherwise the file stays unclassified and the writer reports why.
+
+### 5.7 Update status [DF-64 to DF-66]
+
+A bundle changes over many steps, and a render can take minutes. An **update
+marker** tells every other application that a bundle is being updated. It is a
+signal, not a lock: it doesn't stop a second writer, and it doesn't change the
+single-writer rule in §5.6.
+
+A marker is a file in the bundle's root directory, named `.update-<id>.json`,
+where `<id>` is one or more ASCII letters, digits or hyphens, unique to that
+update. Its content is a JSON object
+([`schemas/update-marker.schema.json`](../schemas/update-marker.schema.json)):
+
+| Key | Required | Meaning |
+|-----|----------|---------|
+| `writer` | yes | The name of the tool making the update. |
+| `startedAt` | yes | When the update began. |
+| `expiresAt` | yes | When this marker stops counting if it isn't renewed. |
+| `label` | no | One line for a person: what the update is doing. |
+
+Unknown keys are allowed, and a reader ignores them. Being hidden, a marker is
+outside `files` and `manifestChecksum`, and a validator doesn't report it (§5.2).
+
+**A writer** SHOULD hold a marker from before its first change to the bundle
+until after its last, with these rules:
+
+- It writes the marker to a temporary name that doesn't match
+  `.update-<id>.json`, such as `.update-<id>.json.tmp`, and renames it into
+  place. It renews a marker the same way, by replacing it with a later
+  `expiresAt`.
+- It sets `expiresAt` no more than 3600 seconds ahead, and renews before that
+  time for as long as the update runs.
+- It removes the marker only after it has replaced `manifest.json` for the last
+  time. A reader that sees the marker gone may read the bundle at once.
+- It removes the marker when the update fails too. It MAY remove another
+  writer's marker only when that marker has expired.
+
+A marker SHOULD be left out of version control. Copying a bundle MAY leave its
+markers behind.
+
+**A reader** answers one question: is this bundle being updated at time `now`?
+The answer is yes when at least one marker in the bundle's root directory is
+**active**. A marker is active when its content is a JSON object whose
+`expiresAt` is a valid timestamp (§1) and
+
+```
+now < expiresAt <= now + 3600 seconds
+```
+
+Every other marker is not active: expired, too far ahead, unreadable, or not
+the shape above. A file that doesn't match the name isn't a marker. The limit
+means a marker from a crashed writer or a wrong clock can't report an update
+forever. A reader checks only `expiresAt`, so a marker missing another required
+key is still active.
+
+**Worked example.** At `now` = `2026-10-19T17:00:00Z`:
+
+| `expiresAt` | Active | Why |
+|-------------|--------|-----|
+| `2026-10-19T17:05:00Z` | yes | Five minutes ahead |
+| `2026-10-19T18:00:00Z` | yes | Exactly 3600 seconds ahead |
+| `2026-10-19T18:00:01Z` | no | More than 3600 seconds ahead |
+| `2026-10-19T17:00:00Z` | no | `now` is not before it |
+| `2026-10-19T12:00:00+05:00` | no | Not a timestamp under §1 |
 
 ## 6. Provenance [DF-28]
 
@@ -656,7 +720,7 @@ follows it, and a source can be cited by its address. Anything else is
 `W-PAGE-EXTERNAL`, including a relative `<a href>`. A script that makes a request
 can't be detected this way, and is still forbidden.
 
-## 12. Hosting [DF-58 to DF-63]
+## 12. Hosting [DF-58 to DF-63, DF-67]
 
 A host (a project browser, a scene tool's cast view) presents a `.dossier`
 as one item, finds the page and the face through a reader's lookup (§8.1),
@@ -664,6 +728,19 @@ shows the page read-only with the bundle as its base, and shows the
 validator's finding in place of the page when there is one. It never edits,
 repairs or deletes a bundle, and a bundle found on disk is not a cast member
 unless `CAST.md` says so.
+
+A host that shows update status does this while a bundle is being updated
+(§5.7):
+
+- It indicates the update on the bundle's item.
+- It keeps showing the page it last loaded, if it has one, because a bundle
+  being updated may be between consistent states. It doesn't report a problem
+  it finds during the update.
+- When no marker is active, it reads the bundle again and shows the result,
+  once.
+
+It never creates, renews or removes a marker. It has to notice a marker that
+expires with no change on disk, so it can't rely on file events alone.
 
 ## 13. Identity across tools
 
