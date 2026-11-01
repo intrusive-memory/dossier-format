@@ -1,0 +1,109 @@
+{
+  "assets": [
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "kind": "description",
+      "path": "CHARACTER.md",
+      "provenance": {
+        "provider": "manual"
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T12:00:00Z",
+      "derivedFrom": [
+        {
+          "path": "CHARACTER.md",
+          "role": "description",
+          "sha256": "014ca4e9897a9e6846dce006cb967600e1060adae2135ace421eb411b696d81a"
+        },
+        {
+          "role": "castMember",
+          "sha256": "5f5aad325048d4dcf1b283df2febedc09ad1748de07346babf175083853a6872"
+        },
+        {
+          "role": "bundle",
+          "sha256": "b0988321a7ef3838c3cb559fa8eb89aa4102e09017c5832f364deb0536197e13"
+        },
+        {
+          "role": "template",
+          "sha256": "ed1841cb886f585f2bed11a600dd9955510659e84b76cd52200d3343d9712cd4",
+          "version": "0.0.0-fixture"
+        }
+      ],
+      "kind": "dossier",
+      "path": "THE CARTOGRAPHER-dossier.html",
+      "provenance": {
+        "notes": "Hand-made for the fixtures.",
+        "provider": "manual"
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "derivedFrom": [
+        {
+          "path": "images/portrait-1f04b342.png",
+          "role": "portrait",
+          "sha256": "1f04b342727b5336d2f4609d95f2ffe28d862b3a85d8534f2b1a75eef20434d7"
+        }
+      ],
+      "kind": "face",
+      "path": "images/face-fd539a46.png",
+      "provenance": {
+        "artStyle": "flat placeholder shapes",
+        "box": {
+          "height": 100,
+          "width": 80,
+          "x": 50,
+          "y": 60
+        },
+        "engine": "fixture",
+        "provider": "personaje"
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "kind": "portrait",
+      "path": "images/portrait-1f04b342.png",
+      "provenance": {
+        "artStyle": "flat placeholder shapes",
+        "engine": "fixture",
+        "provider": "vinetas"
+      },
+      "status": "selected"
+    }
+  ],
+  "character": "THE CARTOGRAPHER",
+  "files": [
+    {
+      "path": "CHARACTER.md",
+      "sha256": "014ca4e9897a9e6846dce006cb967600e1060adae2135ace421eb411b696d81a",
+      "sizeBytes": 443
+    },
+    {
+      "path": "THE CARTOGRAPHER-dossier.html",
+      "sha256": "ed40381e107741fb4658b5b876b6d3a18e8f1f921b772d8ef165532c4deea1e9",
+      "sizeBytes": 31213
+    },
+    {
+      "path": "images/face-fd539a46.png",
+      "sha256": "fd539a4679c25a63cdfebfc807c56ec53453025f421d2eb4c0aed8db19094925",
+      "sizeBytes": 705
+    },
+    {
+      "path": "images/portrait-1f04b342.png",
+      "sha256": "1f04b342727b5336d2f4609d95f2ffe28d862b3a85d8534f2b1a75eef20434d7",
+      "sizeBytes": 940
+    }
+  ],
+  "generator": {
+    "name": "dossier-format fixtures",
+    "version": "1"
+  },
+  "manifestChecksum": "5a1182cdecb2fcd2e68b9a98822d7956a80e43c2320e0e893439284a02756304",
+  "manifestVersion": 2,
+  "role": "background",
+  "updatedAt": "2026-10-31T12:00:00Z"
+}

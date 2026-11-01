@@ -56,6 +56,22 @@
     {
       "input": "A:B",
       "error": "E-NAME"
+    },
+    {
+      "input": "DUKE (V.O.) ^",
+      "canonical": "DUKE"
+    },
+    {
+      "input": "DUKE^ (V.O.)",
+      "canonical": "DUKE"
+    },
+    {
+      "input": "@duke ^",
+      "canonical": "DUKE"
+    },
+    {
+      "input": "^",
+      "error": "E-NAME"
     }
   ]
 }

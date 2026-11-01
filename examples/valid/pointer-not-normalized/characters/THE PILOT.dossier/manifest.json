@@ -1,0 +1,74 @@
+{
+  "assets": [
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "kind": "description",
+      "path": "CHARACTER.md",
+      "provenance": {
+        "provider": "manual"
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "derivedFrom": [
+        {
+          "path": "images/portrait-03bb41d0.png",
+          "role": "portrait",
+          "sha256": "03bb41d0ffbd96eaaff0a4ebe2d27229faff7ca286ee74b73f8434ac4a0a8006"
+        }
+      ],
+      "kind": "face",
+      "path": "images/face-55a1e686.png",
+      "provenance": {
+        "artStyle": "flat placeholder shapes",
+        "box": {
+          "height": 100,
+          "width": 80,
+          "x": 50,
+          "y": 60
+        },
+        "engine": "fixture",
+        "provider": "personaje"
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "kind": "portrait",
+      "path": "images/portrait-03bb41d0.png",
+      "provenance": {
+        "artStyle": "flat placeholder shapes",
+        "engine": "fixture",
+        "provider": "vinetas"
+      },
+      "status": "selected"
+    }
+  ],
+  "character": "THE PILOT",
+  "files": [
+    {
+      "path": "CHARACTER.md",
+      "sha256": "56094473ae714bbe08d7e0678e8906b24b4c2b650f6098a17a9fc529448b93ff",
+      "sizeBytes": 429
+    },
+    {
+      "path": "images/face-55a1e686.png",
+      "sha256": "55a1e686e1444b114fc0fdda8543b3afd3b39ec741f5323891369640cb973385",
+      "sizeBytes": 706
+    },
+    {
+      "path": "images/portrait-03bb41d0.png",
+      "sha256": "03bb41d0ffbd96eaaff0a4ebe2d27229faff7ca286ee74b73f8434ac4a0a8006",
+      "sizeBytes": 941
+    }
+  ],
+  "generator": {
+    "name": "dossier-format fixtures",
+    "version": "1"
+  },
+  "manifestChecksum": "3782ca486f101074ae51934282c7e0c72a75d87b40e06f889ef8b5dfe87ca6ad",
+  "manifestVersion": 2,
+  "role": "background",
+  "updatedAt": "2026-10-31T12:00:00Z"
+}

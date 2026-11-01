@@ -5,6 +5,28 @@ updated: 2026-10-31
 
 # Changelog
 
+## Format 2, release candidate 2 (2026-10-31)
+
+Reviewing a first implementation's requirements against rc.1 found rules a
+validator couldn't implement from the text alone. Fixtures added for each.
+
+- **§2:** `^` is removed repeatedly, in any order with parentheticals, so
+  `DUKE (V.O.) ^` and `DUKE^ (V.O.)` are `DUKE`.
+- **§3:** how a `manifest:` pointer is resolved and compared (`W-POINTER`).
+- **§5.2, schema:** which paths are `E-PATH`. Added: drive letters, URL schemes
+  and backslashes. It covers every path in the manifest, not only `files`.
+- **§7:** a `castMember` hash is taken over the member's normal form, so it doesn't
+  depend on how `CAST.md` is written or change when a writer normalizes it.
+  Hashes of members already in normal form don't change.
+- **§8.1:** `W-SHAPE` as arithmetic, on selected assets, with the boundary stated.
+- **§11:** the current template, for `W-STALE`. A page on any other template is
+  stale, older or newer. What counts as a reference for `W-PAGE-EXTERNAL`. A
+  cited `<a href="https://…">` is allowed.
+- **Appendix A:** migration as ordered steps, with the rename to `.dossier` and
+  the page after the manifest. A retired asset that can't be mapped stays as an
+  unclassified file.
+- **`conformance.json`:** adds `templateSha256`.
+
 ## Format 2, release candidate 1 (2026-10-31)
 
 Conformance fixtures added (`examples/`). Writing them found these gaps in the
