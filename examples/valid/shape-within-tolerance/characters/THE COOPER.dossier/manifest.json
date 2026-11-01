@@ -1,0 +1,45 @@
+{
+  "assets": [
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "kind": "description",
+      "path": "CHARACTER.md",
+      "provenance": {
+        "provider": "manual"
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "kind": "portrait",
+      "path": "images/portrait-a487d2f4.png",
+      "provenance": {
+        "artStyle": "flat placeholder shapes",
+        "engine": "fixture",
+        "provider": "vinetas"
+      },
+      "status": "selected"
+    }
+  ],
+  "character": "THE COOPER",
+  "files": [
+    {
+      "path": "CHARACTER.md",
+      "sha256": "e3fd4cf4c779283d1694ab8d9bb01353c67fa58f7db8acdbbc96cbe0d98e135b",
+      "sizeBytes": 431
+    },
+    {
+      "path": "images/portrait-a487d2f4.png",
+      "sha256": "a487d2f4651458b34d6c3e3668ea7c891e0b9ce1d240f5dfb1a68f369894304a",
+      "sizeBytes": 941
+    }
+  ],
+  "generator": {
+    "name": "dossier-format fixtures",
+    "version": "1"
+  },
+  "manifestChecksum": "3f6f5c55130bc629b8ea1fb8d48e4020f0aaf324080e895662f123c31830e17f",
+  "manifestVersion": 2,
+  "role": "background",
+  "updatedAt": "2026-10-31T12:00:00Z"
+}

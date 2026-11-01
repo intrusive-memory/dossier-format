@@ -256,7 +256,7 @@ class Bundle:
             self.mutate(top)
         return top
 
-    def page(self, member, body_extra="", padding=0):
+    def page(self, member, body_extra="", padding=0, template_sha=TEMPLATE_SHA):
         """A hand-made page meeting §11, without the template, which doesn't exist yet."""
         path = f"{self.name}-dossier.html"
         description = self.selected("description")
@@ -271,7 +271,7 @@ class Bundle:
             embedded["prompts"] = self.prompts
         text = self.files[description["path"]].decode()
         _, fm, body = text.split("---\n", 2)
-        record = {"formatVersion": 2, "character": self.name, "castMember": member,
+        record = {"formatVersion": 2, "character": self.name, "castMember": normal_form(member),
                   "frontMatter": yaml.safe_load(fm), "body": body, "manifest": embedded}
         record_json = json.dumps(record, sort_keys=True, ensure_ascii=False, separators=(",", ":")).replace("<", "\\u003c")
         parts = []
@@ -286,16 +286,16 @@ class Bundle:
                 data = base64.b64encode(self.files[asset["path"]]).decode()
                 parts.append(f'<audio controls src="data:audio/mp4;base64,{data}"></audio>')
         html = (f'<!DOCTYPE html>\n<html lang="en"><head><meta charset="utf-8">'
-                f'<meta name="dossier-template" content="{TEMPLATE_VERSION} {TEMPLATE_SHA}">'
+                f'<meta name="dossier-template" content="{TEMPLATE_VERSION} {template_sha}">'
                 f"<title>{self.name}</title></head><body><h1>{self.name}</h1>\n"
                 + "\n".join(parts) + body_extra
                 + f'\n<script type="application/json" id="character-record">{record_json}</script>\n</body></html>\n').encode()
         if padding:
             html += b"<!--" + b" " * (padding - len(html) - 7) + b"-->\n"
         derived = [self.input("description"),
-                   {"role": "castMember", "sha256": sha(json.dumps(member, sort_keys=True, ensure_ascii=False, separators=(",", ":")).encode())},
+                   {"role": "castMember", "sha256": sha(json.dumps(normal_form(member), sort_keys=True, ensure_ascii=False, separators=(",", ":")).encode())},
                    {"role": "bundle", "sha256": embedded["manifestChecksum"]},
-                   {"role": "template", "version": TEMPLATE_VERSION, "sha256": TEMPLATE_SHA}]
+                   {"role": "template", "version": TEMPLATE_VERSION, "sha256": template_sha}]
         self.put(path, html, "dossier", provenance={"provider": "manual", "notes": "Hand-made for the fixtures."}, created=NOW, derivedFrom=derived)
 
     def write(self, project):
@@ -320,6 +320,25 @@ def member(bundle, role=None, voice=None, prompt=None, language=None):
         entry["voicePrompt"] = prompt
     entry["voices"] = {"voxalta": [voice]} if voice else {}
     entry["manifest"] = f"{bundle.dir}/manifest.json"
+    return entry
+
+
+def normal_form(entry):
+    """§7: what a member's hash is taken over."""
+    entry = copy.deepcopy(entry)
+    legacy = entry.pop("voiceDescription", None)
+    if entry.get("voicePrompt") is None and legacy is not None:
+        entry["voicePrompt"] = legacy
+    voices = {}
+    for provider, value in (entry.get("voices") or {}).items():
+        if isinstance(value, str):
+            voices[provider.lower()] = [value]
+        elif isinstance(value, list) and all(isinstance(item, str) for item in value):
+            voices[provider.lower()] = value
+    entry["voices"] = voices
+    for key in ("character", "role", "actor", "gender", "language", "voicePrompt", "manifest"):
+        if key in entry and entry[key] is None:
+            del entry[key]
     return entry
 
 
@@ -444,6 +463,36 @@ def valid():
     b = Bundle("BYSTANDER #2", "background")
     fixture("valid", "empty-background", [b], [member(b)], complete=True, note="No files and no assets; manifestChecksum is the SHA-256 of the empty string.")
 
+    # A hand-edited member: the hash is over its normal form (§7), so it isn't stale.
+    b = base("THE FERRYMAN")
+    voice = add_voice(b)
+    m = {"character": b.name, "role": "background", "voiceDescription": VOICE_PROMPT, "voices": {"VoxAlta": voice}, "bio": None,
+         "manifest": f"{b.dir}/manifest.json"}
+    b.page(m)
+    fixture("valid", "hand-edited-member", [b], [m], complete=True,
+            note="A legacy voiceDescription, a scalar voices value, a mixed-case provider and an undeclared null. §7's normal form gives the hash.")
+
+    # A pointer that isn't written the short way, but resolves to the bundle (§3).
+    b = base("THE PILOT")
+    fixture("valid", "pointer-not-normalized", [b], [{**member(b), "manifest": f"./characters/../{b.dir}/manifest.json"}], complete=True)
+
+    # Just inside §8.1's tolerance.
+    b = Bundle("THE COOPER", "background")
+    b.put("CHARACTER.md", short_description(b.name, "background"), "description")
+    b.image("portrait", png(179, 320, b.name))
+    fixture("valid", "shape-within-tolerance", [b], [member(b)], complete=True, note="179×320: 0.56% from 9:16.")
+
+    # Every kind of reference §11 allows, and things that look like references and aren't.
+    b = base("THE CARTOGRAPHER")
+    m = member(b)
+    b.page(m, body_extra="""
+<style>h1 { background: url(data:image/gif;base64,R0lGODlhAQABAAAAACw=); } h2 { mask: url(#shape); }</style>
+<!-- <img src="comment.png"> is not a reference -->
+<p style="background: URL('DATA:image/gif;base64,R0lGODlhAQABAAAAACw=')">src="text.png" is text.</p>
+<a href="#sources">Sources</a> <a href="https://example.org/source">A cited source</a> <a href="mailto:author@example.org">The author</a>
+<script>const notAReference = '<img src="script.png">';</script>""")
+    fixture("valid", "page-allowed-references", [b], [m], complete=True)
+
 
 # --- errors ------------------------------------------------------------------
 
@@ -478,6 +527,11 @@ def errors():
     err("E-PATH-escape", b, may_also=["E-SCHEMA", "E-FILE-MISSING", "W-UNCLASSIFIED"])
     b = base(); b.mutate = bad_path("/tmp/outside.txt")
     err("E-PATH-absolute", b, may_also=["E-SCHEMA", "E-FILE-MISSING", "W-UNCLASSIFIED"])
+    for label, path in (("backslash", "images\\outside.txt"), ("drive-letter", "C:/outside.txt"), ("url", "file:///tmp/outside.txt"), ("empty-segment", "images//outside.txt")):
+        b = base(); b.mutate = bad_path(path)
+        err(f"E-PATH-{label}", b, may_also=["E-SCHEMA", "E-FILE-MISSING", "W-UNCLASSIFIED"])
+    b = base(); b.assets[-1]["derivedFrom"][0]["path"] = "../portrait.png"
+    err("E-PATH-derived-from", b, may_also=["E-SCHEMA"], note="A path outside files and assets.")
 
     b = base(); b.missing.add(b.selected("portrait")["path"])
     err("E-FILE-MISSING", b)
@@ -543,10 +597,17 @@ def warnings():
     b = base(description=short_description(PELL, "background", art="woodcut"))
     warn("W-STALE-art-style", b, note="The images' provenance.artStyle differs from the current front matter.")
 
+    b = base(); m = member(b); b.page(m, template_sha=sha(b"an older template\n"))
+    warn("W-STALE-template", b, members=[m], note="The page's template isn't the current one (conformance.json).")
+
     b = Bundle(PELL, "background")
     b.put("CHARACTER.md", short_description(PELL, "background"), "description")
     b.image("portrait", png(180, 180, "square portrait"))
     warn("W-SHAPE", b)
+    b = Bundle(PELL, "background")
+    b.put("CHARACTER.md", short_description(PELL, "background"), "description")
+    b.image("portrait", png(178, 320, "narrow portrait"))
+    warn("W-SHAPE-just-outside", b, note="178×320: 1.1% from 9:16.")
 
     b = base(); b.image("expression", png(128, 128, "wistful", (30, 25, 68, 85)), "wistful", derivedFrom=[b.input("face"), b.input("portrait")])
     warn("W-VARIANT-expression", b)
@@ -580,6 +641,13 @@ def warnings():
     warn("W-PAGE-SIZE", b, members=[m], note="11,000,000 bytes, nearly all of it a comment, which git compresses.")
     b = base(); m = member(b); b.page(m, body_extra=f'\n<img alt="linked" src="{b.selected("face")["path"]}">')
     warn("W-PAGE-EXTERNAL", b, members=[m])
+    for label, html in (("css-url", '<style>body { font-family: x; src: url("fonts/x.woff2"); }</style>'),
+                        ("css-import", '<style>@import "site.css";</style>'),
+                        ("style-attribute", '<p style="background: url(https://example.org/x.png)">Text.</p>'),
+                        ("srcset", '<img alt="set" srcset="data:image/gif;base64,R0lGODlhAQABAAAAACw= 1x, big.png 2x">'),
+                        ("relative-link", '<a href="other-dossier.html">Another page</a>')):
+        b = base(); m = member(b); b.page(m, body_extra="\n" + html)
+        warn(f"W-PAGE-EXTERNAL-{label}", b, members=[m])
 
     name = "WREN HALLOWAY"
     b = Bundle(name, "lead")
@@ -620,6 +688,7 @@ NAMES = [
     ("Mitch", "MITCH"), ("@McCowley", "MCCOWLEY"), ("BILLY (V.O.)", "BILLY"), ("BILLY (CONT'D) (O.S.)", "BILLY"),
     ("Aunt   Stanley", "AUNT STANLEY"), ("mccowley's wife", "MCCOWLEY'S WIFE"), ("CB#1", "CB#1"), ("josé", "JOSÉ"),
     ("josé", "JOSÉ"), ("DUKE^", "DUKE"), ("AC/DC", None), (".HIDDEN", None), ("(V.O.)", None), ("A:B", None),
+    ("DUKE (V.O.) ^", "DUKE"), ("DUKE^ (V.O.)", "DUKE"), ("@duke ^", "DUKE"), ("^", None),
 ]
 
 
@@ -629,7 +698,7 @@ def main():
     valid()
     errors()
     warnings()
-    (OUT / "conformance.json").write_text(json.dumps({"formatVersion": 2, "templateVersion": TEMPLATE_VERSION, "fixtures": FIXTURES}, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    (OUT / "conformance.json").write_text(json.dumps({"formatVersion": 2, "templateVersion": TEMPLATE_VERSION, "templateSha256": TEMPLATE_SHA, "fixtures": FIXTURES}, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     names = [{"input": i, "canonical": c} if c else {"input": i, "error": "E-NAME"} for i, c in NAMES]
     (OUT / "names.json").write_text(json.dumps({"formatVersion": 2, "names": names}, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     print(f"{len(FIXTURES)} fixtures")

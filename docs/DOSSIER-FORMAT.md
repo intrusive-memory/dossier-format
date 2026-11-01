@@ -49,8 +49,9 @@ manifest's `character`, the `CHARACTER.md` `character:`, and the
 **Canonicalization,** applied to every name read from a screenplay, typed in,
 or found in `CAST.md`:
 
-1. Remove a leading Fountain `@` and any trailing parenthetical (`(V.O.)`,
-   `(O.S.)`, `(CONT'D)`, …), repeatedly, and a trailing `^`.
+1. Remove a leading Fountain `@`. Then remove, repeatedly and in any order, a
+   trailing parenthetical (`(V.O.)`, `(O.S.)`, `(CONT'D)`, …) and a trailing `^`
+   (Fountain's dual-dialogue mark), trimming whitespace after each.
 2. Trim; collapse every run of whitespace to one space.
 3. Uppercase (Unicode default case mapping).
 4. Normalize to NFC. Punctuation, digits and accents are kept.
@@ -71,6 +72,7 @@ bundle's only by case.
 | `CB#1` | `CB#1` |
 | `josé` | `JOSÉ` (NFC) |
 | `DUKE^` | `DUKE` |
+| `DUKE (V.O.) ^` | `DUKE` |
 | `AC/DC` | error `E-NAME` |
 | `.HIDDEN` | error `E-NAME` |
 
@@ -82,6 +84,13 @@ bundle's only by case.
 - The bundle is the directory `<CHARACTER>.dossier` containing that
   manifest. The manifest's `character` MUST equal the directory name without
   `.dossier`, and MUST equal the member's `character` (`E-NAME-MISMATCH`).
+- **Resolving a pointer.** Split the `manifest:` value on `/`, drop empty and
+  `.` segments, and let each `..` remove the segment before it, without reading
+  the disk or following links. Compare the result with the bundle manifest's
+  path relative to the same directory, as NFC strings, case-sensitively. A
+  member **points at** a bundle when they are equal. A member whose `character`
+  equals the bundle's name and whose `manifest:` points anywhere else is
+  `W-POINTER`.
 - A member with no `manifest:` has no dossier; that is valid.
 - A `.dossier` directory no member points at is an **orphan** (`W-ORPHAN`):
   reported, never loaded, never deleted. A writer's *refresh* MAY adopt an
@@ -172,6 +181,16 @@ path segment starting with `.`) and symlinks. Each entry has exactly `path`,
 `sha256`, `sizeBytes`. Entries are sorted by `path` (byte order of the UTF-8
 string). A zero-byte file is refused: a writer MUST NOT write it and a
 validator reports `E-ZERO-BYTE`.
+
+**Bundle paths.** Every path recorded in a manifest (`files`, `assets`,
+`derivedFrom`, `provenance.references`) is relative to the bundle, with `/` as
+its only separator. It is `E-PATH` when it:
+
+- starts with `/`, or has a `:` in its first segment (`C:/x`, `file:///x`), which
+  makes it absolute;
+- contains a `\`;
+- has an empty, `.` or `..` segment (`images//x.png`, `../x`). An empty path is
+  an empty segment.
 
 ### 5.3 `manifestChecksum`
 
@@ -299,16 +318,45 @@ Unknown keys are preserved.
 | `voiceSample` | `vox` |
 | `dossier` | `description`, `castMember`, `bundle`, `template` |
 
-**Canonical JSON** of a member: every key the member has in `CAST.md`, as JSON
-in UTF-8, with object keys sorted at every level by the byte order of their
-UTF-8 form and no whitespace outside strings. Inside strings only `"`, `\` and
-the control characters below U+0020 are escaped; `/` and non-ASCII characters
-are written as themselves. `{"character":"INÉS","manifest":"characters/INÉS.dossier/manifest.json"}`
-is already canonical.
+**The hash of a member** is the SHA-256 of the canonical JSON of its normal form,
+so it doesn't depend on how `CAST.md` is written, or change when a writer
+normalizes the file.
+
+**Normal form** of a member:
+
+- A legacy `voiceDescription` becomes `voicePrompt`. If both are present,
+  `voicePrompt` is kept and `voiceDescription` is dropped.
+- `voices` is always present, `{}` when the member has none. Provider keys are
+  lowercased. A single string becomes a one-element array. A value that is
+  neither a string nor an array of strings is dropped.
+- `character`, `role`, `actor`, `gender`, `language`, `voicePrompt` and `manifest`
+  are absent when their value is null.
+- Every other key is kept with its value, including null.
+
+**Canonical JSON:** UTF-8, with object keys sorted at every level by the byte
+order of their UTF-8 form and no whitespace outside strings. Inside strings only
+`"`, `\` and the control characters below U+0020 are escaped; `/` and non-ASCII
+characters are written as themselves. An integer is written in decimal; any other
+number in the shortest form that reads back as the same 64-bit float.
+
+```yaml
+- character: INÉS
+  voiceDescription: A low voice.
+  voices: {VoxAlta: a/b.vox}
+  bio: null
+```
+
+has the canonical JSON
+
+```json
+{"bio":null,"character":"INÉS","voicePrompt":"A low voice.","voices":{"voxalta":["a/b.vox"]}}
+```
+
+and the hash `bf956f8fe4278f30b800f8899b3a634ef1ac15ad101796b31e9d592fa0b73168`.
 
 An asset is **stale** when any input's `sha256` differs from the current
 selected asset of that role (or the current member, bundle, template).
-Changing the character's `artStyle` (§9.1) also makes its images stale: an
+The current template is defined in §11. Changing the character's `artStyle` (§9.1) also makes its images stale: an
 image whose `provenance.artStyle` differs from the current front-matter
 `artStyle` is stale. No other character is affected. Stale assets are
 flagged (`W-STALE`), never deleted or demoted.
@@ -332,7 +380,10 @@ flagged (`W-STALE`), never deleted or demoted.
 | `training` | — | image | §8.4. |
 | `crowdRef` | — | image | A reference for a background character. |
 
-Shapes are checked within 1%; a mismatch is `W-SHAPE`.
+**Shapes** are width to height, in pixels as stored in the file. For each
+`selected` `portrait`, `view`, `face` and `expression`, let *r* be width ÷ height
+and *t* be 9 ÷ 16 or 1. It is `W-SHAPE` when |*r* − *t*| ÷ *t* is over 0.01, or when
+the file has no readable dimensions. 179×320 passes and 178×320 doesn't.
 
 **Retired kinds** (`turnaround`, `faceSheet`, `expressions`, `wardrobe`,
 `palette`): a version 1 reader recognizes them; a writer MUST NOT produce
@@ -523,8 +574,13 @@ registered as `kind: dossier`.
   the page's `bundle` input (§7). Its `updatedAt` is the latest `createdAt` of
   its assets, not the last write, so rendering twice gives the same bytes. It
   otherwise matches `manifest.json`.
-- **Template:** `<meta name="dossier-template" content="<version> <sha256>">`.
-  A newer template makes the page stale.
+- **Template:** `<meta name="dossier-template" content="<version> <sha256>">`,
+  with the same values as the page's `template` input (§7). The **current
+  template** is the one the validator or renderer carries, by the version and
+  `sha256` published with it. The page is stale (`W-STALE`) when the `sha256` in
+  either place differs from the current template's; versions aren't ordered, so
+  an older template is stale too. A validator that carries no template makes no
+  template comparison.
 - **Stable output:** the same inputs and template give the same bytes, per
   implementation. A renderer MUST NOT write the render time.
 - **Content:** only `selected` assets; missing required rows listed by name;
@@ -534,6 +590,20 @@ registered as `kind: dossier`.
   with the template; REQUIREMENTS §13).
 - A complete lead's page should be about 3 MB; over 10,000,000 bytes is
   `W-PAGE-SIZE`.
+
+**`W-PAGE-EXTERNAL`.** A validator reads the page as HTML. Comments, text and the
+contents of `<script>` elements are not searched. The page's references are:
+
+- the attributes `src`, `srcset` (each candidate), `href`, `xlink:href`, `poster`,
+  `data`, `action`, `formaction` and `background`, on any element;
+- every `url(...)` and `@import` in `<style>` elements and `style` attributes.
+
+A reference is allowed when, after trimming whitespace, it is empty, starts with
+`#`, or starts with `data:` (in any case). So is the `href` of an `<a>` element
+with the scheme `http`, `https` or `mailto`: nothing loads unless the reader
+follows it, and a source can be cited by its address. Anything else is
+`W-PAGE-EXTERNAL`, including a relative `<a href>`. A script that makes a request
+can't be detected this way, and is still forbidden.
 
 ## 12. Hosting [DF-58 to DF-63]
 
@@ -563,7 +633,7 @@ MUST be reported and `E-SCHEMA` MAY be reported with it.
 | `E-NAME` | error | Name invalid (§2) |
 | `E-NAME-MISMATCH` | error | Bundle name, manifest `character` and `CAST.md` member disagree |
 | `E-NOT-BUNDLE` | error | A version 2 manifest in a directory without `.dossier` |
-| `E-PATH` | error | A path is absolute, escapes the bundle, or has an empty, `.` or `..` segment |
+| `E-PATH` | error | A path in the manifest breaks §5.2's rules |
 | `E-FILE-MISSING` | error | A `files` entry has no file |
 | `E-FILE-HASH` | error | A file's hash or size doesn't match its entry |
 | `E-ZERO-BYTE` | error | A zero-byte file |
@@ -575,17 +645,17 @@ MUST be reported and `E-SCHEMA` MAY be reported with it.
 | `E-SCHEMA` | error | The manifest fails its schema |
 | `W-UNCLASSIFIED` | warning | A file with no asset entry |
 | `W-STALE` | warning | A derived asset's inputs changed |
-| `W-SHAPE` | warning | Wrong aspect ratio for the kind |
+| `W-SHAPE` | warning | Wrong aspect ratio for the kind (§8.1) |
 | `W-VARIANT` | warning | An `expression` or `view` variant outside the standard set |
 | `W-SIDECAR` | warning | A `.json` sidecar in `images/` |
 | `W-ORPHAN` | warning | No `CAST.md` member points at the bundle |
-| `W-POINTER` | warning | The member's `manifest:` doesn't point at this bundle |
+| `W-POINTER` | warning | The member's `manifest:` doesn't point at this bundle (§3) |
 | `W-ROLE` | warning | The member has no `role` |
 | `W-VOICE-ELSEWHERE` | warning | `voices.voxalta` doesn't name the selected `vox` |
 | `W-VOICE-PROMPT` | warning | `voicePrompt` differs from the vox's |
 | `W-FOOTNOTE` | warning | An undefined or unused footnote |
 | `W-PAGE-SIZE` | warning | The page is over 10,000,000 bytes |
-| `W-PAGE-EXTERNAL` | warning | The page references something outside itself |
+| `W-PAGE-EXTERNAL` | warning | The page references something outside itself (§11) |
 | `W-INCOMPLETE` | warning | A required tier row is missing (listed by row ID) |
 | `W-V1` | warning | A version 1 manifest (readable; migrate it) |
 
@@ -627,13 +697,25 @@ Differences from version 2:
 | `dossier.html`, relative links | `<CHARACTER>-dossier.html`, self-contained |
 | `createdAt` sometimes absent | required |
 
-**Migration** (an implementation's tool, outlined so every migrator
-produces the same bundle): fold each sidecar into its asset's provenance,
-mapping `references[].source` to bundle paths by `sha256` and dropping the
-absolute path; record the round and seed from the old file name in
-`provenance.round` and `provenance.seed`; move candidates and sidecars to
-`.generations/<CHARACTER>/`; map retired kinds (`turnaround` + label →
-`view` + variant, `expressions` + label → `expression` + variant,
-`faceSheet` → `face`); rename selected images to content names; rewrite
-`derivedFrom`; render the new page and delete `dossier.html`; update
-`CAST.md` pointers through its writer; write the version 2 manifest.
+**Migration** is an implementation's tool. So that every migrator produces the
+same bundle, it takes these steps, in this order:
+
+1. Rename `<CHARACTER>/` to `<CHARACTER>.dossier/` if needed.
+2. Fold each sidecar into its asset's provenance, mapping `references[].source`
+   to bundle paths by `sha256` and dropping the absolute path. Record the round
+   and seed from the old file name in `provenance.round` and `provenance.seed`.
+3. Move candidates and sidecars to `.generations/<CHARACTER>/`.
+4. Map retired kinds: `turnaround` + `label` → `view` + `variant`, `expressions`
+   + `label` → `expression` + `variant`, `faceSheet` → `face`.
+5. Rename selected images to content names.
+6. Rewrite `derivedFrom` in the §7 shape.
+7. Update `CAST.md` pointers through its writer.
+8. Write the version 2 manifest.
+9. Render the new page, which hashes the manifest's files, and delete
+   `dossier.html`.
+10. Validate.
+
+**An asset step 4 can't map** is a `turnaround` or `expressions` with no `label`,
+or a `wardrobe` or `palette`, which have no version 2 kind. The migrator MUST NOT
+guess: it drops the asset entry, leaves the file where it is under its old name,
+and reports it. The file stays in `files` and is `W-UNCLASSIFIED`.

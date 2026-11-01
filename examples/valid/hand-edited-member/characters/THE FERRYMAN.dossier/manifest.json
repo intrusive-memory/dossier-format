@@ -1,0 +1,128 @@
+{
+  "assets": [
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "kind": "description",
+      "path": "CHARACTER.md",
+      "provenance": {
+        "provider": "manual"
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T12:00:00Z",
+      "derivedFrom": [
+        {
+          "path": "CHARACTER.md",
+          "role": "description",
+          "sha256": "3879a33cee0a3f1a62a02c6cc22aa2a6f3ab567e0dc27e5261e308ba1df46a6f"
+        },
+        {
+          "role": "castMember",
+          "sha256": "3b642bd6cb3e606119116ff421a7aacf8dda1f02bb32f97e87f858adc949d15a"
+        },
+        {
+          "role": "bundle",
+          "sha256": "66582df930d01ff550676405bf2b162179f39c8ae64173726ba76662458d0b0e"
+        },
+        {
+          "role": "template",
+          "sha256": "ed1841cb886f585f2bed11a600dd9955510659e84b76cd52200d3343d9712cd4",
+          "version": "0.0.0-fixture"
+        }
+      ],
+      "kind": "dossier",
+      "path": "THE FERRYMAN-dossier.html",
+      "provenance": {
+        "notes": "Hand-made for the fixtures.",
+        "provider": "manual"
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "derivedFrom": [
+        {
+          "path": "images/portrait-108deaf9.png",
+          "role": "portrait",
+          "sha256": "108deaf992d40183ec3f119e9d2eba9cabac8c6a55b8f4c3157c43bd7db51ff0"
+        }
+      ],
+      "kind": "face",
+      "path": "images/face-3f84b78e.png",
+      "provenance": {
+        "artStyle": "flat placeholder shapes",
+        "box": {
+          "height": 100,
+          "width": 80,
+          "x": 50,
+          "y": 60
+        },
+        "engine": "fixture",
+        "provider": "personaje"
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "kind": "portrait",
+      "path": "images/portrait-108deaf9.png",
+      "provenance": {
+        "artStyle": "flat placeholder shapes",
+        "engine": "fixture",
+        "provider": "vinetas"
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "kind": "vox",
+      "path": "voice/THE FERRYMAN.vox",
+      "provenance": {
+        "models": [
+          "Qwen3-TTS-12Hz-1.7B-Base-bf16",
+          "Qwen3-TTS-12Hz-0.6B-Base-bf16"
+        ],
+        "provider": "echada",
+        "voicePrompt": "A clear, unhurried alto with a dry edge."
+      },
+      "status": "selected"
+    }
+  ],
+  "character": "THE FERRYMAN",
+  "files": [
+    {
+      "path": "CHARACTER.md",
+      "sha256": "3879a33cee0a3f1a62a02c6cc22aa2a6f3ab567e0dc27e5261e308ba1df46a6f",
+      "sizeBytes": 435
+    },
+    {
+      "path": "THE FERRYMAN-dossier.html",
+      "sha256": "dabcac1f54db03da79ad99ba2aa11d8fac278a25c3e5f42f3cf519d71a6bd4f7",
+      "sizeBytes": 35480
+    },
+    {
+      "path": "images/face-3f84b78e.png",
+      "sha256": "3f84b78e2ecc955210c6cdcbfaae6fe700b7249d1d0e3b2289e0281007e70dff",
+      "sizeBytes": 704
+    },
+    {
+      "path": "images/portrait-108deaf9.png",
+      "sha256": "108deaf992d40183ec3f119e9d2eba9cabac8c6a55b8f4c3157c43bd7db51ff0",
+      "sizeBytes": 940
+    },
+    {
+      "path": "voice/THE FERRYMAN.vox",
+      "sha256": "bf535908d1ea1117749894a707aac92dc4725e47ed67155dcd3f0ed3485c0b5e",
+      "sizeBytes": 1277
+    }
+  ],
+  "generator": {
+    "name": "dossier-format fixtures",
+    "version": "1"
+  },
+  "manifestChecksum": "d2a4b35b74370d3854f6fba4b436ba619760b513920c8e9064e71d7174f666d3",
+  "manifestVersion": 2,
+  "role": "background",
+  "updatedAt": "2026-10-31T12:00:00Z"
+}

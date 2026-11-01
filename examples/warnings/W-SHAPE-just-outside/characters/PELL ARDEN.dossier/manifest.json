@@ -1,0 +1,45 @@
+{
+  "assets": [
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "kind": "description",
+      "path": "CHARACTER.md",
+      "provenance": {
+        "provider": "manual"
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "kind": "portrait",
+      "path": "images/portrait-c7a0c69a.png",
+      "provenance": {
+        "artStyle": "flat placeholder shapes",
+        "engine": "fixture",
+        "provider": "vinetas"
+      },
+      "status": "selected"
+    }
+  ],
+  "character": "PELL ARDEN",
+  "files": [
+    {
+      "path": "CHARACTER.md",
+      "sha256": "68977816de73c9862cfa1dbf9db62346221ec1c10eff5269d22073f34e480d5c",
+      "sizeBytes": 431
+    },
+    {
+      "path": "images/portrait-c7a0c69a.png",
+      "sha256": "c7a0c69a2565c317d893bddb14f5fcfe73e5502a55859beae67ea6fac927e1f4",
+      "sizeBytes": 939
+    }
+  ],
+  "generator": {
+    "name": "dossier-format fixtures",
+    "version": "1"
+  },
+  "manifestChecksum": "6dcd634e3b207cc285f4f3a1adce64e885b093bc9c1e5a1ce04af2a270c740d1",
+  "manifestVersion": 2,
+  "role": "background",
+  "updatedAt": "2026-10-31T12:00:00Z"
+}

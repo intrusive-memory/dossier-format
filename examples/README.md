@@ -36,7 +36,7 @@ Validate it from its `CAST.md`.
 - **The pages are hand-made,** because the template doesn't exist yet. They meet
   §11's structure and carry the template version `0.0.0-fixture`, whose hash is
   the SHA-256 of `dossier-format fixture template\n`. Treat that as the current
-  template. These pages are test input for readers and validators, not a model
+  template: it's `templateVersion` and `templateSha256` in `conformance.json`. These pages are test input for readers and validators, not a model
   for a renderer's output. They will be regenerated when the template ships.
 - **Face detection has no fixture.** Images are shapes, not faces, so the face
   crops use `provenance.box`. §8.5's worked example is the portrait and box

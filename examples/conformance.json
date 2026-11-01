@@ -1,6 +1,7 @@
 {
   "formatVersion": 2,
   "templateVersion": "0.0.0-fixture",
+  "templateSha256": "ed1841cb886f585f2bed11a600dd9955510659e84b76cd52200d3343d9712cd4",
   "fixtures": [
     {
       "path": "valid/complete-lead",
@@ -40,6 +41,44 @@
       "complete": true,
       "missingRequired": [],
       "note": "No files and no assets; manifestChecksum is the SHA-256 of the empty string."
+    },
+    {
+      "path": "valid/hand-edited-member",
+      "bundle": "characters/THE FERRYMAN.dossier",
+      "verdict": "valid",
+      "codes": [],
+      "mayAlso": [],
+      "complete": true,
+      "missingRequired": [],
+      "note": "A legacy voiceDescription, a scalar voices value, a mixed-case provider and an undeclared null. §7's normal form gives the hash."
+    },
+    {
+      "path": "valid/pointer-not-normalized",
+      "bundle": "characters/THE PILOT.dossier",
+      "verdict": "valid",
+      "codes": [],
+      "mayAlso": [],
+      "complete": true,
+      "missingRequired": []
+    },
+    {
+      "path": "valid/shape-within-tolerance",
+      "bundle": "characters/THE COOPER.dossier",
+      "verdict": "valid",
+      "codes": [],
+      "mayAlso": [],
+      "complete": true,
+      "missingRequired": [],
+      "note": "179×320: 0.56% from 9:16."
+    },
+    {
+      "path": "valid/page-allowed-references",
+      "bundle": "characters/THE CARTOGRAPHER.dossier",
+      "verdict": "valid",
+      "codes": [],
+      "mayAlso": [],
+      "complete": true,
+      "missingRequired": []
     },
     {
       "path": "errors/E-VERSION",
@@ -126,6 +165,70 @@
         "E-SCHEMA",
         "W-UNCLASSIFIED"
       ]
+    },
+    {
+      "path": "errors/E-PATH-backslash",
+      "bundle": "characters/PELL ARDEN.dossier",
+      "verdict": "invalid",
+      "codes": [
+        "E-PATH"
+      ],
+      "mayAlso": [
+        "E-FILE-MISSING",
+        "E-SCHEMA",
+        "W-UNCLASSIFIED"
+      ]
+    },
+    {
+      "path": "errors/E-PATH-drive-letter",
+      "bundle": "characters/PELL ARDEN.dossier",
+      "verdict": "invalid",
+      "codes": [
+        "E-PATH"
+      ],
+      "mayAlso": [
+        "E-FILE-MISSING",
+        "E-SCHEMA",
+        "W-UNCLASSIFIED"
+      ]
+    },
+    {
+      "path": "errors/E-PATH-url",
+      "bundle": "characters/PELL ARDEN.dossier",
+      "verdict": "invalid",
+      "codes": [
+        "E-PATH"
+      ],
+      "mayAlso": [
+        "E-FILE-MISSING",
+        "E-SCHEMA",
+        "W-UNCLASSIFIED"
+      ]
+    },
+    {
+      "path": "errors/E-PATH-empty-segment",
+      "bundle": "characters/PELL ARDEN.dossier",
+      "verdict": "invalid",
+      "codes": [
+        "E-PATH"
+      ],
+      "mayAlso": [
+        "E-FILE-MISSING",
+        "E-SCHEMA",
+        "W-UNCLASSIFIED"
+      ]
+    },
+    {
+      "path": "errors/E-PATH-derived-from",
+      "bundle": "characters/PELL ARDEN.dossier",
+      "verdict": "invalid",
+      "codes": [
+        "E-PATH"
+      ],
+      "mayAlso": [
+        "E-SCHEMA"
+      ],
+      "note": "A path outside files and assets."
     },
     {
       "path": "errors/E-FILE-MISSING",
@@ -270,6 +373,18 @@
       "note": "The images' provenance.artStyle differs from the current front matter."
     },
     {
+      "path": "warnings/W-STALE-template",
+      "bundle": "characters/PELL ARDEN.dossier",
+      "verdict": "warnings",
+      "codes": [
+        "W-STALE"
+      ],
+      "mayAlso": [],
+      "complete": true,
+      "missingRequired": [],
+      "note": "The page's template isn't the current one (conformance.json)."
+    },
+    {
       "path": "warnings/W-SHAPE",
       "bundle": "characters/PELL ARDEN.dossier",
       "verdict": "warnings",
@@ -279,6 +394,18 @@
       "mayAlso": [],
       "complete": true,
       "missingRequired": []
+    },
+    {
+      "path": "warnings/W-SHAPE-just-outside",
+      "bundle": "characters/PELL ARDEN.dossier",
+      "verdict": "warnings",
+      "codes": [
+        "W-SHAPE"
+      ],
+      "mayAlso": [],
+      "complete": true,
+      "missingRequired": [],
+      "note": "178×320: 1.1% from 9:16."
     },
     {
       "path": "warnings/W-VARIANT-expression",
@@ -407,6 +534,61 @@
     },
     {
       "path": "warnings/W-PAGE-EXTERNAL",
+      "bundle": "characters/PELL ARDEN.dossier",
+      "verdict": "warnings",
+      "codes": [
+        "W-PAGE-EXTERNAL"
+      ],
+      "mayAlso": [],
+      "complete": true,
+      "missingRequired": []
+    },
+    {
+      "path": "warnings/W-PAGE-EXTERNAL-css-url",
+      "bundle": "characters/PELL ARDEN.dossier",
+      "verdict": "warnings",
+      "codes": [
+        "W-PAGE-EXTERNAL"
+      ],
+      "mayAlso": [],
+      "complete": true,
+      "missingRequired": []
+    },
+    {
+      "path": "warnings/W-PAGE-EXTERNAL-css-import",
+      "bundle": "characters/PELL ARDEN.dossier",
+      "verdict": "warnings",
+      "codes": [
+        "W-PAGE-EXTERNAL"
+      ],
+      "mayAlso": [],
+      "complete": true,
+      "missingRequired": []
+    },
+    {
+      "path": "warnings/W-PAGE-EXTERNAL-style-attribute",
+      "bundle": "characters/PELL ARDEN.dossier",
+      "verdict": "warnings",
+      "codes": [
+        "W-PAGE-EXTERNAL"
+      ],
+      "mayAlso": [],
+      "complete": true,
+      "missingRequired": []
+    },
+    {
+      "path": "warnings/W-PAGE-EXTERNAL-srcset",
+      "bundle": "characters/PELL ARDEN.dossier",
+      "verdict": "warnings",
+      "codes": [
+        "W-PAGE-EXTERNAL"
+      ],
+      "mayAlso": [],
+      "complete": true,
+      "missingRequired": []
+    },
+    {
+      "path": "warnings/W-PAGE-EXTERNAL-relative-link",
       "bundle": "characters/PELL ARDEN.dossier",
       "verdict": "warnings",
       "codes": [
