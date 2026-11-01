@@ -3,7 +3,7 @@ type: execution-plan
 feature_name: OPERATION PAPER DOLL
 mission_branch: mission/paper-doll/01
 iteration: 1
-starting_point_commit: 5f44840
+starting_point_commit: 22ba6e8
 ---
 
 # EXECUTION_PLAN.md — dossier-format page template
@@ -39,7 +39,7 @@ The design source is the latest "Personaje mockups" claude.ai artifact, `project
 
 **Exit criteria**:
 - [ ] Both parse, with seven tabs in DF-47's order.
-- [ ] `git diff --stat 5f44840 -- docs schemas examples tools` is empty.
+- [ ] `git diff --stat 22ba6e8 -- docs schemas examples tools` is empty.
 
 ### Sortie 2: Template
 
