@@ -47,7 +47,8 @@ The standard, and only the standard:
   here. The Swift implementation is SwiftDossier. Reference code in any
   language goes in that language's own repository.
   `tools/build_examples.py` regenerates the fixtures, broken ones included, so
-  that rule 9 can be met. `tools/build_template_css.py`, `template_version.py` and
+  that rule 9 can be met; it fills the template for those fixtures' own pages and
+  for nothing else. `tools/build_template_css.py`, `template_version.py` and
   `check_template.py` generate and check `template/`. None is an implementation,
   and nothing should depend on them.
 - **Not a generator.** How an image or a voice is made, and by which model, is
@@ -60,9 +61,8 @@ The standard, and only the standard:
 
 Draft. Written: the specification (`docs/DOSSIER-FORMAT.md`), the schemas, the
 data files (`data/`), the conformance fixtures (`examples/`) and the page template
-(`template/`, version 0.1.0). Not written: the fixture pages from that template, which
-are still hand-made, and the template's proposed rules (`template/README.md`) in the
-specification. [REQUIREMENTS.md](REQUIREMENTS.md) is what the standard must
+(`template/`, version 0.1.0), whose rules §11 makes normative. The fixture pages are
+filled from that template. [REQUIREMENTS.md](REQUIREMENTS.md) is what the standard must
 say (DF-1 to DF-67), with the deliverables and the open questions.
 
 ## Rules for working here
