@@ -27,15 +27,15 @@
         },
         {
           "role": "template",
-          "sha256": "ed1841cb886f585f2bed11a600dd9955510659e84b76cd52200d3343d9712cd4",
-          "version": "0.0.0-fixture"
+          "sha256": "1bc7363767e2bbd2a165d8455ecc5b5fdf989ba2cde0dc449d9bd800a1e414cc",
+          "version": "0.1.0"
         }
       ],
       "kind": "dossier",
       "path": "THE ARCHIVIST-dossier.html",
       "provenance": {
-        "notes": "Hand-made for the fixtures.",
-        "provider": "manual"
+        "notes": "Filled from template/ by tools/build_examples.py.",
+        "provider": "dossier-format fixtures"
       },
       "status": "selected"
     },
@@ -84,8 +84,8 @@
     },
     {
       "path": "THE ARCHIVIST-dossier.html",
-      "sha256": "8b7a4ea5f24cd9e4d05e374a707bb93e5e05bd6fb870b5df478724e33d2c8323",
-      "sizeBytes": 34487
+      "sha256": "c395789c2af885ffae629381953117637cddb320df1577e61e3300819084c3ff",
+      "sizeBytes": 332201
     },
     {
       "path": "images/face-35c29e17.png",
@@ -102,7 +102,7 @@
     "name": "dossier-format fixtures",
     "version": "1"
   },
-  "manifestChecksum": "3bc66757c85de0a0f0e21d6abe4f90dd502a6d435c6f5ff6c79eb57c65dd5f21",
+  "manifestChecksum": "db8ba46bd8559646a57d75f0ea9e633185fe92208311f691e7cf3d2eb5942a7c",
   "manifestVersion": 2,
   "role": "background",
   "updatedAt": "2026-10-31T12:00:00Z"

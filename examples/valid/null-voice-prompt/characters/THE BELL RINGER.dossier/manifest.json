@@ -27,15 +27,15 @@
         },
         {
           "role": "template",
-          "sha256": "ed1841cb886f585f2bed11a600dd9955510659e84b76cd52200d3343d9712cd4",
-          "version": "0.0.0-fixture"
+          "sha256": "1bc7363767e2bbd2a165d8455ecc5b5fdf989ba2cde0dc449d9bd800a1e414cc",
+          "version": "0.1.0"
         }
       ],
       "kind": "dossier",
       "path": "THE BELL RINGER-dossier.html",
       "provenance": {
-        "notes": "Hand-made for the fixtures.",
-        "provider": "manual"
+        "notes": "Filled from template/ by tools/build_examples.py.",
+        "provider": "dossier-format fixtures"
       },
       "status": "selected"
     },
@@ -98,8 +98,8 @@
     },
     {
       "path": "THE BELL RINGER-dossier.html",
-      "sha256": "3e0d062ba3bc6e330bf1d526382f37b7428c41affa2c1acd5e925965a5061777",
-      "sizeBytes": 39345
+      "sha256": "2e4394f3ec777aaf979b58ef291453208afb3320074ae84c2923b26e7a9d43ab",
+      "sizeBytes": 346718
     },
     {
       "path": "images/face-0fedbd6c.png",
@@ -121,7 +121,7 @@
     "name": "dossier-format fixtures",
     "version": "1"
   },
-  "manifestChecksum": "635f0f7870b6f5a071adba724289691cea6b4ee407bceb266e5aba6a7cb4c9d0",
+  "manifestChecksum": "6f20a5a9adaeb1529869abd511415e3e4119d5a3866cc1444415f89726a05d35",
   "manifestVersion": 2,
   "role": "background",
   "updatedAt": "2026-10-31T12:00:00Z"

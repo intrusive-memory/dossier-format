@@ -27,15 +27,15 @@
         },
         {
           "role": "template",
-          "sha256": "ed1841cb886f585f2bed11a600dd9955510659e84b76cd52200d3343d9712cd4",
-          "version": "0.0.0-fixture"
+          "sha256": "1bc7363767e2bbd2a165d8455ecc5b5fdf989ba2cde0dc449d9bd800a1e414cc",
+          "version": "0.1.0"
         }
       ],
       "kind": "dossier",
       "path": "THE LAMPLIGHTER-dossier.html",
       "provenance": {
-        "notes": "Hand-made for the fixtures.",
-        "provider": "manual"
+        "notes": "Filled from template/ by tools/build_examples.py.",
+        "provider": "dossier-format fixtures"
       },
       "status": "selected"
     },
@@ -148,8 +148,8 @@
     },
     {
       "path": "THE LAMPLIGHTER-dossier.html",
-      "sha256": "6da3e4c4503baa771768fcca9d30a1632763b74c47fa9955c42c6cfb6eee48c2",
-      "sizeBytes": 49966
+      "sha256": "adfd2485250cd060020aba61caf12ef9e7d2eaa889b47455469d394a7082668d",
+      "sizeBytes": 354517
     },
     {
       "path": "images/face-afc3211a.png",
@@ -181,7 +181,7 @@
     "name": "dossier-format fixtures",
     "version": "1"
   },
-  "manifestChecksum": "0ed11b097399cb5a3bf33be141e9f6f5781adda20cca1e69626b6b8517fb7e68",
+  "manifestChecksum": "d9fa6b6fe3f6e151b5fc7c45f79d26171224fc04252c15ba29c1c4d10d8c2849",
   "manifestVersion": 2,
   "role": "costar",
   "updatedAt": "2026-10-31T12:00:00Z"

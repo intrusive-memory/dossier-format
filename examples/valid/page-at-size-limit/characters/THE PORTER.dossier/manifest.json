@@ -27,15 +27,15 @@
         },
         {
           "role": "template",
-          "sha256": "ed1841cb886f585f2bed11a600dd9955510659e84b76cd52200d3343d9712cd4",
-          "version": "0.0.0-fixture"
+          "sha256": "1bc7363767e2bbd2a165d8455ecc5b5fdf989ba2cde0dc449d9bd800a1e414cc",
+          "version": "0.1.0"
         }
       ],
       "kind": "dossier",
       "path": "THE PORTER-dossier.html",
       "provenance": {
-        "notes": "Hand-made for the fixtures.",
-        "provider": "manual"
+        "notes": "Filled from template/ by tools/build_examples.py.",
+        "provider": "dossier-format fixtures"
       },
       "status": "selected"
     },
@@ -84,7 +84,7 @@
     },
     {
       "path": "THE PORTER-dossier.html",
-      "sha256": "2cb7b9a445932112792b1d87e7c5756613ad47cac055bc5f8e1b6f4dda75465b",
+      "sha256": "e3732209a41055386da890180b7201387fc740f7cc3c61c370d75a9486d8b114",
       "sizeBytes": 10000000
     },
     {
@@ -102,7 +102,7 @@
     "name": "dossier-format fixtures",
     "version": "1"
   },
-  "manifestChecksum": "50ac5e1a9afb3028db5145473d2bd8e2b7bc7eb123b3b66761354f8b3581b211",
+  "manifestChecksum": "74f2edf4661ce383dc2143afd342c45993137487d5f336bebe2ee744f94c6f39",
   "manifestVersion": 2,
   "role": "background",
   "updatedAt": "2026-10-31T12:00:00Z"

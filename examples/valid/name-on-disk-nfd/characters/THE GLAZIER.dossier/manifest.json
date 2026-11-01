@@ -1,0 +1,88 @@
+{
+  "assets": [
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "kind": "description",
+      "path": "CHARACTER.md",
+      "provenance": {
+        "provider": "manual"
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "derivedFrom": [
+        {
+          "path": "images/portrait-17b322c6.png",
+          "role": "portrait",
+          "sha256": "17b322c6bb056c428c12f8aed7f27355ba398247fa8ec8e436f01580d11039d3"
+        }
+      ],
+      "kind": "face",
+      "path": "images/face-19390513.png",
+      "provenance": {
+        "artStyle": "flat placeholder shapes",
+        "box": {
+          "height": 100,
+          "width": 80,
+          "x": 50,
+          "y": 60
+        },
+        "engine": "fixture",
+        "provider": "personaje"
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "kind": "portrait",
+      "path": "images/portrait-17b322c6.png",
+      "provenance": {
+        "artStyle": "flat placeholder shapes",
+        "engine": "fixture",
+        "provider": "vinetas"
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "kind": "sourcePhoto",
+      "path": "source/café-sketch.png",
+      "provenance": {
+        "provider": "import"
+      },
+      "status": "selected"
+    }
+  ],
+  "character": "THE GLAZIER",
+  "files": [
+    {
+      "path": "CHARACTER.md",
+      "sha256": "91ab5000ccc6182b257ace46bdccd07bb23d1d4bdf74f27314fc643a4076825d",
+      "sizeBytes": 433
+    },
+    {
+      "path": "images/face-19390513.png",
+      "sha256": "19390513fe39dc713fa2a22644b4a48790f9a1253485bf58cf23e17b915d436c",
+      "sizeBytes": 704
+    },
+    {
+      "path": "images/portrait-17b322c6.png",
+      "sha256": "17b322c6bb056c428c12f8aed7f27355ba398247fa8ec8e436f01580d11039d3",
+      "sizeBytes": 940
+    },
+    {
+      "path": "source/café-sketch.png",
+      "sha256": "6bc380e0be10d3bf11fea9dd19efd16df5507352e848d4dfc2d6722a165070db",
+      "sizeBytes": 368
+    }
+  ],
+  "generator": {
+    "name": "dossier-format fixtures",
+    "version": "1"
+  },
+  "manifestChecksum": "337ae4c1cf88b1828da2b348ddd5a8dce72efb1fac23bd67b64b5e325ee18e2b",
+  "manifestVersion": 2,
+  "role": "background",
+  "updatedAt": "2026-10-31T12:00:00Z"
+}

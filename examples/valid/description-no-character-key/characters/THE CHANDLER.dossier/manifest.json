@@ -1,0 +1,74 @@
+{
+  "assets": [
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "kind": "description",
+      "path": "CHARACTER.md",
+      "provenance": {
+        "provider": "manual"
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "derivedFrom": [
+        {
+          "path": "images/portrait-bc1f3f42.png",
+          "role": "portrait",
+          "sha256": "bc1f3f427cbbc6f1bcb42a314961ab87a19b46a82124bf99baf74775e2351db7"
+        }
+      ],
+      "kind": "face",
+      "path": "images/face-d907802b.png",
+      "provenance": {
+        "artStyle": "flat placeholder shapes",
+        "box": {
+          "height": 100,
+          "width": 80,
+          "x": 50,
+          "y": 60
+        },
+        "engine": "fixture",
+        "provider": "personaje"
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "kind": "portrait",
+      "path": "images/portrait-bc1f3f42.png",
+      "provenance": {
+        "artStyle": "flat placeholder shapes",
+        "engine": "fixture",
+        "provider": "vinetas"
+      },
+      "status": "selected"
+    }
+  ],
+  "character": "THE CHANDLER",
+  "files": [
+    {
+      "path": "CHARACTER.md",
+      "sha256": "d55214051846dd4b5947fb5692dacb2645c8a9bf865cdf907cc747b5392cb71c",
+      "sizeBytes": 411
+    },
+    {
+      "path": "images/face-d907802b.png",
+      "sha256": "d907802b419d591c63beb1a7ee0faa2019effbd0a22763a39a84e4dcc75fcc33",
+      "sizeBytes": 705
+    },
+    {
+      "path": "images/portrait-bc1f3f42.png",
+      "sha256": "bc1f3f427cbbc6f1bcb42a314961ab87a19b46a82124bf99baf74775e2351db7",
+      "sizeBytes": 941
+    }
+  ],
+  "generator": {
+    "name": "dossier-format fixtures",
+    "version": "1"
+  },
+  "manifestChecksum": "7a14bac983c91adde94fab74d5dba03f56aeb633c720f3d08eb2d7a4b34bb15d",
+  "manifestVersion": 2,
+  "role": "background",
+  "updatedAt": "2026-10-31T12:00:00Z"
+}

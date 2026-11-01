@@ -27,15 +27,15 @@
         },
         {
           "role": "template",
-          "sha256": "ed1841cb886f585f2bed11a600dd9955510659e84b76cd52200d3343d9712cd4",
-          "version": "0.0.0-fixture"
+          "sha256": "1bc7363767e2bbd2a165d8455ecc5b5fdf989ba2cde0dc449d9bd800a1e414cc",
+          "version": "0.1.0"
         }
       ],
       "kind": "dossier",
       "path": "THE FERRYMAN-dossier.html",
       "provenance": {
-        "notes": "Hand-made for the fixtures.",
-        "provider": "manual"
+        "notes": "Filled from template/ by tools/build_examples.py.",
+        "provider": "dossier-format fixtures"
       },
       "status": "selected"
     },
@@ -98,8 +98,8 @@
     },
     {
       "path": "THE FERRYMAN-dossier.html",
-      "sha256": "dabcac1f54db03da79ad99ba2aa11d8fac278a25c3e5f42f3cf519d71a6bd4f7",
-      "sizeBytes": 35480
+      "sha256": "e2ecc8da00ee86283a0ff22c04fd619671d23d11f5d186a869886571cbeda3d3",
+      "sizeBytes": 335161
     },
     {
       "path": "images/face-3f84b78e.png",
@@ -121,7 +121,7 @@
     "name": "dossier-format fixtures",
     "version": "1"
   },
-  "manifestChecksum": "d2a4b35b74370d3854f6fba4b436ba619760b513920c8e9064e71d7174f666d3",
+  "manifestChecksum": "14e65302b04af35e6e83c50bdd265c26f91871ae85cb7b1459460113926d8da6",
   "manifestVersion": 2,
   "role": "background",
   "updatedAt": "2026-10-31T12:00:00Z"
