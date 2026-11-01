@@ -4,8 +4,7 @@
 This builds test data. It is not a reader, writer, validator or renderer of
 the format, and no implementation may treat it as one: it deliberately writes
 broken bundles, and it hard-codes what each one should report. It fills
-template/ for its own fixture pages, as far as those pages need and no further:
-it asserts on input they don't have, such as a footnote never cited.
+template/ for its own fixture pages, as far as those pages need and no further.
 
     python3 -m venv /tmp/df && /tmp/df/bin/pip install -r tools/requirements.txt
     /tmp/df/bin/python tools/build_examples.py
@@ -412,8 +411,10 @@ class FilledPage:
                 self.sections.append((line[3:].strip(), []))
             elif self.sections:
                 self.sections[-1][1].append(line)
-        self.cited = list(dict.fromkeys(re.findall(r"\[\^([^\]]+)\]", body)))
-        assert sorted(self.cited) == sorted(self.notes), f"{bundle.name}: a fixture page needs every footnote cited and defined"
+        # Field rule 2: cited ones in citation order, then the rest in file order. `notes` keeps file order.
+        referenced = list(dict.fromkeys(re.findall(r"\[\^([^\]]+)\]", body)))
+        self.cited = [label for label in referenced if label in self.notes]
+        self.cited += [label for label in self.notes if label not in referenced]
 
     # What's selected, and what a row asks (§8.1, §8.3).
 
@@ -525,7 +526,10 @@ class FilledPage:
         text = esc(text)
         text = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", text)
         text = re.sub(r"\*(.+?)\*", r"<em>\1</em>", text)
-        return re.sub(r"\[\^([^\]]+)\]", lambda m: fragment("mark", number=str(self.cited.index(m.group(1)) + 1)), text)
+        def mark(match):
+            # Field rule 2: a mark with no definition stays as plain text.
+            return fragment("mark", number=str(self.cited.index(match.group(1)) + 1)) if match.group(1) in self.notes else match.group(0)
+        return re.sub(r"\[\^([^\]]+)\]", mark, text)
 
     @staticmethod
     def blocks(lines):
@@ -582,7 +586,7 @@ class FilledPage:
         for _, lines in self.matching(source["section"]):
             for kind, text in self.blocks(lines):
                 if kind in ("p", "li"):
-                    classes = [self.notes[label].split(".", 1)[0] for label in re.findall(r"\[\^([^\]]+)\]", text)]
+                    classes = [self.notes[label].split(".", 1)[0] for label in re.findall(r"\[\^([^\]]+)\]", text) if label in self.notes]
                     items.append(fragment("canonItem", text=self.inline(text), source=esc(", ".join(classes))))
         return "".join(items) or None
 
@@ -1210,6 +1214,11 @@ def warnings():
     warn("W-FOOTNOTE-undefined", b)
     b = base(description=short_description(PELL, "background") + b"[^unused]: Author. Nothing refers to this, 2026-10-31.\n")
     warn("W-FOOTNOTE-unused", b)
+    b = base(description=short_description(PELL, "background", extra="\nA claim.[^cited] A claim with no definition.[^nowhere]\n")
+             + b"[^cited]: Author. Cited, 2026-11-01.\n[^z-unused]: Author. Never cited, first in the file, 2026-11-01.\n[^a-unused]: Author. Never cited, second in the file, 2026-11-01.\n")
+    m = member(b); b.page(m)
+    warn("W-FOOTNOTE-on-page", b, members=[m], codes=["W-FOOTNOTE"],
+         note="The page shows the cited footnote first, the two never cited after it in file order, and the undefined mark as plain text.")
 
     b = base(); m = member(b); b.page(m, padding=10_000_001)
     warn("W-PAGE-SIZE", b, members=[m], note="10,000,001 bytes, nearly all of it a comment, which git compresses.")
