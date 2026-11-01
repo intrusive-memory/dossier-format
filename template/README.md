@@ -23,7 +23,7 @@ language substitutes text into two files.
 | `page-copies.json` | DF-43's sizes and quality, in one place. |
 | `fonts/` | The fonts and a licence for each. |
 | `VERSION.json` | `version` and `sha256`. |
-| `example/` | A page filled by hand from `examples/valid/complete-lead`. |
+| `example/` | A page filled by hand from `examples/valid/complete-lead`. Not hashed. |
 
 Checks: `python3 tools/check_template.py`, which also runs
 `tools/build_template_css.py --check` and `tools/template_version.py --check`.
@@ -51,7 +51,7 @@ here.
 | `{{tab.links}}` | A `tabLink` fragment per tab of `fields.json`, in order | Markup |
 | `{{tab.panels}}` | A `tab` fragment per tab, in order, joined by a newline | Markup |
 | `{{page.after}}` | Each field of `page.after`, stamped | Markup |
-| `{{record}}` | The record (§11), every `<` written `<` | Markup |
+| `{{record}}` | The record (§11), every `<` written `\u003c` | Markup |
 
 ### Stamping a field
 
@@ -76,7 +76,7 @@ Other placeholders of those fragments:
 | `{{state}}` | `filled`; `empty` when there's no value and `emptyText` is a string; `absent` when there's no value and `emptyText` is null. An `imageSet` is always `filled`. |
 | `{{labelStyle}}`, `{{textStyle}}` | From the field, by default `label` and `body`. Each names an entry of `type` in `data/tokens.json`. |
 | `{{labelHidden}}` | Empty, or ` is-hidden` (with the leading space) when `labelVisible` is false. |
-| `{{caption}}` | A `caption` fragment from the field's `caption`, or nothing. |
+| `{{caption}}` | A `caption` fragment from the field's `caption`, or nothing. Nothing when the field has no value. |
 | `{{note}}` on `imageItem` | An `itemNote` fragment from the item's `note`, or nothing. |
 | `{{src}}`, `{{width}}`, `{{height}}` on `img` | The page copy as a `data:` URI, and its size from `page-copies.json`. |
 | `{{left}}`, `{{top}}`, `{{size}}` on `overlay` | The §8.5 crop as percentages of the image's width (`left`, `size`) and height (`top`). Plain decimals with no trailing zeros, at most 4 places. |
@@ -87,14 +87,12 @@ fragment; on `audio`, an `audioEmpty` fragment. When `emptyText` is null, it's n
 Footnote references become `mark` fragments, `{{number}}` being the footnote's
 position in `page.sources`.
 
-## Proposed rules
+## Template rules
 
-The format doesn't state these. They are this template's reading, and proposed
-for the specification.
+These rules are normative: DOSSIER-FORMAT §11 makes them part of the format.
 
-1. **The template's `sha256`.** §11 says "the `sha256` published with it" and not
-   of what. Proposed: list every regular file under `template/` except `VERSION.json`,
-   `README.md`, anything under `example/`, and any path with a segment beginning with
+1. **The template's `sha256`,** the one §11 says is published with it. List every
+   regular file under `template/` except `VERSION.json`, `README.md`, anything under `example/`, and any path with a segment beginning with
    `.`. Sort the relative `/`-separated paths by the byte order of their UTF-8 form.
    Hash, with SHA-256, the concatenation for each file of its path, one NUL byte and
    its bytes. `README.md` is out so that fixing a sentence here doesn't make every page
@@ -104,27 +102,27 @@ for the specification.
    Worked example. Two files, `a.css` holding `x\n` and `b/c.js` holding `y\n`, hash
    `a.css\0x\nb/c.js\0y\n` to
    `f465131ed964bfee065fecc04d28486ed88ded7a3bd01c4583ac3da801c09b74`.
-2. **The host message handler (DF-51).** No name is stated. Proposed: an object with
+2. **The host message handler (DF-51)** is an object with
    a `postMessage` function at `window.dossierHost`, or a platform's named handler
    `window.webkit.messageHandlers.dossier`. The message is the field key, a string, on
    a click inside that field. Neither present: nothing happens. A click on a name in
    a field posts that field's key; DF-51 doesn't say how a host would learn the name.
-3. **Markdown.** `fields.json` says "The text is Markdown" and names no dialect.
-   Proposed: paragraphs, `-` lists, `**bold**`, `*emphasis*`, and `###` as `<h4>`.
+3. **Markdown,** where `fields.json` says "The text is Markdown", is
+   paragraphs, `-` lists, `**bold**`, `*emphasis*`, and `###` as `<h4>`.
    Everything else is literal text. HTML in the source is escaped, never passed
    through, and a Markdown link stays as text (DF-51).
-4. **Footnote marks.** `fields.json` says they "lead to `page.sources`" and not what
-   they look like. Proposed: the `mark` fragment, numbered by citation order, with
+4. **Footnote marks,** which `fields.json` says "lead to `page.sources`", are the
+   `mark` fragment, numbered by citation order, with
    `page.sources` shown numbered. Items have no anchors of their own, because every id
    on the page is a key.
-5. **Scaling a page copy.** DF-43 gives the size, not how an image of another shape
-   gets there. Proposed: scale to cover and crop the centre. The overlay's percentages
+5. **Scaling a page copy.** DF-43 gives the size. An image of another shape gets there
+   this way: scale to cover and crop the centre. The overlay's percentages
    are computed on the source image, so they're exact only for an image of the target
    shape.
 6. **The audio `data:` type** is by extension: `.m4a` is `audio/mp4`.
 7. **`{{lang}}`, `<title>`,** and `und` for no language, above.
 8. **Print is always light,** whatever the reader's color preference.
-9. **The record's JSON bytes (DF-45).** Proposed: the canonical JSON of §7, then the
+9. **The record's JSON bytes (DF-45)** are the canonical JSON of §7, then the
    `<` replacement.
 10. **An unknown or absent `#` anchor** opens the first tab. A `page.*` anchor scrolls
     and doesn't change the tab.
@@ -132,6 +130,37 @@ for the specification.
     `overlay`, `row`, `role`. They're read as above. `role: banner` on `page.integrity`
     is carried by the stylesheet, which names that key; it doesn't become an ARIA role,
     since ARIA's `banner` means the site header.
+
+## Field rules
+
+These are normative too (§11). They state how `data/fields.json` reads where a renderer
+could otherwise read it two ways.
+
+1. **Canon items.** Each paragraph or list item of Canon & Guardrails is one item of
+   `profile.canon`. Its `source` is the class of each footnote it cites, in order, joined
+   by `, `. With none cited, `source` is the empty text.
+2. **Citation order.** `page.sources` has one item per footnote definition, in the order
+   each label is first referenced in the `CHARACTER.md` body, whichever field shows that
+   reference. Each item is the class, then the text. A mark's number is its footnote's
+   position in that list. A definition is shown only in `page.sources`, not in the
+   section it follows.
+3. **Repeated headings.** A section field shows the body of every `##` heading that
+   matches by §9.2's rule, in body order. A parenthetical on a matched heading is shown as
+   written, in a `parenthetical` fragment, above that body. The field's label doesn't
+   change. The field is empty when no heading matches or there's only whitespace under
+   those that do.
+4. **The page's own tier row.** In `page.completeness` the `dossier` row counts as
+   satisfied, since this page is that asset and the embedded manifest leaves it out (§11).
+   In `page.missing` it is never listed. `page.completeness` is `n/N`: `N` is the rows of
+   `data/tiers.json` required for the member's role, and `n` how many of them are
+   satisfied. A member with no role shows the empty text, and `page.missing` is empty.
+5. **The banner is computed without the page.** `page.integrity` lists the findings of
+   §14 over the bundle without the page, as the embedded manifest describes it, so the
+   page being replaced is never among them. It has one item per error, and per `W-STALE`
+   on a selected asset: the code, then what it names.
+6. **Row labels for missing rows.** `page.missing` lists each unsatisfied required row by
+   its `label` in `data/tiers.json`, in the table's order. `W-INCOMPLETE` lists the same
+   rows by ID (§14).
 
 ## Not in this template
 
@@ -169,6 +198,8 @@ is in Plex Sans.
 `example/WREN HALLOWAY-dossier.html` was filled by hand for acceptance 3 and 4:
 WREN HALLOWAY from `examples/valid/complete-lead`, an invented character with flat
 placeholder images and 0.2 seconds of silence for each sample. It isn't regenerated by
-any tool. No renderer lives in this repository. After a change to the template its
+any tool. `tools/build_examples.py` fills the template for its own fixture pages, and
+its `complete-lead` page is byte-identical to this one today; it is test data, not a
+renderer (AGENTS.md). After a change to the template this page's
 `dossier-template` meta and its copies of the CSS and script need replacing by hand;
 `tools/check_template.py` fails until they are.

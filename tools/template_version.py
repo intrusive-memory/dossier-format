@@ -4,7 +4,7 @@
     python3 tools/template_version.py          # writes the sha256
     python3 tools/template_version.py --check  # exits 1 when it doesn't match
 
-The hash is stated in template/README.md, as proposed. Standard library only.
+The hash is stated in template/README.md, rule 1. Standard library only.
 """
 import hashlib
 import json
