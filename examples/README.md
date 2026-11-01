@@ -44,8 +44,8 @@ Validate it from its `CAST.md`.
 - **Some checks can't be expressed here.** `E-NAME` for a case-only collision is
   a writer's refusal (§2), and a fixture can't be created on a case-insensitive
   disk.
-- `warnings/W-PAGE-SIZE` is 11 MB on disk, nearly all of it a comment. It
-  compresses to almost nothing in git.
+- `warnings/W-PAGE-SIZE` and `valid/page-at-size-limit` are 10 MB on disk, nearly
+  all of it a comment. They compress to almost nothing in git.
 
 ## Regenerating
 

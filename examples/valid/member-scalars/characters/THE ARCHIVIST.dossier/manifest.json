@@ -1,0 +1,109 @@
+{
+  "assets": [
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "kind": "description",
+      "path": "CHARACTER.md",
+      "provenance": {
+        "provider": "manual"
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T12:00:00Z",
+      "derivedFrom": [
+        {
+          "path": "CHARACTER.md",
+          "role": "description",
+          "sha256": "ab7310cb4c4ef73432ab2ddade8a7f413b6cba38d89022ff7dc30e992784b4eb"
+        },
+        {
+          "role": "castMember",
+          "sha256": "458ff2d060bc79d1445c302bbceff5ad8120f86ef8272490d27e87de731d4db1"
+        },
+        {
+          "role": "bundle",
+          "sha256": "34f38a8ca87f1525ba3d1d9956356551391fe6cd837b885a406e7ce546f3814e"
+        },
+        {
+          "role": "template",
+          "sha256": "ed1841cb886f585f2bed11a600dd9955510659e84b76cd52200d3343d9712cd4",
+          "version": "0.0.0-fixture"
+        }
+      ],
+      "kind": "dossier",
+      "path": "THE ARCHIVIST-dossier.html",
+      "provenance": {
+        "notes": "Hand-made for the fixtures.",
+        "provider": "manual"
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "derivedFrom": [
+        {
+          "path": "images/portrait-8c4006cb.png",
+          "role": "portrait",
+          "sha256": "8c4006cb13f65077a0a8ade7ada00650dc1b31d783600e13f362abfa6944c6c0"
+        }
+      ],
+      "kind": "face",
+      "path": "images/face-35c29e17.png",
+      "provenance": {
+        "artStyle": "flat placeholder shapes",
+        "box": {
+          "height": 100,
+          "width": 80,
+          "x": 50,
+          "y": 60
+        },
+        "engine": "fixture",
+        "provider": "personaje"
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "kind": "portrait",
+      "path": "images/portrait-8c4006cb.png",
+      "provenance": {
+        "artStyle": "flat placeholder shapes",
+        "engine": "fixture",
+        "provider": "vinetas"
+      },
+      "status": "selected"
+    }
+  ],
+  "character": "THE ARCHIVIST",
+  "files": [
+    {
+      "path": "CHARACTER.md",
+      "sha256": "ab7310cb4c4ef73432ab2ddade8a7f413b6cba38d89022ff7dc30e992784b4eb",
+      "sizeBytes": 437
+    },
+    {
+      "path": "THE ARCHIVIST-dossier.html",
+      "sha256": "8b7a4ea5f24cd9e4d05e374a707bb93e5e05bd6fb870b5df478724e33d2c8323",
+      "sizeBytes": 34487
+    },
+    {
+      "path": "images/face-35c29e17.png",
+      "sha256": "35c29e17738cf7c753db4ff70ff343d9cdaacdd011aa7222d21baf85e559e57b",
+      "sizeBytes": 704
+    },
+    {
+      "path": "images/portrait-8c4006cb.png",
+      "sha256": "8c4006cb13f65077a0a8ade7ada00650dc1b31d783600e13f362abfa6944c6c0",
+      "sizeBytes": 939
+    }
+  ],
+  "generator": {
+    "name": "dossier-format fixtures",
+    "version": "1"
+  },
+  "manifestChecksum": "3bc66757c85de0a0f0e21d6abe4f90dd502a6d435c6f5ff6c79eb57c65dd5f21",
+  "manifestVersion": 2,
+  "role": "background",
+  "updatedAt": "2026-10-31T12:00:00Z"
+}

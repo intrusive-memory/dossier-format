@@ -1,0 +1,109 @@
+{
+  "assets": [
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "kind": "description",
+      "path": "CHARACTER.md",
+      "provenance": {
+        "provider": "manual"
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T12:00:00Z",
+      "derivedFrom": [
+        {
+          "path": "CHARACTER.md",
+          "role": "description",
+          "sha256": "0556a6405eb4b5a3a2e0a1211496fcd3dd7ce39eb41e59421efa3ed6ba95936a"
+        },
+        {
+          "role": "castMember",
+          "sha256": "3d490567f30af320b26b060c70bc7f1fdb6aa82eae199213f4be874f19b3da41"
+        },
+        {
+          "role": "bundle",
+          "sha256": "25efd3b0f1c32f32e794e1dfcc30c3a35899851c6ed73085fe8e0e9143d34326"
+        },
+        {
+          "role": "template",
+          "sha256": "ed1841cb886f585f2bed11a600dd9955510659e84b76cd52200d3343d9712cd4",
+          "version": "0.0.0-fixture"
+        }
+      ],
+      "kind": "dossier",
+      "path": "THE PORTER-dossier.html",
+      "provenance": {
+        "notes": "Hand-made for the fixtures.",
+        "provider": "manual"
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "derivedFrom": [
+        {
+          "path": "images/portrait-3c013d8e.png",
+          "role": "portrait",
+          "sha256": "3c013d8e5caa92e1a6fbc0e57d3a078c1c7f2a551ea16a8d5e9874a09626c004"
+        }
+      ],
+      "kind": "face",
+      "path": "images/face-68ef8914.png",
+      "provenance": {
+        "artStyle": "flat placeholder shapes",
+        "box": {
+          "height": 100,
+          "width": 80,
+          "x": 50,
+          "y": 60
+        },
+        "engine": "fixture",
+        "provider": "personaje"
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "kind": "portrait",
+      "path": "images/portrait-3c013d8e.png",
+      "provenance": {
+        "artStyle": "flat placeholder shapes",
+        "engine": "fixture",
+        "provider": "vinetas"
+      },
+      "status": "selected"
+    }
+  ],
+  "character": "THE PORTER",
+  "files": [
+    {
+      "path": "CHARACTER.md",
+      "sha256": "0556a6405eb4b5a3a2e0a1211496fcd3dd7ce39eb41e59421efa3ed6ba95936a",
+      "sizeBytes": 431
+    },
+    {
+      "path": "THE PORTER-dossier.html",
+      "sha256": "2cb7b9a445932112792b1d87e7c5756613ad47cac055bc5f8e1b6f4dda75465b",
+      "sizeBytes": 10000000
+    },
+    {
+      "path": "images/face-68ef8914.png",
+      "sha256": "68ef89146bc94cfb001fd881c7e17f20ea25fcc2c877813a18952abec3bbf9c8",
+      "sizeBytes": 704
+    },
+    {
+      "path": "images/portrait-3c013d8e.png",
+      "sha256": "3c013d8e5caa92e1a6fbc0e57d3a078c1c7f2a551ea16a8d5e9874a09626c004",
+      "sizeBytes": 940
+    }
+  ],
+  "generator": {
+    "name": "dossier-format fixtures",
+    "version": "1"
+  },
+  "manifestChecksum": "50ac5e1a9afb3028db5145473d2bd8e2b7bc7eb123b3b66761354f8b3581b211",
+  "manifestVersion": 2,
+  "role": "background",
+  "updatedAt": "2026-10-31T12:00:00Z"
+}

@@ -1,0 +1,156 @@
+{
+  "assets": [
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "kind": "description",
+      "path": "CHARACTER.md",
+      "provenance": {
+        "provider": "manual"
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "kind": "vox",
+      "path": "voice/WREN HALLOWAY.vox",
+      "provenance": {
+        "models": [
+          "Qwen3-TTS-12Hz-1.7B-Base-bf16",
+          "Qwen3-TTS-12Hz-0.6B-Base-bf16"
+        ],
+        "provider": "echada",
+        "voicePrompt": "A clear, unhurried alto with a dry edge."
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "derivedFrom": [
+        {
+          "path": "voice/WREN HALLOWAY.vox",
+          "role": "vox",
+          "sha256": "91974e3d43e2f51cb99298f0a89994cba640e71c1f5290e60ab7a8e7879df2b3"
+        }
+      ],
+      "kind": "voiceSample",
+      "language": "en-US",
+      "model": "0.6b",
+      "path": "voice/sample-neutral-0.6b.m4a",
+      "provenance": {
+        "instructApplied": "unverified",
+        "provider": "diga",
+        "source": "sampleLine"
+      },
+      "sampleText": "One line.",
+      "status": "selected",
+      "variant": "neutral"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "derivedFrom": [
+        {
+          "path": "voice/WREN HALLOWAY.vox",
+          "role": "vox",
+          "sha256": "91974e3d43e2f51cb99298f0a89994cba640e71c1f5290e60ab7a8e7879df2b3"
+        }
+      ],
+      "kind": "voiceSample",
+      "language": "en-US",
+      "model": "1.7b",
+      "path": "voice/sample-neutral.m4a",
+      "provenance": {
+        "instructApplied": "unverified",
+        "provider": "diga",
+        "source": "sampleLine"
+      },
+      "sampleText": "One line.",
+      "status": "selected",
+      "variant": "neutral"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "derivedFrom": [
+        {
+          "path": "voice/WREN HALLOWAY.vox",
+          "role": "vox",
+          "sha256": "91974e3d43e2f51cb99298f0a89994cba640e71c1f5290e60ab7a8e7879df2b3"
+        }
+      ],
+      "kind": "voiceSample",
+      "language": "en-US",
+      "model": "1.7b",
+      "path": "voice/sample-urgent.m4a",
+      "provenance": {
+        "instructApplied": "unverified",
+        "provider": "diga",
+        "source": "sampleLine"
+      },
+      "sampleText": "One line.",
+      "status": "selected",
+      "variant": "urgent"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "derivedFrom": [
+        {
+          "path": "voice/WREN HALLOWAY.vox",
+          "role": "vox",
+          "sha256": "91974e3d43e2f51cb99298f0a89994cba640e71c1f5290e60ab7a8e7879df2b3"
+        }
+      ],
+      "kind": "voiceSample",
+      "language": "en-US",
+      "model": "1.7b",
+      "path": "voice/sample-wry.m4a",
+      "provenance": {
+        "instructApplied": "unverified",
+        "provider": "diga",
+        "source": "sampleLine"
+      },
+      "sampleText": "One line.",
+      "status": "selected",
+      "variant": "wry"
+    }
+  ],
+  "character": "WREN HALLOWAY",
+  "files": [
+    {
+      "path": "CHARACTER.md",
+      "sha256": "07fe241362a7b741103a8cc9d5ddd6924394fadba5ce068fbfa57613262a5e44",
+      "sizeBytes": 1564
+    },
+    {
+      "path": "voice/WREN HALLOWAY.vox",
+      "sha256": "91974e3d43e2f51cb99298f0a89994cba640e71c1f5290e60ab7a8e7879df2b3",
+      "sizeBytes": 1278
+    },
+    {
+      "path": "voice/sample-neutral-0.6b.m4a",
+      "sha256": "4174c9e12dcb15013aa749afedabe4668548c0f6da3250e5c7f8f649ec8f7b36",
+      "sizeBytes": 4124
+    },
+    {
+      "path": "voice/sample-neutral.m4a",
+      "sha256": "4174c9e12dcb15013aa749afedabe4668548c0f6da3250e5c7f8f649ec8f7b36",
+      "sizeBytes": 4124
+    },
+    {
+      "path": "voice/sample-urgent.m4a",
+      "sha256": "4174c9e12dcb15013aa749afedabe4668548c0f6da3250e5c7f8f649ec8f7b36",
+      "sizeBytes": 4124
+    },
+    {
+      "path": "voice/sample-wry.m4a",
+      "sha256": "4174c9e12dcb15013aa749afedabe4668548c0f6da3250e5c7f8f649ec8f7b36",
+      "sizeBytes": 4124
+    }
+  ],
+  "generator": {
+    "name": "dossier-format fixtures",
+    "version": "1"
+  },
+  "manifestChecksum": "f9fc0ea1001816f005b6a8a66ea4143ce0bcd2189660c78e5181940a1408904c",
+  "manifestVersion": 2,
+  "role": "lead",
+  "updatedAt": "2026-10-31T12:00:00Z"
+}

@@ -593,6 +593,20 @@
                 "lora"
               ]
             }
+          },
+          {
+            "if": {
+              "properties": {
+                "kind": {
+                  "const": "training"
+                }
+              }
+            },
+            "then": {
+              "required": [
+                "training"
+              ]
+            }
           }
         ]
       }

@@ -1,0 +1,100 @@
+{
+  "assets": [
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "kind": "description",
+      "path": "CHARACTER.md",
+      "provenance": {
+        "provider": "manual"
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "kind": "portrait",
+      "path": "images/portrait-7e701007.png",
+      "provenance": {
+        "artStyle": "flat placeholder shapes",
+        "engine": "fixture",
+        "provider": "vinetas"
+      },
+      "status": "candidate"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "kind": "portrait",
+      "path": "images/portrait-d422ac3e.png",
+      "provenance": {
+        "artStyle": "flat placeholder shapes",
+        "engine": "fixture",
+        "provider": "vinetas"
+      },
+      "status": "candidate"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "kind": "portrait",
+      "path": "images/portrait-f5873eb9.png",
+      "provenance": {
+        "engine": "fixture",
+        "provider": "vinetas"
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "derivedFrom": [
+        {
+          "path": "images/portrait-7e701007.png",
+          "role": "portrait",
+          "sha256": "7e701007f032611c13af3dd398462ffa01ad07b8a15f38c0cf360b5065eb4f44"
+        }
+      ],
+      "kind": "view",
+      "path": "images/view-front-30f38311.png",
+      "provenance": {
+        "artStyle": "flat placeholder shapes",
+        "engine": "fixture",
+        "provider": "vinetas"
+      },
+      "status": "candidate",
+      "variant": "front"
+    }
+  ],
+  "character": "THE HARBORMASTER",
+  "files": [
+    {
+      "path": "CHARACTER.md",
+      "sha256": "6f040f3edc4e0a42abc4508d5cb40a144647f1b4cf9dd25ee82e3b615a43fb32",
+      "sizeBytes": 443
+    },
+    {
+      "path": "images/portrait-7e701007.png",
+      "sha256": "7e701007f032611c13af3dd398462ffa01ad07b8a15f38c0cf360b5065eb4f44",
+      "sizeBytes": 942
+    },
+    {
+      "path": "images/portrait-d422ac3e.png",
+      "sha256": "d422ac3ea8dc506ed0a3edbf852e0a7ebe63ddf2b97ae2f3e95a63c1cca8e63b",
+      "sizeBytes": 705
+    },
+    {
+      "path": "images/portrait-f5873eb9.png",
+      "sha256": "f5873eb942b49b29f96854481ce0f5962a72238040f983c903aa24bd114bf277",
+      "sizeBytes": 938
+    },
+    {
+      "path": "images/view-front-30f38311.png",
+      "sha256": "30f383110d3548adfe73ef83e0a1805d96d704cc7163ceb62970ad9fd36a12c0",
+      "sizeBytes": 938
+    }
+  ],
+  "generator": {
+    "name": "dossier-format fixtures",
+    "version": "1"
+  },
+  "manifestChecksum": "694003ff2f95f8149140e9efe7e72d8dbfe7a1967dd77685c810e35f61c583aa",
+  "manifestVersion": 2,
+  "role": "background",
+  "updatedAt": "2026-10-31T12:00:00Z"
+}

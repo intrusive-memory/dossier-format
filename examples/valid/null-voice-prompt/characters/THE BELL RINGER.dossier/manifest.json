@@ -1,0 +1,128 @@
+{
+  "assets": [
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "kind": "description",
+      "path": "CHARACTER.md",
+      "provenance": {
+        "provider": "manual"
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T12:00:00Z",
+      "derivedFrom": [
+        {
+          "path": "CHARACTER.md",
+          "role": "description",
+          "sha256": "99b77388792f1896b99111af73b13c9be203be0ac66fb4e49f6e68d34e30d6e8"
+        },
+        {
+          "role": "castMember",
+          "sha256": "b1cf8253e34e4597c24dc94f68b5dab9fa39265579de6fc4340917f4d40899f0"
+        },
+        {
+          "role": "bundle",
+          "sha256": "b3efbce238bf7a6bd9c03c0f8f5b3a740d227979bce77d0935fe7b8304586549"
+        },
+        {
+          "role": "template",
+          "sha256": "ed1841cb886f585f2bed11a600dd9955510659e84b76cd52200d3343d9712cd4",
+          "version": "0.0.0-fixture"
+        }
+      ],
+      "kind": "dossier",
+      "path": "THE BELL RINGER-dossier.html",
+      "provenance": {
+        "notes": "Hand-made for the fixtures.",
+        "provider": "manual"
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "derivedFrom": [
+        {
+          "path": "images/portrait-e89a121d.png",
+          "role": "portrait",
+          "sha256": "e89a121de28efcb746b9a81571337f9bc16ee98b741853268549f609e87aac5e"
+        }
+      ],
+      "kind": "face",
+      "path": "images/face-0fedbd6c.png",
+      "provenance": {
+        "artStyle": "flat placeholder shapes",
+        "box": {
+          "height": 100,
+          "width": 80,
+          "x": 50,
+          "y": 60
+        },
+        "engine": "fixture",
+        "provider": "personaje"
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "kind": "portrait",
+      "path": "images/portrait-e89a121d.png",
+      "provenance": {
+        "artStyle": "flat placeholder shapes",
+        "engine": "fixture",
+        "provider": "vinetas"
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "kind": "vox",
+      "path": "voice/THE BELL RINGER.vox",
+      "provenance": {
+        "models": [
+          "Qwen3-TTS-12Hz-1.7B-Base-bf16",
+          "Qwen3-TTS-12Hz-0.6B-Base-bf16"
+        ],
+        "provider": "echada",
+        "voicePrompt": "A clear, unhurried alto with a dry edge."
+      },
+      "status": "selected"
+    }
+  ],
+  "character": "THE BELL RINGER",
+  "files": [
+    {
+      "path": "CHARACTER.md",
+      "sha256": "99b77388792f1896b99111af73b13c9be203be0ac66fb4e49f6e68d34e30d6e8",
+      "sizeBytes": 441
+    },
+    {
+      "path": "THE BELL RINGER-dossier.html",
+      "sha256": "3e0d062ba3bc6e330bf1d526382f37b7428c41affa2c1acd5e925965a5061777",
+      "sizeBytes": 39345
+    },
+    {
+      "path": "images/face-0fedbd6c.png",
+      "sha256": "0fedbd6cf583167d66137c5787ecbf7484e96288922a207b2cc85d1cf262d7c0",
+      "sizeBytes": 704
+    },
+    {
+      "path": "images/portrait-e89a121d.png",
+      "sha256": "e89a121de28efcb746b9a81571337f9bc16ee98b741853268549f609e87aac5e",
+      "sizeBytes": 939
+    },
+    {
+      "path": "voice/THE BELL RINGER.vox",
+      "sha256": "46dd0a02c26ef8de59f376edcba0a71c61b26269be76cead3d3df062c32b22ea",
+      "sizeBytes": 1280
+    }
+  ],
+  "generator": {
+    "name": "dossier-format fixtures",
+    "version": "1"
+  },
+  "manifestChecksum": "635f0f7870b6f5a071adba724289691cea6b4ee407bceb266e5aba6a7cb4c9d0",
+  "manifestVersion": 2,
+  "role": "background",
+  "updatedAt": "2026-10-31T12:00:00Z"
+}

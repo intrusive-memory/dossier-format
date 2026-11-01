@@ -1,0 +1,109 @@
+{
+  "assets": [
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "kind": "description",
+      "path": "CHARACTER.md",
+      "provenance": {
+        "provider": "manual"
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T12:00:00Z",
+      "derivedFrom": [
+        {
+          "path": "CHARACTER.md",
+          "role": "description",
+          "sha256": "68977816de73c9862cfa1dbf9db62346221ec1c10eff5269d22073f34e480d5c"
+        },
+        {
+          "role": "castMember",
+          "sha256": "62900bfed6abdbf1d29c4ee79c9f17c72425d46f9a9b7384826407cc4c84a2d0"
+        },
+        {
+          "role": "bundle",
+          "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+        },
+        {
+          "role": "template",
+          "sha256": "ed1841cb886f585f2bed11a600dd9955510659e84b76cd52200d3343d9712cd4",
+          "version": "0.0.0-fixture"
+        }
+      ],
+      "kind": "dossier",
+      "path": "PELL ARDEN-dossier.html",
+      "provenance": {
+        "notes": "Hand-made for the fixtures.",
+        "provider": "manual"
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "derivedFrom": [
+        {
+          "path": "images/portrait-b4ea7922.png",
+          "role": "portrait",
+          "sha256": "b4ea7922e4584d539d0db374f8380c3ee7ba42b3f070f080fe296a262d959bfb"
+        }
+      ],
+      "kind": "face",
+      "path": "images/face-199a72c5.png",
+      "provenance": {
+        "artStyle": "flat placeholder shapes",
+        "box": {
+          "height": 100,
+          "width": 80,
+          "x": 50,
+          "y": 60
+        },
+        "engine": "fixture",
+        "provider": "personaje"
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "kind": "portrait",
+      "path": "images/portrait-b4ea7922.png",
+      "provenance": {
+        "artStyle": "flat placeholder shapes",
+        "engine": "fixture",
+        "provider": "vinetas"
+      },
+      "status": "selected"
+    }
+  ],
+  "character": "PELL ARDEN",
+  "files": [
+    {
+      "path": "CHARACTER.md",
+      "sha256": "68977816de73c9862cfa1dbf9db62346221ec1c10eff5269d22073f34e480d5c",
+      "sizeBytes": 431
+    },
+    {
+      "path": "PELL ARDEN-dossier.html",
+      "sha256": "0a64a55f3b51835d1fa1f4a48051f03218b6c5d2846b50354fabac26c8862b8b",
+      "sizeBytes": 37412
+    },
+    {
+      "path": "images/face-199a72c5.png",
+      "sha256": "199a72c5bce7e5df914c0db81b70230843f9eb809d8fde10aca00bb58b13db27",
+      "sizeBytes": 704
+    },
+    {
+      "path": "images/portrait-b4ea7922.png",
+      "sha256": "b4ea7922e4584d539d0db374f8380c3ee7ba42b3f070f080fe296a262d959bfb",
+      "sizeBytes": 940
+    }
+  ],
+  "generator": {
+    "name": "dossier-format fixtures",
+    "version": "1"
+  },
+  "manifestChecksum": "4a33afa01d2562d7a35738e8c9c444c192b37beee93994418dfb8fe3b215a63b",
+  "manifestVersion": 2,
+  "role": "background",
+  "updatedAt": "2026-10-31T12:00:00Z"
+}

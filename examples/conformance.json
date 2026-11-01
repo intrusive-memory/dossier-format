@@ -81,11 +81,153 @@
       "missingRequired": []
     },
     {
+      "path": "valid/null-voice-prompt",
+      "bundle": "characters/THE BELL RINGER.dossier",
+      "verdict": "valid",
+      "codes": [],
+      "mayAlso": [],
+      "complete": true,
+      "missingRequired": []
+    },
+    {
+      "path": "valid/member-scalars",
+      "bundle": "characters/THE ARCHIVIST.dossier",
+      "verdict": "valid",
+      "codes": [],
+      "mayAlso": [],
+      "complete": true,
+      "missingRequired": [],
+      "note": "Read by §7's rules, the page's castMember input matches. Reading 1.5 as a number, 0755 as an octal or no as a boolean makes it stale."
+    },
+    {
+      "path": "valid/not-reported",
+      "bundle": "characters/THE HARBORMASTER.dossier",
+      "verdict": "valid",
+      "codes": [],
+      "mayAlso": [],
+      "complete": true,
+      "missingRequired": [],
+      "note": "A stale candidate; a wrong-shaped candidate; a selected image with no provenance.artStyle; a hidden zero-byte file; a member with no role, no dossier and a non-canonical name; a bundle below characters/, which isn't scanned."
+    },
+    {
+      "path": "valid/voice-second-path",
+      "bundle": "characters/THE TUNER.dossier",
+      "verdict": "valid",
+      "codes": [],
+      "mayAlso": [],
+      "complete": true,
+      "missingRequired": []
+    },
+    {
+      "path": "valid/page-at-size-limit",
+      "bundle": "characters/THE PORTER.dossier",
+      "verdict": "valid",
+      "codes": [],
+      "mayAlso": [],
+      "complete": true,
+      "missingRequired": [],
+      "note": "10,000,000 bytes, nearly all of it a comment."
+    },
+    {
       "path": "errors/E-VERSION",
       "bundle": "characters/PELL ARDEN.dossier",
       "verdict": "invalid",
       "codes": [
         "E-VERSION"
+      ],
+      "mayAlso": [
+        "E-SCHEMA"
+      ]
+    },
+    {
+      "path": "errors/E-MANIFEST-missing",
+      "bundle": "characters/PELL ARDEN.dossier",
+      "verdict": "invalid",
+      "codes": [
+        "E-MANIFEST"
+      ],
+      "mayAlso": []
+    },
+    {
+      "path": "errors/E-MANIFEST-not-json",
+      "bundle": "characters/PELL ARDEN.dossier",
+      "verdict": "invalid",
+      "codes": [
+        "E-MANIFEST"
+      ],
+      "mayAlso": []
+    },
+    {
+      "path": "errors/E-MANIFEST-not-object",
+      "bundle": "characters/PELL ARDEN.dossier",
+      "verdict": "invalid",
+      "codes": [
+        "E-MANIFEST"
+      ],
+      "mayAlso": []
+    },
+    {
+      "path": "errors/E-CAST-unknown-role",
+      "bundle": "characters/PELL ARDEN.dossier",
+      "verdict": "invalid",
+      "codes": [
+        "E-CAST"
+      ],
+      "mayAlso": []
+    },
+    {
+      "path": "errors/E-CAST-not-yaml",
+      "bundle": "characters/PELL ARDEN.dossier",
+      "verdict": "invalid",
+      "codes": [
+        "E-CAST"
+      ],
+      "mayAlso": []
+    },
+    {
+      "path": "errors/E-CAST-voices-not-map",
+      "bundle": "characters/PELL ARDEN.dossier",
+      "verdict": "invalid",
+      "codes": [
+        "E-CAST"
+      ],
+      "mayAlso": []
+    },
+    {
+      "path": "errors/E-NAME-not-canonical",
+      "bundle": "characters/pell arden.dossier",
+      "verdict": "invalid",
+      "codes": [
+        "E-NAME"
+      ],
+      "mayAlso": [],
+      "note": "Everything agrees, and the name isn't canonical."
+    },
+    {
+      "path": "errors/E-NAME-not-nfc",
+      "bundle": "characters/INÉS.dossier",
+      "verdict": "invalid",
+      "codes": [
+        "E-NAME"
+      ],
+      "mayAlso": [],
+      "note": "The manifest and member are NFD and the directory NFC. They agree as NFC strings (§3), and the name isn't canonical."
+    },
+    {
+      "path": "errors/E-CAST-no-character",
+      "bundle": "characters/PELL ARDEN.dossier",
+      "verdict": "invalid",
+      "codes": [
+        "E-CAST"
+      ],
+      "mayAlso": []
+    },
+    {
+      "path": "errors/E-CAST-unknown-gender",
+      "bundle": "characters/PELL ARDEN.dossier",
+      "verdict": "invalid",
+      "codes": [
+        "E-CAST"
       ],
       "mayAlso": []
     },
@@ -123,6 +265,25 @@
     },
     {
       "path": "errors/E-NAME-MISMATCH-member",
+      "bundle": "characters/PELL ARDEN.dossier",
+      "verdict": "invalid",
+      "codes": [
+        "E-NAME-MISMATCH"
+      ],
+      "mayAlso": []
+    },
+    {
+      "path": "errors/E-NAME-MISMATCH-case",
+      "bundle": "characters/PELL ARDEN.dossier",
+      "verdict": "invalid",
+      "codes": [
+        "E-NAME-MISMATCH"
+      ],
+      "mayAlso": [],
+      "note": "Names compare exactly."
+    },
+    {
+      "path": "errors/E-NAME-MISMATCH-description",
       "bundle": "characters/PELL ARDEN.dossier",
       "verdict": "invalid",
       "codes": [
@@ -219,6 +380,29 @@
       ]
     },
     {
+      "path": "errors/E-PATH-reference",
+      "bundle": "characters/PELL ARDEN.dossier",
+      "verdict": "invalid",
+      "codes": [
+        "E-PATH"
+      ],
+      "mayAlso": [
+        "E-SCHEMA"
+      ]
+    },
+    {
+      "path": "errors/E-PATH-asset-only",
+      "bundle": "characters/PELL ARDEN.dossier",
+      "verdict": "invalid",
+      "codes": [
+        "E-PATH"
+      ],
+      "mayAlso": [
+        "E-ASSET-NO-FILE",
+        "E-SCHEMA"
+      ]
+    },
+    {
       "path": "errors/E-PATH-derived-from",
       "bundle": "characters/PELL ARDEN.dossier",
       "verdict": "invalid",
@@ -269,6 +453,28 @@
       "mayAlso": [
         "E-SCHEMA"
       ]
+    },
+    {
+      "path": "errors/E-FILE-HASH-size-only",
+      "bundle": "characters/PELL ARDEN.dossier",
+      "verdict": "invalid",
+      "codes": [
+        "E-FILE-HASH"
+      ],
+      "mayAlso": [],
+      "note": "The hash is right and sizeBytes isn't."
+    },
+    {
+      "path": "errors/E-ZERO-BYTE-not-listed",
+      "bundle": "characters/PELL ARDEN.dossier",
+      "verdict": "invalid",
+      "codes": [
+        "E-ZERO-BYTE"
+      ],
+      "mayAlso": [
+        "W-UNCLASSIFIED"
+      ],
+      "note": "On disk and not in files: §5.2's inventory is of the disk."
     },
     {
       "path": "errors/E-CHECKSUM",
@@ -348,6 +554,85 @@
       "mayAlso": [],
       "complete": true,
       "missingRequired": []
+    },
+    {
+      "path": "warnings/W-UNCLASSIFIED-not-listed",
+      "bundle": "characters/PELL ARDEN.dossier",
+      "verdict": "warnings",
+      "codes": [
+        "W-UNCLASSIFIED"
+      ],
+      "mayAlso": [],
+      "complete": true,
+      "missingRequired": [],
+      "note": "On disk and not in files, as §5.6 allows."
+    },
+    {
+      "path": "warnings/W-STALE-input-face",
+      "bundle": "characters/PELL ARDEN.dossier",
+      "verdict": "warnings",
+      "codes": [
+        "W-STALE"
+      ],
+      "mayAlso": [],
+      "complete": true,
+      "missingRequired": []
+    },
+    {
+      "path": "warnings/W-STALE-input-vox",
+      "bundle": "characters/PELL ARDEN.dossier",
+      "verdict": "warnings",
+      "codes": [
+        "W-STALE"
+      ],
+      "mayAlso": [],
+      "complete": true,
+      "missingRequired": []
+    },
+    {
+      "path": "warnings/W-STALE-input-description",
+      "bundle": "characters/PELL ARDEN.dossier",
+      "verdict": "warnings",
+      "codes": [
+        "W-STALE"
+      ],
+      "mayAlso": [],
+      "complete": true,
+      "missingRequired": []
+    },
+    {
+      "path": "warnings/W-STALE-input-member",
+      "bundle": "characters/PELL ARDEN.dossier",
+      "verdict": "warnings",
+      "codes": [
+        "W-STALE"
+      ],
+      "mayAlso": [],
+      "complete": true,
+      "missingRequired": []
+    },
+    {
+      "path": "warnings/W-STALE-input-bundle",
+      "bundle": "characters/PELL ARDEN.dossier",
+      "verdict": "warnings",
+      "codes": [
+        "W-STALE"
+      ],
+      "mayAlso": [],
+      "complete": true,
+      "missingRequired": []
+    },
+    {
+      "path": "warnings/W-STALE-no-selection",
+      "bundle": "characters/PELL ARDEN.dossier",
+      "verdict": "warnings",
+      "codes": [
+        "W-STALE"
+      ],
+      "mayAlso": [],
+      "complete": true,
+      "missingRequired": [],
+      "note": "The face's portrait input has no current selection."
     },
     {
       "path": "warnings/W-STALE",
@@ -443,6 +728,18 @@
       "missingRequired": []
     },
     {
+      "path": "warnings/W-ORPHAN-beside-a-bundle",
+      "bundle": "people/PELL ARDEN.dossier",
+      "verdict": "warnings",
+      "codes": [
+        "W-ORPHAN"
+      ],
+      "mayAlso": [],
+      "complete": true,
+      "missingRequired": [],
+      "note": "Beside a pointed-at bundle, outside characters/."
+    },
+    {
       "path": "warnings/W-ORPHAN",
       "bundle": "characters/PELL ARDEN.dossier",
       "verdict": "warnings",
@@ -459,12 +756,32 @@
       "bundle": "characters/PELL ARDEN.dossier",
       "verdict": "warnings",
       "codes": [
+        "W-ORPHAN",
         "W-POINTER"
       ],
-      "mayAlso": [
-        "W-ORPHAN"
+      "mayAlso": [],
+      "note": "The pointer leads nowhere, so the member's bundle is an orphan and isn't loaded. Completeness isn't defined."
+    },
+    {
+      "path": "warnings/W-POINTER-directory",
+      "bundle": "characters/PELL ARDEN.dossier",
+      "verdict": "warnings",
+      "codes": [
+        "W-ORPHAN",
+        "W-POINTER"
       ],
-      "note": "The pointer leads nowhere, so the bundle isn't loaded and completeness isn't defined."
+      "mayAlso": [],
+      "note": "The pointer names the bundle, not its manifest."
+    },
+    {
+      "path": "warnings/W-POINTER-nowhere",
+      "bundle": "characters/PELL ARDEN.dossier",
+      "verdict": "warnings",
+      "codes": [
+        "W-POINTER"
+      ],
+      "mayAlso": [],
+      "note": "The member points at a bundle that doesn't exist at all."
     },
     {
       "path": "warnings/W-ROLE",
@@ -475,6 +792,16 @@
       ],
       "mayAlso": [],
       "note": "No tier, so completeness isn't defined."
+    },
+    {
+      "path": "warnings/W-ROLE-manifest-has-one",
+      "bundle": "characters/PELL ARDEN.dossier",
+      "verdict": "warnings",
+      "codes": [
+        "W-ROLE"
+      ],
+      "mayAlso": [],
+      "note": "The manifest's role is a copy and doesn't supply a tier, so no W-INCOMPLETE."
     },
     {
       "path": "warnings/W-VOICE-ELSEWHERE",
@@ -530,7 +857,7 @@
       "mayAlso": [],
       "complete": true,
       "missingRequired": [],
-      "note": "11,000,000 bytes, nearly all of it a comment, which git compresses."
+      "note": "10,000,001 bytes, nearly all of it a comment, which git compresses."
     },
     {
       "path": "warnings/W-PAGE-EXTERNAL",
@@ -588,6 +915,17 @@
       "missingRequired": []
     },
     {
+      "path": "warnings/W-PAGE-EXTERNAL-link-element",
+      "bundle": "characters/PELL ARDEN.dossier",
+      "verdict": "warnings",
+      "codes": [
+        "W-PAGE-EXTERNAL"
+      ],
+      "mayAlso": [],
+      "complete": true,
+      "missingRequired": []
+    },
+    {
       "path": "warnings/W-PAGE-EXTERNAL-relative-link",
       "bundle": "characters/PELL ARDEN.dossier",
       "verdict": "warnings",
@@ -620,6 +958,108 @@
         "vox.0.6b",
         "vox.1.7b"
       ]
+    },
+    {
+      "path": "warnings/W-INCOMPLETE-short-on-a-lead",
+      "bundle": "characters/WREN HALLOWAY.dossier",
+      "verdict": "warnings",
+      "codes": [
+        "W-INCOMPLETE"
+      ],
+      "mayAlso": [],
+      "complete": false,
+      "missingRequired": [
+        "description.full",
+        "dossier",
+        "expressions",
+        "face",
+        "portrait",
+        "pronunciation",
+        "sample.neutral.0.6b",
+        "sample.neutral.1.7b",
+        "sample.range",
+        "views",
+        "voicePrompt",
+        "vox.0.6b",
+        "vox.1.7b"
+      ]
+    },
+    {
+      "path": "warnings/W-INCOMPLETE-empty-pronunciation",
+      "bundle": "characters/WREN HALLOWAY.dossier",
+      "verdict": "warnings",
+      "codes": [
+        "W-INCOMPLETE"
+      ],
+      "mayAlso": [],
+      "complete": false,
+      "missingRequired": [
+        "dossier",
+        "expressions",
+        "face",
+        "portrait",
+        "pronunciation",
+        "sample.neutral.0.6b",
+        "sample.neutral.1.7b",
+        "sample.range",
+        "views",
+        "voicePrompt",
+        "vox.0.6b",
+        "vox.1.7b"
+      ]
+    },
+    {
+      "path": "warnings/W-INCOMPLETE-no-voice-section",
+      "bundle": "characters/WREN HALLOWAY.dossier",
+      "verdict": "warnings",
+      "codes": [
+        "W-INCOMPLETE"
+      ],
+      "mayAlso": [],
+      "complete": false,
+      "missingRequired": [
+        "description.short",
+        "dossier",
+        "face",
+        "portrait",
+        "sample.neutral.0.6b",
+        "sample.neutral.1.7b",
+        "voicePrompt",
+        "vox.0.6b",
+        "vox.1.7b"
+      ]
+    },
+    {
+      "path": "warnings/W-INCOMPLETE-lora-no-training",
+      "bundle": "characters/PELL ARDEN.dossier",
+      "verdict": "warnings",
+      "codes": [
+        "W-INCOMPLETE"
+      ],
+      "mayAlso": [],
+      "complete": false,
+      "missingRequired": [
+        "training.withLora"
+      ]
+    },
+    {
+      "path": "warnings/W-INCOMPLETE-two-range-samples",
+      "bundle": "characters/WREN HALLOWAY.dossier",
+      "verdict": "warnings",
+      "codes": [
+        "W-INCOMPLETE"
+      ],
+      "mayAlso": [],
+      "complete": false,
+      "missingRequired": [
+        "dossier",
+        "expressions",
+        "face",
+        "portrait",
+        "sample.range",
+        "views"
+      ],
+      "note": "Neutral reads don't count toward the range."
     },
     {
       "path": "warnings/W-V1",

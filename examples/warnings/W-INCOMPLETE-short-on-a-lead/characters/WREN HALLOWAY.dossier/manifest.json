@@ -1,0 +1,29 @@
+{
+  "assets": [
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "kind": "description",
+      "path": "CHARACTER.md",
+      "provenance": {
+        "provider": "manual"
+      },
+      "status": "selected"
+    }
+  ],
+  "character": "WREN HALLOWAY",
+  "files": [
+    {
+      "path": "CHARACTER.md",
+      "sha256": "e6fd8d3abdc9b18e687c1b48c2fc659bab5f3315f9e7e2c5b0ed75759f0b7a46",
+      "sizeBytes": 431
+    }
+  ],
+  "generator": {
+    "name": "dossier-format fixtures",
+    "version": "1"
+  },
+  "manifestChecksum": "1078aadcc60bd986a0fbf34d5dff231bfccdadae8cfb37c22c574abf55ad6ee3",
+  "manifestVersion": 2,
+  "role": "lead",
+  "updatedAt": "2026-10-31T12:00:00Z"
+}
