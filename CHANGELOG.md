@@ -16,6 +16,9 @@ Template 0.1.1. No valid bundle becomes invalid, so `manifestVersion` stays 2.
   may span one.
 - **Field rule 2:** a definition cited only from another definition's text counts as never
   cited.
+- **§11, DF-52, field rule 5:** a renderer refuses a bundle with `E-FILE-HASH` or
+  `E-FILE-MISSING` on any file but the page being replaced, and changes nothing, so a
+  re-render can't clear an integrity banner. A validator's results don't change.
 - **Fixtures:** `valid/page-wrapped-text`. Every page is regenerated with template 0.1.1, and
   each fixture's expected result is unchanged.
 

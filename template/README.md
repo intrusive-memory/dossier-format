@@ -165,7 +165,8 @@ could otherwise read it two ways.
 5. **The banner is computed without the page.** `page.integrity` lists the findings of
    §14 over the bundle without the page, as the embedded manifest describes it, so the
    page being replaced is never among them. It has one item per error, and per `W-STALE`
-   on a selected asset: the code, then what it names.
+   on a selected asset: the code, then what it names. `E-FILE-HASH` and `E-FILE-MISSING`
+   never appear, because they refuse the render (§11).
 6. **Row labels for missing rows.** `page.missing` lists each unsatisfied required row by
    its `label` in `data/tiers.json`, in the table's order. `W-INCOMPLETE` lists the same
    rows by ID (§14).

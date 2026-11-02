@@ -768,6 +768,11 @@ registered as `kind: dossier`.
   an integrity banner for errors and stale selections; a provenance line per
   tab; the footnotes as a sources list in citation order. Other characters
   are plain text. The tabs and fields are `data/fields.json`.
+- **A broken inventory refuses a render.** A renderer MUST refuse a bundle with
+  `E-FILE-HASH` or `E-FILE-MISSING` on any file but the page being replaced, and
+  change nothing. A render rescans `files` (§5.6), so otherwise re-rendering would
+  clear the finding along with the page's banner. Other errors and stale selections
+  still go on the banner.
 - **Filling the template:** the sections "Template rules" and "Field rules" of
   [`template/README.md`](../template/README.md) are normative, as part of this
   section.

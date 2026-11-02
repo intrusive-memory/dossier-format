@@ -171,7 +171,7 @@ characters/<CHARACTER>.dossier/
 | DF-49 | **Content is plain HTML inside the custom elements.** Script only adds behavior: tabs, a lightbox, one audio player at a time. With script off, every tab shows, stacked in order; that is also the print layout. |
 | DF-50 | Tabs and fields are anchors (`#voice`, `#profile.age`). Audio plays on click only. The page has light and dark modes and works at phone width. One file serves a narrow and a wide layout. |
 | DF-51 | **Other characters are plain-text names,** never links to other files. A host application MAY intercept a click on a name or a field; the page posts the field key to a host message handler when one is present and does nothing otherwise. |
-| DF-52 | Only `selected` assets are shown. Missing required assets are listed by name. Integrity problems (a missing file, a hash mismatch, a stale selection, a name mismatch) appear as a banner at the top. Provenance is a line under each tab. |
+| DF-52 | Only `selected` assets are shown. Missing required assets are listed by name. Integrity problems (a stale selection, a name mismatch) appear as a banner at the top. A missing file or a hash mismatch refuses the render, and nothing is changed (§11). Provenance is a line under each tab. |
 | DF-53 | A complete lead's page should be about 3 MB. A validator warns above 10 MB. |
 
 ## 10. Hosting
