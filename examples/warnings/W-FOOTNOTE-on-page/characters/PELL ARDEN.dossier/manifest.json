@@ -1,0 +1,109 @@
+{
+  "assets": [
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "kind": "description",
+      "path": "CHARACTER.md",
+      "provenance": {
+        "provider": "manual"
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T12:00:00Z",
+      "derivedFrom": [
+        {
+          "path": "CHARACTER.md",
+          "role": "description",
+          "sha256": "6c3b2b1cfd7ab5c545b7e5c5436e8b85141a0ab7e476ec87689b81e7357ebc61"
+        },
+        {
+          "role": "castMember",
+          "sha256": "62900bfed6abdbf1d29c4ee79c9f17c72425d46f9a9b7384826407cc4c84a2d0"
+        },
+        {
+          "role": "bundle",
+          "sha256": "6b652174f4696f4606c3995497a56ec42f33e91eecb4df5658cfc4375c875b78"
+        },
+        {
+          "role": "template",
+          "sha256": "1bc7363767e2bbd2a165d8455ecc5b5fdf989ba2cde0dc449d9bd800a1e414cc",
+          "version": "0.1.0"
+        }
+      ],
+      "kind": "dossier",
+      "path": "PELL ARDEN-dossier.html",
+      "provenance": {
+        "notes": "Filled from template/ by tools/build_examples.py.",
+        "provider": "dossier-format fixtures"
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "derivedFrom": [
+        {
+          "path": "images/portrait-b4ea7922.png",
+          "role": "portrait",
+          "sha256": "b4ea7922e4584d539d0db374f8380c3ee7ba42b3f070f080fe296a262d959bfb"
+        }
+      ],
+      "kind": "face",
+      "path": "images/face-199a72c5.png",
+      "provenance": {
+        "artStyle": "flat placeholder shapes",
+        "box": {
+          "height": 100,
+          "width": 80,
+          "x": 50,
+          "y": 60
+        },
+        "engine": "fixture",
+        "provider": "personaje"
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "kind": "portrait",
+      "path": "images/portrait-b4ea7922.png",
+      "provenance": {
+        "artStyle": "flat placeholder shapes",
+        "engine": "fixture",
+        "provider": "vinetas"
+      },
+      "status": "selected"
+    }
+  ],
+  "character": "PELL ARDEN",
+  "files": [
+    {
+      "path": "CHARACTER.md",
+      "sha256": "6c3b2b1cfd7ab5c545b7e5c5436e8b85141a0ab7e476ec87689b81e7357ebc61",
+      "sizeBytes": 655
+    },
+    {
+      "path": "PELL ARDEN-dossier.html",
+      "sha256": "b26def68660ddf1fe0169a1ab20ed856d74f1e360511e1702f1bda865c692ee5",
+      "sizeBytes": 342347
+    },
+    {
+      "path": "images/face-199a72c5.png",
+      "sha256": "199a72c5bce7e5df914c0db81b70230843f9eb809d8fde10aca00bb58b13db27",
+      "sizeBytes": 704
+    },
+    {
+      "path": "images/portrait-b4ea7922.png",
+      "sha256": "b4ea7922e4584d539d0db374f8380c3ee7ba42b3f070f080fe296a262d959bfb",
+      "sizeBytes": 940
+    }
+  ],
+  "generator": {
+    "name": "dossier-format fixtures",
+    "version": "1"
+  },
+  "manifestChecksum": "4a9b9e48f2788b853ff63dfdd435b00b4ab09a3cd68c0d88cff8115a0eb1fc6c",
+  "manifestVersion": 2,
+  "role": "background",
+  "updatedAt": "2026-10-31T12:00:00Z"
+}

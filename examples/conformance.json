@@ -928,6 +928,18 @@
       "missingRequired": []
     },
     {
+      "path": "warnings/W-FOOTNOTE-on-page",
+      "bundle": "characters/PELL ARDEN.dossier",
+      "verdict": "warnings",
+      "codes": [
+        "W-FOOTNOTE"
+      ],
+      "mayAlso": [],
+      "complete": true,
+      "missingRequired": [],
+      "note": "The page shows the cited footnote first, the two never cited after it in file order, and the undefined mark as plain text."
+    },
+    {
       "path": "warnings/W-PAGE-SIZE",
       "bundle": "characters/PELL ARDEN.dossier",
       "verdict": "warnings",

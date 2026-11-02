@@ -85,7 +85,8 @@ Other placeholders of those fragments:
 fragment; on `audio`, an `audioEmpty` fragment. When `emptyText` is null, it's nothing.
 
 Footnote references become `mark` fragments, `{{number}}` being the footnote's
-position in `page.sources`.
+position in `page.sources`. A reference with no definition stays as plain text (field
+rule 2).
 
 ## Template rules
 
@@ -141,9 +142,11 @@ could otherwise read it two ways.
    by `, `. With none cited, `source` is the empty text.
 2. **Citation order.** `page.sources` has one item per footnote definition, in the order
    each label is first referenced in the `CHARACTER.md` body, whichever field shows that
-   reference. Each item is the class, then the text. A mark's number is its footnote's
-   position in that list. A definition is shown only in `page.sources`, not in the
-   section it follows.
+   reference. Definitions never cited in the body come after those, in file order, and
+   aren't marked anywhere. Each item is the class, then the text. A mark's number is its
+   footnote's position in that list. A definition is shown only in `page.sources`, not in
+   the section it follows. A reference with no definition is shown as written, as plain
+   text, with no `mark` fragment and no number. `W-FOOTNOTE` still reports both (§9.3).
 3. **Repeated headings.** A section field shows the body of every `##` heading that
    matches by §9.2's rule, in body order. A parenthetical on a matched heading is shown as
    written, in a `parenthetical` fragment, above that body. The field's label doesn't
