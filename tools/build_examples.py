@@ -544,44 +544,63 @@ class FilledPage:
 
     @staticmethod
     def blocks(lines):
-        """(kind, text) for each heading, list item and paragraph."""
+        """[kind, text, quote] for each heading, list item, quote and paragraph. Rule 3.
+
+        `quote` is the text of a quote inside a list item, otherwise None.
+        """
         found = []
         paragraph = []
-        item_open = False  # Rule 3: a line break inside a list item continues it.
+        open_block = None  # What a line with no marker continues: "item", "quote" or nothing.
 
         def flush():
             if paragraph:
-                found.append(("p", "\n".join(paragraph)))
+                found.append(["p", "\n".join(paragraph), None])
                 paragraph.clear()
         for line in lines:
-            if line.startswith("### "):
+            text = line.strip()
+            if not text or text == "---":
                 flush()
-                found.append(("h4", line[4:].strip()))
-                item_open = False
+                open_block = None
+            elif line.startswith("### "):
+                flush()
+                found.append(["h4", line[4:].strip(), None])
+                open_block = None
             elif line.startswith("- "):
                 flush()
-                found.append(("li", line[2:].strip()))
-                item_open = True
-            elif line.strip() and item_open:
-                found[-1] = ("li", found[-1][1] + "\n" + line.strip())
-            elif line.strip():
-                paragraph.append(line.strip())
+                found.append(["li", line[2:].strip(), None])
+                open_block = "item"
+            elif text.startswith(">") or open_block == "quote":
+                content = re.sub(r"^> ?", "", text).strip() if text.startswith(">") else text
+                if open_block == "item":
+                    found[-1][2] = content
+                elif open_block == "quote":
+                    slot = 2 if found[-1][0] == "li" else 1
+                    found[-1][slot] += "\n" + content
+                else:
+                    flush()
+                    found.append(["blockquote", content, None])
+                open_block = "quote"
+            elif open_block == "item":
+                found[-1][1] += "\n" + text
             else:
-                flush()
-                item_open = False
+                paragraph.append(text)
         flush()
         return found
+
+    def block_text(self, text, quote):
+        """A block's inline markup. An item's quote goes inside it, and `**` doesn't cross into it."""
+        return self.inline(text) + (f"<blockquote>{self.inline(quote)}</blockquote>" if quote is not None else "")
 
     def markdown(self, lines):
         out = []
         in_list = False
-        for kind, text in self.blocks(lines):
+        for kind, text, quote in self.blocks(lines):
             if kind == "li" and not in_list:
                 out.append("<ul>")
             if kind != "li" and in_list:
                 out.append("</ul>")
             in_list = kind == "li"
-            out.append(f"<{kind}>{self.inline(text)}</{kind}>")
+            out.append(f"<{kind}>{self.block_text(text, quote)}</{kind}>")
         if in_list:
             out.append("</ul>")
         return "".join(out)
@@ -590,7 +609,7 @@ class FilledPage:
         """Every matching heading, in body order, its parenthetical above its body."""
         out = []
         matched = self.matching(section)
-        if not any("".join(lines).strip() for _, lines in matched):
+        if not any(line.strip() not in ("", "---") for _, lines in matched for line in lines):  # Rule 3, field rule 3.
             return None
         for heading, lines in matched:
             if heading != section:
@@ -601,10 +620,11 @@ class FilledPage:
     def canon_items(self, source):
         items = []
         for _, lines in self.matching(source["section"]):
-            for kind, text in self.blocks(lines):
-                if kind in ("p", "li"):
-                    classes = [self.notes[label].split(".", 1)[0] for label in re.findall(r"\[\^([^\]]+)\]", text) if label in self.notes]
-                    items.append(fragment("canonItem", text=self.inline(text), source=esc(", ".join(classes))))
+            for kind, text, quote in self.blocks(lines):
+                if kind in ("p", "li", "blockquote"):
+                    classes = [self.notes[label].split(".", 1)[0] for label in re.findall(r"\[\^([^\]]+)\]", text + (quote or "")) if label in self.notes]
+                    shown = f"<blockquote>{self.inline(text)}</blockquote>" if kind == "blockquote" else self.block_text(text, quote)
+                    items.append(fragment("canonItem", text=shown, source=esc(", ".join(classes))))
         return "".join(items) or None
 
     # Stamping (template/README.md).
@@ -980,18 +1000,46 @@ Synthetic data only.
     voice = add_voice(b)
     fixture("valid", "voice-second-path", [b], [member(b, prompt=VOICE_PROMPT) | {"voices": {"voxalta": ["voices/other.vox", f"./{voice}"]}}], complete=True)
 
-    # Rules 3 and 4: hard-wrapped text, bold across a line break, and marks side by side.
+    # Rules 3 and 4: hard-wrapped text, bold across a line break, marks side by side, quotes and --- lines.
     wrapped = short_description("THE SCRIBE", "background", extra="""
 - **A list item that
 wraps in bold** and goes on
   over an indented line.[^one][^two]
 - A second item.[^one] Then more text.[^two]
 
+- An item with a quote inside it.
+  > A quoted line in that item, with **bold**.[^one]
+
 **A paragraph's bold that
 wraps** and goes on.[^one]
-""") + b"[^one]: Author. The first source, 2026-11-01.\n[^two]: Author. The second source, 2026-11-01.\n"
+
+> The first quote line, in *one quote*
+> with the second, and **bold that
+> crosses** the break.[^two]
+Then a wrapped line with no marker.
+
+> A quote that keeps <b>markup</b> as text, and 1 < 2.
+
+A line with > inside it stays plain text.
+
+## Pronunciation
+
+Said the way it's spelled.[^one]
+
+## Wardrobe
+
+---
+
+## Canon & Guardrails
+
+- A canon item that carries a quote.[^one]
+> The quote is part of that item.[^two]
+
+> A canon quote that is an item of its own.[^two]
+
+---""") + b"[^one]: Author. The first source, 2026-11-01.\n[^two]: Author. The second source, 2026-11-01.\n"
     b = base("THE SCRIBE", description=wrapped); m = member(b); b.page(m)
-    fixture("valid", "page-wrapped-text", [b], [m], complete=True, note="On its page, each wrapped item is one <li>, the bold spans the line break, and only marks with nothing between them get a separator.")
+    fixture("valid", "page-wrapped-text", [b], [m], complete=True, note="On its page, each wrapped item is one <li>, the bold spans the line break, and only marks with nothing between them get a separator. Quotes: two > lines and a wrapped line are one <blockquote>, a quote after item text is inside its <li>, < in a quote is escaped, and a > elsewhere in a line is literal. The --- lines are dropped, so Wardrobe, with only a --- under it, shows its empty text. A mark on the Voice tab leads to Sources on the Profile tab.")
 
     # §5.2: a path compares with a name on disk as NFC strings. The manifest is NFC and the disk NFD.
     # Git on a Mac stores this name as NFC unless told otherwise: see examples/README.md.

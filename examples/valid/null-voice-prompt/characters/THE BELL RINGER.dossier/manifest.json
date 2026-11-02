@@ -27,7 +27,7 @@
         },
         {
           "role": "template",
-          "sha256": "fe917290fcaa8f2c9bceede04ee0600848aff666861625dfd0cfb3ba40c8157f",
+          "sha256": "8819dcefe82728a9a407707195af5277527a65e842db63a831587d062ffad76c",
           "version": "0.1.1"
         }
       ],
@@ -98,8 +98,8 @@
     },
     {
       "path": "THE BELL RINGER-dossier.html",
-      "sha256": "31a0191cee667c755464b836812b72c533c0ff8fc073d6fe3e31b05569e79cfb",
-      "sizeBytes": 346718
+      "sha256": "00b41b39e86ac5a437bcf7cf468c81d591cf2f6858e3e3f616f6ed4f71554fd3",
+      "sizeBytes": 347785
     },
     {
       "path": "images/face-0fedbd6c.png",
@@ -121,7 +121,7 @@
     "name": "dossier-format fixtures",
     "version": "1"
   },
-  "manifestChecksum": "f8b1d553c80fe45468f62ff6161f1258d4eca39ff1b6f6c455a2f39d51d9eca4",
+  "manifestChecksum": "36c885f841d7aaf810dc33a15b1c1a12f36953471af1e44ad879ddba64914464",
   "manifestVersion": 2,
   "role": "background",
   "updatedAt": "2026-10-31T12:00:00Z"

@@ -15,7 +15,7 @@
         {
           "path": "CHARACTER.md",
           "role": "description",
-          "sha256": "e98d14a1d38220330d6e780f84e340864ad1177d2ee3aa89b42423db91d3d628"
+          "sha256": "be1d6d6a5bfe486aa728f6948693b964785e39d97920741d14cd6c08e63741e5"
         },
         {
           "role": "castMember",
@@ -23,11 +23,11 @@
         },
         {
           "role": "bundle",
-          "sha256": "eca5779f54b7458c1d5169d9b3a8b72fca67fbb83174c18be279966394c84d94"
+          "sha256": "e697027a7be903ccc4415368f249303bb760e96023885b8074386d5b3aaabea8"
         },
         {
           "role": "template",
-          "sha256": "fe917290fcaa8f2c9bceede04ee0600848aff666861625dfd0cfb3ba40c8157f",
+          "sha256": "8819dcefe82728a9a407707195af5277527a65e842db63a831587d062ffad76c",
           "version": "0.1.1"
         }
       ],
@@ -79,13 +79,13 @@
   "files": [
     {
       "path": "CHARACTER.md",
-      "sha256": "e98d14a1d38220330d6e780f84e340864ad1177d2ee3aa89b42423db91d3d628",
-      "sizeBytes": 710
+      "sha256": "be1d6d6a5bfe486aa728f6948693b964785e39d97920741d14cd6c08e63741e5",
+      "sizeBytes": 1269
     },
     {
       "path": "THE SCRIBE-dossier.html",
-      "sha256": "70bdfe7471de4d8afbc09aa4d43f814c358454c4aa30f49450784eee84272620",
-      "sizeBytes": 324271
+      "sha256": "8301cc289006c7965bb0d331542dda0e88d80d1eb19a9f169502b8eec92acb1d",
+      "sizeBytes": 327058
     },
     {
       "path": "images/face-b78d1b6b.png",
@@ -102,7 +102,7 @@
     "name": "dossier-format fixtures",
     "version": "1"
   },
-  "manifestChecksum": "0614634da4d54b6f63a9f2d7bd79e57808111fcb1b3f8c87744cb159cef85328",
+  "manifestChecksum": "fb0cb1159d0ad0bde168f296fb1722c66d0330c51c818ab69113bdb21f56bab5",
   "manifestVersion": 2,
   "role": "background",
   "updatedAt": "2026-10-31T12:00:00Z"

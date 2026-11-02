@@ -766,7 +766,7 @@ registered as `kind: dossier`.
   implementation. A renderer MUST NOT write the render time.
 - **Content:** only `selected` assets; missing required rows listed by name;
   an integrity banner for errors and stale selections; a provenance line per
-  tab; the footnotes as a sources list in citation order. Other characters
+  tab; the footnotes as a sources list in citation order, on the Profile tab. Other characters
   are plain text. The tabs and fields are `data/fields.json`.
 - **A broken inventory refuses a render.** A renderer MUST refuse a bundle with
   `E-FILE-HASH` or `E-FILE-MISSING` on any file but the page being replaced, and

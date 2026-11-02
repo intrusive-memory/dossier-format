@@ -27,7 +27,7 @@
         },
         {
           "role": "template",
-          "sha256": "fe917290fcaa8f2c9bceede04ee0600848aff666861625dfd0cfb3ba40c8157f",
+          "sha256": "8819dcefe82728a9a407707195af5277527a65e842db63a831587d062ffad76c",
           "version": "0.1.1"
         }
       ],
@@ -148,8 +148,8 @@
     },
     {
       "path": "THE LAMPLIGHTER-dossier.html",
-      "sha256": "1930a5112be19e3104782a68827e0fa8697afeb338eaee4e84289bebe71c69bc",
-      "sizeBytes": 354517
+      "sha256": "474427dfcac6218d2a965d02adaa4e7b98795a2187230f19c6015c030cbef089",
+      "sizeBytes": 355584
     },
     {
       "path": "images/face-afc3211a.png",
@@ -181,7 +181,7 @@
     "name": "dossier-format fixtures",
     "version": "1"
   },
-  "manifestChecksum": "7f95e61f73c189016b3970c127bd3240fa614845b39a41a66ed5b2e0c5e1ce16",
+  "manifestChecksum": "7b47219b69dedbe80ccf545f609f036ddce83e45b58647f7ed749b8f5b7515fe",
   "manifestVersion": 2,
   "role": "costar",
   "updatedAt": "2026-10-31T12:00:00Z"
