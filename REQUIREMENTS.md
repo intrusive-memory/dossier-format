@@ -96,12 +96,12 @@ characters/<CHARACTER>.dossier/
 
 | ID | Requirement |
 |----|-------------|
-| DF-13 | **The bundle is the character's folder,** the one source of truth, read and written in place. It is not an export. |
-| DF-14 | **The writer names image files:** `images/<kind>[-<variant>]-<sha8>.<ext>`, where `<sha8>` is the first 8 hex digits of the file's SHA-256. A file's name can't claim to be something it isn't, and names never collide. |
+| DF-13 | **The bundle is the character's folder,** the one source of truth, read and written in place. It is not an export. The files on disk are the source of truth, and the manifest is an index of them: an edit isn't an alteration until it's saved and the file in the directory reflects it, and a hash mismatch means the manifest is behind the disk, not that the file is wrong. Readers and validators judge only what's on disk. |
+| DF-14 | **The writer names image files:** `images/<kind>[-<variant>]-<sha8>.<ext>`, where `<sha8>` is the first 8 hex digits of the file's SHA-256 when the file was added. It records those bytes, and the manifest's hash is the authority: when `refresh` accepts a changed image, the file keeps its name and is never renamed (§5.6). |
 | DF-15 | Voice files keep the names their producer gives them: `voice/<CHARACTER>.vox`, `voice/sample-<variant>.m4a`. |
 | DF-16 | **No sidecar files.** A generator's sidecar metadata is folded into the asset's `provenance`. A `.json` sidecar inside a bundle is a validation warning. |
 | DF-17 | **Candidates live outside the bundle,** in `<charactersDir>/.generations/<CHARACTER>/`. A render enters the bundle when it is selected or explicitly kept. The standard defines this location and nothing about its contents. |
-| DF-18 | Originals in `images/` are never modified once they are in the bundle, and never embedded in the page (§9). A writer MAY strip metadata when it copies an image in: pixel data is untouched, embedded records are read for provenance first, and the stored hash and file name come from the stripped bytes. In a PNG, metadata means the chunks `tEXt`, `zTXt`, `iTXt`, `eXIf` and `tIME`; chunks such as `iCCP`, `gAMA` and `sRGB` are kept. |
+| DF-18 | A writer doesn't modify an original in `images/` once it is in the bundle, and originals are never embedded in the page (§9). The disk is still the truth about an original (DF-13). A writer MAY strip metadata when it copies an image in: pixel data is untouched, embedded records are read for provenance first, and the stored hash and file name come from the stripped bytes. In a PNG, metadata means the chunks `tEXt`, `zTXt`, `iTXt`, `eXIf` and `tIME`; chunks such as `iCCP`, `gAMA` and `sRGB` are kept. |
 | DF-19 | The standard reserves a uniform type identifier and extension for the bundle (`dossier`, conforming to a package type) so an application can register it. A bundle shown as a plain folder is still valid. |
 | DF-20 | **One home for a character's trained adapter:** the bundle's `lora/`. A tool that keeps adapters elsewhere treats the bundle's as the authority for a character that has a dossier. |
 
@@ -120,7 +120,7 @@ characters/<CHARACTER>.dossier/
 | DF-27 | **`derivedFrom`** on `face`, `view`, `expression` and `dossier` records the SHA-256 of every input. When an input's selected file changes, the derived asset is **stale**: flagged, never deleted. |
 | DF-28 | **`provenance`** records `provider`, `model`, `prompt` (the prompt actually sent), `seed`, and `references`: `{path, sha256}` for every reference image sent. An imported file has `provider: "import"`. A hand-set face-crop box is recorded here. |
 | DF-29 | **Writes are atomic and verified:** write to a temporary file, replace, re-read, and check. Output is pretty-printed with sorted keys. |
-| DF-30 | **Single writer.** Only a conforming writer changes `manifest.json`. Other tools may put files in the bundle (a voice tool writing a `.vox`); they appear as unclassified until a writer's `refresh` adopts them. |
+| DF-30 | **Single writer.** Only a conforming writer changes `manifest.json`. Other tools may put files in the bundle (a voice tool writing a `.vox`); they appear as unclassified until a writer's `refresh` adopts them. `refresh` is also the one way to accept a changed file; an ordinary write keeps the recorded hash. `refresh` drops the entry of a missing file with no asset, refuses a missing file an asset points at, and reports each (§5.6). |
 | DF-31 | The standard ships a JSON Schema for version 2 and one for version 1. |
 
 ## 7. Asset kinds and tiers

@@ -45,8 +45,10 @@ Validate it from its `CAST.md`.
   `template/example/`.
 - **Stripping metadata (§4) has no fixture.** It happens as a file is copied in, and a
   fixture holds only the result, which is an ordinary PNG with its own hash. Nor can a
-  fixture show that an original wasn't changed later. §4 has a worked example. Adoption
-  by *refresh* (§5.6) has no fixture for the same reason.
+  fixture show that a writer left an original alone later. §4 has a worked example. Adoption
+  by *refresh* (§5.6) has no fixture for the same reason, and neither does a writer's
+  rescan keeping a recorded hash, or *refresh* accepting a changed file or dropping a missing
+  one: a fixture holds a bundle before or after, and a validator judges only that.
 - **Check findings (§14) aren't asserted.** `C-` codes are outside validation results,
   so they aren't in `codes` or `mayAlso`. `valid/empty-background` and
   `valid/description-no-character-key` say in their notes which one a check reports.
