@@ -147,9 +147,11 @@ The format writes none of them except through a `CAST.md` writer.
 - **The bundle is the character's one source of truth,** read and written in
   place. It is not an export.
 - **Image names.** A writer names every file it adds under `images/` as
-  `<kind>[-<variant>]-<sha8>.png`. The name is derived from the content, so
-  it never collides and can't claim to be something it isn't. v2 images are
-  PNG. [DF-14]
+  `<kind>[-<variant>]-<sha8>.png`, from the file's bytes as it adds them. v2 images
+  are PNG. A name's `<sha8>` records the bytes when the file was added, and the
+  manifest's `sha256` is the authority. So when *refresh* accepts a changed image, the
+  file keeps its name and is never renamed, and a name that no longer matches its hash
+  isn't a finding (§5.6). [DF-14]
 - **Voice names** are the producer's: `voice/<CHARACTER>.vox`,
   `voice/sample-<variant>.m4a`; a sample on a model size other than the
   `.vox`'s default adds `-<model>` (`sample-neutral-0.6b.m4a`). [DF-15]
@@ -160,8 +162,9 @@ The format writes none of them except through a `CAST.md` writer.
   A file enters the bundle when it is selected or explicitly kept. Names in
   `.generations/` that aren't a character name (lowercase, e.g. `scenes`) are
   reserved for other tools. [DF-17]
-- **Originals are never modified** once they are in the bundle, and never embedded
-  in the page. [DF-18]
+- **A writer doesn't modify an original** once it is in the bundle, and originals are
+  never embedded in the page. The disk is still the truth about an original: a file
+  changed by anything else is what the bundle now holds (§5.6). [DF-18]
 - **Stripping metadata.** A writer MAY remove metadata (§1) from an image when it
   copies the image in, and at no other time. [DF-18]
   1. It reads any record embedded in the image, for `provenance` (§6), before
@@ -236,7 +239,8 @@ This inventory is of the disk, not of `files`. A validator walks the bundle:
 `W-UNCLASSIFIED` and `E-ZERO-BYTE` apply to a file in the inventory whether or not
 `files` lists it, and neither applies to a hidden file. A file on disk that
 `files` doesn't list doesn't change `manifestChecksum`, which is computed from
-`files`.
+`files`. An ordinary write doesn't bring a changed or missing listed file back into
+line by rewriting its entry, and *refresh* can (§5.6).
 
 **Matching an entry to the disk.** A manifest path compares with a name on disk as
 NFC strings, case-sensitively, whatever the file system would open. So an entry in
@@ -309,7 +313,13 @@ Unknown asset keys MUST be preserved by writers and MAY be ignored by readers.
 A reader's "identity prompt" is `prompts.identity`. How prompts are composed
 is the generating tool's.
 
-### 5.6 Writes [DF-29, DF-30]
+### 5.6 Writes [DF-13, DF-29, DF-30]
+
+**The disk is the truth.** The files on disk are the source of truth, and the manifest
+is an index of them. An edit isn't an alteration until it's saved and the file in the
+directory reflects it. `E-FILE-HASH` means the manifest is behind the disk, not that the
+file is wrong. Unsaved in-memory state doesn't count: readers and validators judge only
+what's on disk.
 
 Write to a temporary file in the bundle, replace `manifest.json` with it,
 re-read it, and verify it parses and matches what was written. Only a
@@ -327,6 +337,28 @@ until a writer's *refresh* adopts them by these rules. An adopted asset has
   `derivedFrom`, and `voice/samples.yaml` has an entry for that `variant` and
   `model` (an entry with no `model` matches any), which gives its `sampleText`.
   Otherwise the file stays unclassified and the writer reports why.
+
+**The rescan.** Each write reads the bundle's files again and updates `files`. It adds
+an entry for a file in the inventory that `files` doesn't list (§5.2), unless the file is
+zero bytes. For a listed file whose bytes don't match, an ordinary write keeps the
+recorded `sha256` and `sizeBytes`, and for a listed file that's missing, it keeps the
+entry, unless the write itself changed or removed that file. So `E-FILE-HASH` and
+`E-FILE-MISSING` stay after an ordinary write. A write that creates, replaces or removes
+a file records that.
+
+**What refresh does with a listed file.** It reports each of these by path.
+
+- **A changed file.** *Refresh* is the one way to accept one. It records the file's new
+  `sha256` and `sizeBytes`, in place: the file keeps its name and is never renamed. The
+  report says when an image's name no longer matches its hash (§4). A selected asset made
+  from that file then reads `W-STALE` (§7). A zero-byte file can't be accepted (§5.2).
+- **A missing file with no asset.** Refresh drops the entry.
+- **A missing file an asset points at.** Refresh refuses, and the entry stays, because
+  dropping it would make the asset `E-ASSET-NO-FILE`. How to resolve this is left to the
+  implementation.
+
+A missing file also clears when it's put back or a write removes it. A validator's
+results don't change.
 
 ### 5.7 Update status [DF-64 to DF-66]
 
@@ -766,8 +798,13 @@ registered as `kind: dossier`.
   implementation. A renderer MUST NOT write the render time.
 - **Content:** only `selected` assets; missing required rows listed by name;
   an integrity banner for errors and stale selections; a provenance line per
-  tab; the footnotes as a sources list in citation order. Other characters
+  tab; the footnotes as a sources list in citation order, on the Profile tab. Other characters
   are plain text. The tabs and fields are `data/fields.json`.
+- **A broken inventory refuses a render.** A renderer MUST refuse a bundle with
+  `E-FILE-HASH` or `E-FILE-MISSING` on any file but the page being replaced, and
+  change nothing, so a page is never made from a bundle whose manifest is behind its
+  disk. It refuses until the finding clears, which for a changed file means until
+  *refresh* has run (§5.6). Other errors and stale selections still go on the banner.
 - **Filling the template:** the sections "Template rules" and "Field rules" of
   [`template/README.md`](../template/README.md) are normative, as part of this
   section.
@@ -813,10 +850,12 @@ expires with no change on disk, so it can't rely on file events alone.
 
 ## 13. Identity across tools
 
-**A file's identity is its SHA-256.** File names change when content changes
-(§4), so a tool that records which dossier files it used (a storyboard panel
-recording its references) records their `sha256`, and finds them again by
-`sha256` through the manifest.
+**A tool refers to a file by the SHA-256 the manifest records for it.** A file's name
+doesn't do this: a new image has a new name, and a changed one keeps its old name when
+*refresh* accepts it (§4, §5.6). So a tool that records which dossier files it used (a
+storyboard panel recording its references) records their `sha256`, and finds them again
+by `sha256` through the manifest. A recorded hash names those bytes, so after refresh
+accepts a change to the file, that hash no longer finds it.
 
 ## 14. Validation [DF-54 to DF-57]
 
@@ -834,7 +873,7 @@ MUST be reported and `E-SCHEMA` MAY be reported with it.
 | `E-NOT-BUNDLE` | error | A version 2 manifest in a directory without `.dossier` |
 | `E-PATH` | error | A path in the manifest breaks §5.2's rules |
 | `E-FILE-MISSING` | error | A `files` entry has no file, or names a symlink or `manifest.json` (§5.2) |
-| `E-FILE-HASH` | error | A file's hash or size doesn't match its entry |
+| `E-FILE-HASH` | error | A file's hash or size doesn't match its entry: the manifest is behind the disk (§5.6) |
 | `E-ZERO-BYTE` | error | A zero-byte file |
 | `E-CHECKSUM` | error | `manifestChecksum` doesn't match |
 | `E-ASSET-NO-FILE` | error | An asset with no `files` entry |

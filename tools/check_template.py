@@ -250,6 +250,22 @@ def check_tabs(page, fields):
         check(not (tag in ELEMENT_FOR_KIND.values() and "hidden" in attrs), f"{attrs.get('id')} is hidden in the markup")
 
 
+def check_sources(page, fields):
+    """Sources is a field of the Profile tab, once, and every mark leads to it (rule 4, rule 10)."""
+    profile = next(tab for tab in fields["tabs"] if tab["key"] == "profile")
+    check(any(field["key"] == "page.sources" for field in profile["fields"]), "fields.json: page.sources isn't on the Profile tab")
+    tab = None
+    placed = []
+    for tag, attrs, _ in page.elements:
+        if tag == "section" and attrs.get("data-kind") == "tab":
+            tab = attrs.get("id")
+        if attrs.get("id") == "page.sources":
+            placed.append(tab)
+    check(placed == ["profile"], f"page.sources is on {placed}, not once on the Profile tab")
+    hrefs = {attrs.get("href") for tag, attrs, ancestors in page.elements if tag == "a" and "sup" in ancestors}
+    check(hrefs <= {"#page.sources"}, f"marks lead to {sorted(hrefs)}")
+
+
 def check_record_shape(record):
     schema = json.loads((ROOT / "schemas/record.schema.json").read_text(encoding="utf-8"))
     python_types = {"object": dict, "string": str, "null": type(None)}
@@ -352,6 +368,7 @@ def check_page(path, version):
     check(not external, f"W-PAGE-EXTERNAL: {external[:5]}")
     keys = check_keys(page, fields)
     check_tabs(page, fields)
+    check_sources(page, fields)
     how = check_record(page)
     images = check_media(page, fields)
 
