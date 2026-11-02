@@ -85,7 +85,8 @@ Other placeholders of those fragments:
 fragment; on `audio`, an `audioEmpty` fragment. When `emptyText` is null, it's nothing.
 
 Footnote references become `mark` fragments, `{{number}}` being the footnote's
-position in `page.sources`. A reference with no definition stays as plain text (field
+position in `page.sources`, with a `markSeparator` fragment between two side by side
+(rule 4). A reference with no definition stays as plain text (field
 rule 2).
 
 ## Template rules
@@ -110,11 +111,14 @@ These rules are normative: DOSSIER-FORMAT §11 makes them part of the format.
    a field posts that field's key; DF-51 doesn't say how a host would learn the name.
 3. **Markdown,** where `fields.json` says "The text is Markdown", is
    paragraphs, `-` lists, `**bold**`, `*emphasis*`, and `###` as `<h4>`.
-   Everything else is literal text. HTML in the source is escaped, never passed
+   A line break inside a paragraph or list item continues it, and `**` and `*` may span
+   one; a blank line, a `###` heading, a footnote definition or the next `- ` ends a list
+   item. Everything else is literal text. HTML in the source is escaped, never passed
    through, and a Markdown link stays as text (DF-51).
 4. **Footnote marks,** which `fields.json` says "lead to `page.sources`", are the
    `mark` fragment, numbered by citation order, with
-   `page.sources` shown numbered. Items have no anchors of their own, because every id
+   `page.sources` shown numbered. Two marks with nothing at all between them have a
+   `markSeparator` fragment between them. Items have no anchors of their own, because every id
    on the page is a key.
 5. **Scaling a page copy.** DF-43 gives the size. An image of another shape gets there
    this way: scale to cover and crop the centre. The overlay's percentages
@@ -145,7 +149,8 @@ could otherwise read it two ways.
    reference. Definitions never cited in the body come after those, in file order, and
    aren't marked anywhere. Each item is the class, then the text. A mark's number is its
    footnote's position in that list. A definition is shown only in `page.sources`, not in
-   the section it follows. A reference with no definition is shown as written, as plain
+   the section it follows. A definition cited only from another definition's text counts
+   as never cited. A reference with no definition is shown as written, as plain
    text, with no `mark` fragment and no number. `W-FOOTNOTE` still reports both (§9.3).
 3. **Repeated headings.** A section field shows the body of every `##` heading that
    matches by §9.2's rule, in body order. A parenthetical on a matched heading is shown as

@@ -5,6 +5,20 @@ updated: 2026-11-01
 
 # Changelog
 
+## Format 2, release candidate 7 (2026-11-01)
+
+Template 0.1.1. No valid bundle becomes invalid, so `manifestVersion` stays 2.
+
+- **`template/fragments.html`, rule 4:** a `markSeparator` fragment goes between two
+  footnote marks with nothing between them, so `1`, `2` doesn't read as `12`. This is in the
+  markup, because a CSS sibling selector also matches two marks with text between them.
+- **Rule 3:** a line break inside a paragraph or list item continues it, and `**` and `*`
+  may span one.
+- **Field rule 2:** a definition cited only from another definition's text counts as never
+  cited.
+- **Fixtures:** `valid/page-wrapped-text`. Every page is regenerated with template 0.1.1, and
+  each fixture's expected result is unchanged.
+
 ## Format 2, release candidate 6 (2026-11-01)
 
 No valid bundle becomes invalid, so `manifestVersion` stays 2. `template/` doesn't change.

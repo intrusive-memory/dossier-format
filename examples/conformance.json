@@ -1,7 +1,7 @@
 {
   "formatVersion": 2,
-  "templateVersion": "0.1.0",
-  "templateSha256": "1bc7363767e2bbd2a165d8455ecc5b5fdf989ba2cde0dc449d9bd800a1e414cc",
+  "templateVersion": "0.1.1",
+  "templateSha256": "fe917290fcaa8f2c9bceede04ee0600848aff666861625dfd0cfb3ba40c8157f",
   "fixtures": [
     {
       "path": "valid/complete-lead",
@@ -145,6 +145,16 @@
       "mayAlso": [],
       "complete": true,
       "missingRequired": []
+    },
+    {
+      "path": "valid/page-wrapped-text",
+      "bundle": "characters/THE SCRIBE.dossier",
+      "verdict": "valid",
+      "codes": [],
+      "mayAlso": [],
+      "complete": true,
+      "missingRequired": [],
+      "note": "On its page, each wrapped item is one <li>, the bold spans the line break, and only marks with nothing between them get a separator."
     },
     {
       "path": "valid/name-on-disk-nfd",

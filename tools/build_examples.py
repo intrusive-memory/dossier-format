@@ -524,18 +524,30 @@ class FilledPage:
 
     def inline(self, text):
         text = esc(text)
-        text = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", text)
-        text = re.sub(r"\*(.+?)\*", r"<em>\1</em>", text)
-        def mark(match):
-            # Field rule 2: a mark with no definition stays as plain text.
-            return fragment("mark", number=str(self.cited.index(match.group(1)) + 1)) if match.group(1) in self.notes else match.group(0)
-        return re.sub(r"\[\^([^\]]+)\]", mark, text)
+        text = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", text, flags=re.S)
+        text = re.sub(r"\*(.+?)\*", r"<em>\1</em>", text, flags=re.S)
+        out = []
+        position = 0
+        previous_mark_end = None
+        for match in re.finditer(r"\[\^([^\]]+)\]", text):
+            out.append(text[position:match.start()])
+            position = match.end()
+            if match.group(1) not in self.notes:
+                out.append(match.group(0))  # Field rule 2: a mark with no definition stays as plain text.
+                continue
+            if previous_mark_end == match.start():
+                out.append(fragment("markSeparator"))  # Rule 4.
+            out.append(fragment("mark", number=str(self.cited.index(match.group(1)) + 1)))
+            previous_mark_end = match.end()
+        out.append(text[position:])
+        return "".join(out)
 
     @staticmethod
     def blocks(lines):
         """(kind, text) for each heading, list item and paragraph."""
         found = []
         paragraph = []
+        item_open = False  # Rule 3: a line break inside a list item continues it.
 
         def flush():
             if paragraph:
@@ -545,13 +557,18 @@ class FilledPage:
             if line.startswith("### "):
                 flush()
                 found.append(("h4", line[4:].strip()))
+                item_open = False
             elif line.startswith("- "):
                 flush()
                 found.append(("li", line[2:].strip()))
+                item_open = True
+            elif line.strip() and item_open:
+                found[-1] = ("li", found[-1][1] + "\n" + line.strip())
             elif line.strip():
                 paragraph.append(line.strip())
             else:
                 flush()
+                item_open = False
         flush()
         return found
 
@@ -962,6 +979,19 @@ Synthetic data only.
     b = base("THE TUNER")
     voice = add_voice(b)
     fixture("valid", "voice-second-path", [b], [member(b, prompt=VOICE_PROMPT) | {"voices": {"voxalta": ["voices/other.vox", f"./{voice}"]}}], complete=True)
+
+    # Rules 3 and 4: hard-wrapped text, bold across a line break, and marks side by side.
+    wrapped = short_description("THE SCRIBE", "background", extra="""
+- **A list item that
+wraps in bold** and goes on
+  over an indented line.[^one][^two]
+- A second item.[^one] Then more text.[^two]
+
+**A paragraph's bold that
+wraps** and goes on.[^one]
+""") + b"[^one]: Author. The first source, 2026-11-01.\n[^two]: Author. The second source, 2026-11-01.\n"
+    b = base("THE SCRIBE", description=wrapped); m = member(b); b.page(m)
+    fixture("valid", "page-wrapped-text", [b], [m], complete=True, note="On its page, each wrapped item is one <li>, the bold spans the line break, and only marks with nothing between them get a separator.")
 
     # §5.2: a path compares with a name on disk as NFC strings. The manifest is NFC and the disk NFD.
     # Git on a Mac stores this name as NFC unless told otherwise: see examples/README.md.

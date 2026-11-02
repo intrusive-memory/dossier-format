@@ -27,8 +27,8 @@
         },
         {
           "role": "template",
-          "sha256": "1bc7363767e2bbd2a165d8455ecc5b5fdf989ba2cde0dc449d9bd800a1e414cc",
-          "version": "0.1.0"
+          "sha256": "fe917290fcaa8f2c9bceede04ee0600848aff666861625dfd0cfb3ba40c8157f",
+          "version": "0.1.1"
         }
       ],
       "kind": "dossier",
@@ -84,7 +84,7 @@
     },
     {
       "path": "THE PORTER-dossier.html",
-      "sha256": "e3732209a41055386da890180b7201387fc740f7cc3c61c370d75a9486d8b114",
+      "sha256": "3683b4f49a0b4e7e2fae86455e40400a1e41b5f19a9ebbed827e4302718b3b68",
       "sizeBytes": 10000000
     },
     {
@@ -102,7 +102,7 @@
     "name": "dossier-format fixtures",
     "version": "1"
   },
-  "manifestChecksum": "74f2edf4661ce383dc2143afd342c45993137487d5f336bebe2ee744f94c6f39",
+  "manifestChecksum": "87cde31336e400f969be0b0b631486cecab40c4aa54610b5668b91e50be896e5",
   "manifestVersion": 2,
   "role": "background",
   "updatedAt": "2026-10-31T12:00:00Z"

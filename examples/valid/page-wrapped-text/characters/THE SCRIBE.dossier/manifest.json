@@ -1,0 +1,109 @@
+{
+  "assets": [
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "kind": "description",
+      "path": "CHARACTER.md",
+      "provenance": {
+        "provider": "manual"
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T12:00:00Z",
+      "derivedFrom": [
+        {
+          "path": "CHARACTER.md",
+          "role": "description",
+          "sha256": "e98d14a1d38220330d6e780f84e340864ad1177d2ee3aa89b42423db91d3d628"
+        },
+        {
+          "role": "castMember",
+          "sha256": "764220cefdd9562d15a588659c3f638542e404c2e1d271fc24d2008e5cbc1a1f"
+        },
+        {
+          "role": "bundle",
+          "sha256": "eca5779f54b7458c1d5169d9b3a8b72fca67fbb83174c18be279966394c84d94"
+        },
+        {
+          "role": "template",
+          "sha256": "fe917290fcaa8f2c9bceede04ee0600848aff666861625dfd0cfb3ba40c8157f",
+          "version": "0.1.1"
+        }
+      ],
+      "kind": "dossier",
+      "path": "THE SCRIBE-dossier.html",
+      "provenance": {
+        "notes": "Filled from template/ by tools/build_examples.py.",
+        "provider": "dossier-format fixtures"
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "derivedFrom": [
+        {
+          "path": "images/portrait-695667eb.png",
+          "role": "portrait",
+          "sha256": "695667ebf2b298a1518f9165cc61aff8ffe042ec250831808194a3ad64c0c431"
+        }
+      ],
+      "kind": "face",
+      "path": "images/face-b78d1b6b.png",
+      "provenance": {
+        "artStyle": "flat placeholder shapes",
+        "box": {
+          "height": 100,
+          "width": 80,
+          "x": 50,
+          "y": 60
+        },
+        "engine": "fixture",
+        "provider": "personaje"
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "kind": "portrait",
+      "path": "images/portrait-695667eb.png",
+      "provenance": {
+        "artStyle": "flat placeholder shapes",
+        "engine": "fixture",
+        "provider": "vinetas"
+      },
+      "status": "selected"
+    }
+  ],
+  "character": "THE SCRIBE",
+  "files": [
+    {
+      "path": "CHARACTER.md",
+      "sha256": "e98d14a1d38220330d6e780f84e340864ad1177d2ee3aa89b42423db91d3d628",
+      "sizeBytes": 710
+    },
+    {
+      "path": "THE SCRIBE-dossier.html",
+      "sha256": "70bdfe7471de4d8afbc09aa4d43f814c358454c4aa30f49450784eee84272620",
+      "sizeBytes": 324271
+    },
+    {
+      "path": "images/face-b78d1b6b.png",
+      "sha256": "b78d1b6bf842e45478ff1d011a23ba89b9e71d2243bc2bd2c3a679e22dbc0e34",
+      "sizeBytes": 707
+    },
+    {
+      "path": "images/portrait-695667eb.png",
+      "sha256": "695667ebf2b298a1518f9165cc61aff8ffe042ec250831808194a3ad64c0c431",
+      "sizeBytes": 942
+    }
+  ],
+  "generator": {
+    "name": "dossier-format fixtures",
+    "version": "1"
+  },
+  "manifestChecksum": "0614634da4d54b6f63a9f2d7bd79e57808111fcb1b3f8c87744cb159cef85328",
+  "manifestVersion": 2,
+  "role": "background",
+  "updatedAt": "2026-10-31T12:00:00Z"
+}

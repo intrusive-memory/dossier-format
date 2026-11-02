@@ -27,8 +27,8 @@
         },
         {
           "role": "template",
-          "sha256": "1bc7363767e2bbd2a165d8455ecc5b5fdf989ba2cde0dc449d9bd800a1e414cc",
-          "version": "0.1.0"
+          "sha256": "fe917290fcaa8f2c9bceede04ee0600848aff666861625dfd0cfb3ba40c8157f",
+          "version": "0.1.1"
         }
       ],
       "kind": "dossier",
@@ -84,7 +84,7 @@
     },
     {
       "path": "THE CARTOGRAPHER-dossier.html",
-      "sha256": "aa5f143ae15a8d50e24e3a712db04820425add4982cd778f249f73ac58245788",
+      "sha256": "2d79b940fa2b96cd7c01863c7a8188f23e4cfcf08d7fce980d8d8d791261aa7f",
       "sizeBytes": 322339
     },
     {
@@ -102,7 +102,7 @@
     "name": "dossier-format fixtures",
     "version": "1"
   },
-  "manifestChecksum": "4118b32ad028e9034c0a425fcaf78f7e6b05e385e3d5a838774efc4653154868",
+  "manifestChecksum": "9946c461bea5ca3df4b6a89914895da86c1c36895b0c6356e89917616db3456d",
   "manifestVersion": 2,
   "role": "background",
   "updatedAt": "2026-10-31T12:00:00Z"
