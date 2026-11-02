@@ -27,8 +27,8 @@
         },
         {
           "role": "template",
-          "sha256": "1bc7363767e2bbd2a165d8455ecc5b5fdf989ba2cde0dc449d9bd800a1e414cc",
-          "version": "0.1.0"
+          "sha256": "8819dcefe82728a9a407707195af5277527a65e842db63a831587d062ffad76c",
+          "version": "0.1.1"
         }
       ],
       "kind": "dossier",
@@ -98,8 +98,8 @@
     },
     {
       "path": "THE FERRYMAN-dossier.html",
-      "sha256": "e2ecc8da00ee86283a0ff22c04fd619671d23d11f5d186a869886571cbeda3d3",
-      "sizeBytes": 335161
+      "sha256": "ece9d698ba01213395401cc4ef7c38db6bb8e154507c995f14272624a572fb7a",
+      "sizeBytes": 336228
     },
     {
       "path": "images/face-3f84b78e.png",
@@ -121,7 +121,7 @@
     "name": "dossier-format fixtures",
     "version": "1"
   },
-  "manifestChecksum": "14e65302b04af35e6e83c50bdd265c26f91871ae85cb7b1459460113926d8da6",
+  "manifestChecksum": "416f4209ac8400d21fdfd9c06f51792828141bcc7d78fc5be38c3f84eba36bbb",
   "manifestVersion": 2,
   "role": "background",
   "updatedAt": "2026-10-31T12:00:00Z"

@@ -1,7 +1,7 @@
 {
   "formatVersion": 2,
-  "templateVersion": "0.1.0",
-  "templateSha256": "1bc7363767e2bbd2a165d8455ecc5b5fdf989ba2cde0dc449d9bd800a1e414cc",
+  "templateVersion": "0.1.1",
+  "templateSha256": "8819dcefe82728a9a407707195af5277527a65e842db63a831587d062ffad76c",
   "fixtures": [
     {
       "path": "valid/complete-lead",
@@ -145,6 +145,16 @@
       "mayAlso": [],
       "complete": true,
       "missingRequired": []
+    },
+    {
+      "path": "valid/page-wrapped-text",
+      "bundle": "characters/THE SCRIBE.dossier",
+      "verdict": "valid",
+      "codes": [],
+      "mayAlso": [],
+      "complete": true,
+      "missingRequired": [],
+      "note": "On its page, each wrapped item is one <li>, the bold spans the line break, and only marks with nothing between them get a separator. Quotes: two > lines and a wrapped line are one <blockquote>, a quote after item text is inside its <li>, < in a quote is escaped, and a > elsewhere in a line is literal. The --- lines are dropped, so Wardrobe, with only a --- under it, shows its empty text. A mark on the Voice tab leads to Sources on the Profile tab."
     },
     {
       "path": "valid/name-on-disk-nfd",
