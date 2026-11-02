@@ -23,7 +23,7 @@ language substitutes text into two files.
 | `page-copies.json` | DF-43's sizes and quality, in one place. |
 | `fonts/` | The fonts and a licence for each. |
 | `VERSION.json` | `version` and `sha256`. |
-| `example/` | A page filled by hand from `examples/valid/complete-lead`. Not hashed. |
+| `example/` | The page of `examples/valid/complete-lead`. Not hashed. |
 
 Checks: `python3 tools/check_template.py`, which also runs
 `tools/build_template_css.py --check` and `tools/template_version.py --check`.
@@ -50,7 +50,7 @@ here.
 | `{{page.before}}` | Each field of `page.before` in `fields.json`, stamped | Markup |
 | `{{tab.links}}` | A `tabLink` fragment per tab of `fields.json`, in order | Markup |
 | `{{tab.panels}}` | A `tab` fragment per tab, in order, joined by a newline | Markup |
-| `{{page.after}}` | Each field of `page.after`, stamped | Markup |
+| `{{page.after}}` | Each field of `page.after`, stamped. It has none today, so this is empty and the footer is hidden. | Markup |
 | `{{record}}` | The record (§11), every `<` written `\u003c` | Markup |
 
 ### Stamping a field
@@ -85,7 +85,8 @@ Other placeholders of those fragments:
 fragment; on `audio`, an `audioEmpty` fragment. When `emptyText` is null, it's nothing.
 
 Footnote references become `mark` fragments, `{{number}}` being the footnote's
-position in `page.sources`. A reference with no definition stays as plain text (field
+position in `page.sources`, with a `markSeparator` fragment between two side by side
+(rule 4). A reference with no definition stays as plain text (field
 rule 2).
 
 ## Template rules
@@ -109,12 +110,34 @@ These rules are normative: DOSSIER-FORMAT §11 makes them part of the format.
    a click inside that field. Neither present: nothing happens. A click on a name in
    a field posts that field's key; DF-51 doesn't say how a host would learn the name.
 3. **Markdown,** where `fields.json` says "The text is Markdown", is
-   paragraphs, `-` lists, `**bold**`, `*emphasis*`, and `###` as `<h4>`.
-   Everything else is literal text. HTML in the source is escaped, never passed
-   through, and a Markdown link stays as text (DF-51).
+   paragraphs, `-` lists, `>` quotes, `**bold**`, `*emphasis*`, and `###` as `<h4>`.
+   `<p>`, `<ul>`, `<li>`, `<h4>` and `<blockquote>` are written as those elements, not
+   stamped from fragments.
+   A line break inside a paragraph or list item continues it, and `**` and `*` may span
+   one; a blank line, a `---` line, a `###` heading, a footnote definition or the next
+   `- ` ends a list item. Everything else is literal text. HTML in the source is escaped,
+   never passed through, and a Markdown link stays as text (DF-51).
+
+   **`---` lines.** A line that is only `---`, spaces aside, is dropped. It ends the
+   paragraph, list item or quote it follows, as a blank line does. This rule has no code
+   fences: a fence is literal text, and a `---` between two of them is dropped like any
+   other.
+
+   **Quotes.** A line whose first non-space character is `>`, optionally followed by one
+   space, is a quote line. A `>` elsewhere in a line is literal text. Consecutive quote
+   lines form one quote, in one `<blockquote>` that holds the text directly, and the line
+   break between them continues it, as a paragraph's does. A non-blank line with no `>`
+   directly after a quote line continues the quote. A blank line, a `---`, a `###`, a `- `
+   item or a footnote definition ends it. A quote line directly after list-item text
+   belongs to that item, so the `<blockquote>` is inside the `<li>`, after its text, and
+   indentation doesn't matter. Otherwise it's a block of its own, and it ends a paragraph
+   it follows. Its content takes `**`, `*` and marks like any text, and HTML stays
+   escaped; a `###` or `- ` after the `>` is literal. `**` and `*` don't span from an
+   item's text into its quote.
 4. **Footnote marks,** which `fields.json` says "lead to `page.sources`", are the
    `mark` fragment, numbered by citation order, with
-   `page.sources` shown numbered. Items have no anchors of their own, because every id
+   `page.sources` shown numbered. Two marks with nothing at all between them have a
+   `markSeparator` fragment between them. Items have no anchors of their own, because every id
    on the page is a key.
 5. **Scaling a page copy.** DF-43 gives the size. An image of another shape gets there
    this way: scale to cover and crop the centre. The overlay's percentages
@@ -125,8 +148,11 @@ These rules are normative: DOSSIER-FORMAT §11 makes them part of the format.
 8. **Print is always light,** whatever the reader's color preference.
 9. **The record's JSON bytes (DF-45)** are the canonical JSON of §7, then the
    `<` replacement.
-10. **An unknown or absent `#` anchor** opens the first tab. A `page.*` anchor scrolls
-    and doesn't change the tab.
+10. **An unknown or absent `#` anchor** opens the first tab. An anchor for a tab, or for
+    a key inside one, opens that tab and scrolls to the key. `page.sources` is on the
+    Profile tab, so a click on a footnote mark, on any tab, opens Profile and scrolls to
+    Sources, every time, including when the hash is already `#page.sources`. A `page.*`
+    anchor outside the tabs scrolls and doesn't change the tab.
 11. **`fields.json` keys its comment doesn't list:** `wrap`, `caption`, `note`,
     `overlay`, `row`, `role`. They're read as above. `role: banner` on `page.integrity`
     is carried by the stylesheet, which names that key; it doesn't become an ARIA role,
@@ -137,21 +163,23 @@ These rules are normative: DOSSIER-FORMAT §11 makes them part of the format.
 These are normative too (§11). They state how `data/fields.json` reads where a renderer
 could otherwise read it two ways.
 
-1. **Canon items.** Each paragraph or list item of Canon & Guardrails is one item of
-   `profile.canon`. Its `source` is the class of each footnote it cites, in order, joined
-   by `, `. With none cited, `source` is the empty text.
+1. **Canon items.** Each paragraph, list item or top-level quote of Canon & Guardrails is
+   one item of `profile.canon`, and a quote inside a list item is part of that item (rule
+   3). Its `source` is the class of each footnote it cites, quote included, in order,
+   joined by `, `. With none cited, `source` is the empty text.
 2. **Citation order.** `page.sources` has one item per footnote definition, in the order
    each label is first referenced in the `CHARACTER.md` body, whichever field shows that
    reference. Definitions never cited in the body come after those, in file order, and
    aren't marked anywhere. Each item is the class, then the text. A mark's number is its
    footnote's position in that list. A definition is shown only in `page.sources`, not in
-   the section it follows. A reference with no definition is shown as written, as plain
+   the section it follows. A definition cited only from another definition's text counts
+   as never cited. A reference with no definition is shown as written, as plain
    text, with no `mark` fragment and no number. `W-FOOTNOTE` still reports both (§9.3).
 3. **Repeated headings.** A section field shows the body of every `##` heading that
    matches by §9.2's rule, in body order. A parenthetical on a matched heading is shown as
    written, in a `parenthetical` fragment, above that body. The field's label doesn't
-   change. The field is empty when no heading matches or there's only whitespace under
-   those that do.
+   change. The field is empty when no heading matches or there's only whitespace and
+   `---` lines under those that do.
 4. **The page's own tier row.** In `page.completeness` the `dossier` row counts as
    satisfied, since this page is that asset and the embedded manifest leaves it out (§11).
    In `page.missing` it is never listed. `page.completeness` is `n/N`: `N` is the rows of
@@ -160,7 +188,8 @@ could otherwise read it two ways.
 5. **The banner is computed without the page.** `page.integrity` lists the findings of
    §14 over the bundle without the page, as the embedded manifest describes it, so the
    page being replaced is never among them. It has one item per error, and per `W-STALE`
-   on a selected asset: the code, then what it names.
+   on a selected asset: the code, then what it names. `E-FILE-HASH` and `E-FILE-MISSING`
+   never appear, because they refuse the render (§11).
 6. **Row labels for missing rows.** `page.missing` lists each unsatisfied required row by
    its `label` in `data/tiers.json`, in the table's order. `W-INCOMPLETE` lists the same
    rows by ID (§14).
@@ -198,11 +227,10 @@ is in Plex Sans.
 
 ## The example
 
-`example/WREN HALLOWAY-dossier.html` was filled by hand for acceptance 3 and 4:
-WREN HALLOWAY from `examples/valid/complete-lead`, an invented character with flat
-placeholder images and 0.2 seconds of silence for each sample. It isn't regenerated by
-any tool. `tools/build_examples.py` fills the template for its own fixture pages, and
-its `complete-lead` page is byte-identical to this one today; it is test data, not a
-renderer (AGENTS.md). After a change to the template this page's
-`dossier-template` meta and its copies of the CSS and script need replacing by hand;
-`tools/check_template.py` fails until they are.
+`example/WREN HALLOWAY-dossier.html` is WREN HALLOWAY from
+`examples/valid/complete-lead`, an invented character with flat placeholder images and
+0.2 seconds of silence for each sample. No tool writes it. `tools/build_examples.py`
+fills the template for its own fixture pages, and this file is a copy of its
+`complete-lead` page, byte for byte; that tool is test data, not a renderer (AGENTS.md).
+After a change to the template or to `data/fields.json`, copy that page over this one;
+`tools/check_template.py` fails until the template's copy is current.

@@ -5,6 +5,56 @@ updated: 2026-11-01
 
 # Changelog
 
+## Format 2, release candidate 7 (2026-11-01)
+
+Template 0.1.1. No valid bundle becomes invalid, so `manifestVersion` stays 2.
+
+- **`template/fragments.html`, rule 4:** a `markSeparator` fragment goes between two
+  footnote marks with nothing between them, so `1`, `2` doesn't read as `12`. This is in the
+  markup, because a CSS sibling selector also matches two marks with text between them.
+- **Rule 3:** a line break inside a paragraph or list item continues it, and `**` and `*`
+  may span one.
+- **Field rule 2:** a definition cited only from another definition's text counts as never
+  cited.
+- **§11, DF-52, field rule 5:** a renderer refuses a bundle with `E-FILE-HASH` or
+  `E-FILE-MISSING` on any file but the page being replaced, and changes nothing, so a
+  re-render can't clear an integrity banner. A validator's results don't change.
+- **Rule 3, `---`:** a line that is only `---` is dropped when reading description
+  Markdown, and it ends the paragraph, list item or quote it follows, as a blank line does.
+  The rule has no code fences, so a `---` between fences is dropped too. A section with only
+  `---` lines under it is empty (field rule 3).
+- **Rule 3, `>` quotes:** a line whose first non-space character is `>` is a quote line.
+  Consecutive quote lines, and non-blank lines directly after one, are one `<blockquote>`. A
+  quote directly after list-item text is inside its `<li>`; otherwise it's a block of its own.
+  In Canon & Guardrails it's part of its item, or an item of its own (field rule 1).
+  `<blockquote>` is a literal element, as `<p>`, `<ul>` and `<h4>` are, with its style from a
+  new token, `component.blockquote`. The `canonItem` fragment's text is now in a `<div>`,
+  because a quote can't sit in a `<span>`.
+- **`data/fields.json`, rule 10:** `page.sources` is now a field of the Profile tab, before
+  `profile.provenance`, so each tab still ends with its provenance line. Its key and the marks'
+  `#page.sources` link don't change, and there are still 60 keys. `page.after` stays, with no
+  fields, and its empty footer is hidden. A click on a mark on any tab opens Profile and scrolls
+  to Sources, every time. With script off and in print, Sources shows once. A `page.*` anchor
+  outside the tabs still scrolls and doesn't change the tab.
+- **§5.6, DF-13:** the files on disk are the source of truth, and the manifest is an index of
+  them. An edit isn't an alteration until it's saved and the file in the directory reflects it.
+  `E-FILE-HASH` means the manifest is behind the disk, not that the file is wrong. Readers and
+  validators judge only what's on disk.
+- **§5.2, §5.6, §11, DF-30:** a writer's rescan adds an entry for an unlisted file, and keeps the
+  recorded hash and size of a listed file that doesn't match, and the entry of one that's missing,
+  unless the write itself changed or removed it. *Refresh* is the one way to accept a changed
+  file. It drops the entry of a missing file with no asset, refuses a missing file an asset
+  points at, and reports each by path. A renderer still refuses `E-FILE-HASH` and
+  `E-FILE-MISSING`. A validator's results don't change.
+- **§4, §13, DF-14, DF-18:** a name's `<sha8>` records the bytes when the file was added, and the
+  manifest's hash is the authority. A file refresh accepts keeps its name, and the report says
+  when a name no longer matches its hash. A writer doesn't modify an original, and the disk is
+  still the truth about it. §13 no longer calls the hash a file's identity, and §4 and DF-14 no
+  longer say a name can't collide or claim to be something it isn't.
+- **Fixtures:** `valid/page-wrapped-text`, which also has `---` lines, quotes and a mark on the
+  Voice tab. Every page is regenerated with template 0.1.1, and each fixture's expected result
+  is unchanged.
+
 ## Format 2, release candidate 6 (2026-11-01)
 
 No valid bundle becomes invalid, so `manifestVersion` stays 2. `template/` doesn't change.

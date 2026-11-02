@@ -27,8 +27,8 @@
         },
         {
           "role": "template",
-          "sha256": "1bc7363767e2bbd2a165d8455ecc5b5fdf989ba2cde0dc449d9bd800a1e414cc",
-          "version": "0.1.0"
+          "sha256": "8819dcefe82728a9a407707195af5277527a65e842db63a831587d062ffad76c",
+          "version": "0.1.1"
         }
       ],
       "kind": "dossier",
@@ -84,8 +84,8 @@
     },
     {
       "path": "INÉS-dossier.html",
-      "sha256": "9ab4cd825d01905b85fd1eda9af727964791a5944acd4a02ffce252245286d4b",
-      "sizeBytes": 242362
+      "sha256": "ddd835d89a5d8c53fc029b6a0379973dc24ad31e1e7412d401de4c069cd99b17",
+      "sizeBytes": 243429
     },
     {
       "path": "voice/INÉS.vox",
@@ -102,7 +102,7 @@
     "name": "dossier-format fixtures",
     "version": "1"
   },
-  "manifestChecksum": "caf4b96baafd1a1fdbd5191426618dccd44023eab5069197667edca5575ea38e",
+  "manifestChecksum": "cb46b2bff0f96fc07555dfb1017b6e56cb9630c9ab94526185567bb00e87e295",
   "manifestVersion": 2,
   "role": "underfive",
   "updatedAt": "2026-10-31T12:00:00Z"

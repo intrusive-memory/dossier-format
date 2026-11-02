@@ -27,8 +27,8 @@
         },
         {
           "role": "template",
-          "sha256": "1bc7363767e2bbd2a165d8455ecc5b5fdf989ba2cde0dc449d9bd800a1e414cc",
-          "version": "0.1.0"
+          "sha256": "8819dcefe82728a9a407707195af5277527a65e842db63a831587d062ffad76c",
+          "version": "0.1.1"
         }
       ],
       "kind": "dossier",
@@ -84,8 +84,8 @@
     },
     {
       "path": "THE ARCHIVIST-dossier.html",
-      "sha256": "c395789c2af885ffae629381953117637cddb320df1577e61e3300819084c3ff",
-      "sizeBytes": 332201
+      "sha256": "fc789d3e322d0e15cbc1f1e10549b00e0abb7669f6750bfcb46cf8ba885fb74b",
+      "sizeBytes": 333268
     },
     {
       "path": "images/face-35c29e17.png",
@@ -102,7 +102,7 @@
     "name": "dossier-format fixtures",
     "version": "1"
   },
-  "manifestChecksum": "db8ba46bd8559646a57d75f0ea9e633185fe92208311f691e7cf3d2eb5942a7c",
+  "manifestChecksum": "d2459261c10e3dc46d6c120833d6c16fe6b8ad278329e32397b81611c5f6dc13",
   "manifestVersion": 2,
   "role": "background",
   "updatedAt": "2026-10-31T12:00:00Z"

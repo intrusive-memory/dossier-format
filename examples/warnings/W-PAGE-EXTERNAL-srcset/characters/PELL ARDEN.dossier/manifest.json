@@ -27,8 +27,8 @@
         },
         {
           "role": "template",
-          "sha256": "1bc7363767e2bbd2a165d8455ecc5b5fdf989ba2cde0dc449d9bd800a1e414cc",
-          "version": "0.1.0"
+          "sha256": "8819dcefe82728a9a407707195af5277527a65e842db63a831587d062ffad76c",
+          "version": "0.1.1"
         }
       ],
       "kind": "dossier",
@@ -84,8 +84,8 @@
     },
     {
       "path": "PELL ARDEN-dossier.html",
-      "sha256": "d0885dfca3d176fcbb3358255941605337585c95053b7fcb1336b80cb430a817",
-      "sizeBytes": 341939
+      "sha256": "ab69a0ef030e57201e18bc4cc7c962fadfe68d630890be85001d48eadeada6f4",
+      "sizeBytes": 343006
     },
     {
       "path": "images/face-199a72c5.png",
@@ -102,7 +102,7 @@
     "name": "dossier-format fixtures",
     "version": "1"
   },
-  "manifestChecksum": "041e3621d5ddf04656152242408c4f4940323b07ba95c6351971b76a37b345f3",
+  "manifestChecksum": "f00c5a4cf7884637d78762da4152134d799f059cc36ae7e97683962ab09240ad",
   "manifestVersion": 2,
   "role": "background",
   "updatedAt": "2026-10-31T12:00:00Z"

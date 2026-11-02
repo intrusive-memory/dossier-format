@@ -28,8 +28,8 @@
         },
         {
           "role": "template",
-          "sha256": "1bc7363767e2bbd2a165d8455ecc5b5fdf989ba2cde0dc449d9bd800a1e414cc",
-          "version": "0.1.0"
+          "sha256": "8819dcefe82728a9a407707195af5277527a65e842db63a831587d062ffad76c",
+          "version": "0.1.1"
         }
       ],
       "kind": "dossier",
@@ -507,8 +507,8 @@
     },
     {
       "path": "WREN HALLOWAY-dossier.html",
-      "sha256": "530765c01b999c6e716e31162b3b46fc692ebd1b55aafddaeab2c81fda8eec36",
-      "sizeBytes": 498809
+      "sha256": "461e0846b249fb9ffa2b0679a9f73a5f33bc1ac3f435af79cdc4077a1057e4cb",
+      "sizeBytes": 499874
     },
     {
       "path": "images/expression-frightened-350a34f2.png",
@@ -620,7 +620,7 @@
     "name": "dossier-format fixtures",
     "version": "1"
   },
-  "manifestChecksum": "837e37bae9aebf31fd6b5abb6ef770466befbf708ff079145a9cfbd6a08d316e",
+  "manifestChecksum": "fc0f50c34801f5fc29d63d562f2b1ae5c50bd9251468589abab52e41724ee2e9",
   "manifestVersion": 2,
   "prompts": {
     "identity": "A tall woman, grey eyes, long grey coat, no jewelry, no glasses.",
