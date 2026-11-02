@@ -5,6 +5,15 @@ updated: 2026-11-01
 
 # Changelog
 
+## Format 2, release candidate 6 (2026-11-01)
+
+No valid bundle becomes invalid, so `manifestVersion` stays 2. `template/` doesn't change.
+
+- **`template/README.md` field rule 2, `data/fields.json`:** on the page, footnote
+  definitions never cited go after the numbered sources, in file order, and a mark with no
+  definition shows as plain text. `W-FOOTNOTE` still flags both.
+- **Fixtures:** `warnings/W-FOOTNOTE-on-page`. No existing fixture changed.
+
 ## Format 2, release candidate 5 (2026-11-01)
 
 Template 0.1.0. No valid bundle becomes invalid, so `manifestVersion` stays 2. The
