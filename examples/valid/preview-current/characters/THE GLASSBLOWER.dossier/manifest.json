@@ -1,0 +1,109 @@
+{
+  "assets": [
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "kind": "description",
+      "path": "CHARACTER.md",
+      "provenance": {
+        "provider": "manual"
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T12:00:00Z",
+      "derivedFrom": [
+        {
+          "path": "CHARACTER.md",
+          "role": "description",
+          "sha256": "20e4da52aff2101dbceaa045714e5351feb20f66cfc73c91c0025b61c67d33d1"
+        },
+        {
+          "role": "castMember",
+          "sha256": "b365a7e8d729791828a10dff1411ad0dde19c4408d84f2c8338d12e90313aa05"
+        },
+        {
+          "role": "bundle",
+          "sha256": "cc0dde3760392f7dfe6544e021e90d7f6a655f4f8f95805f6e1ee75479f83ad8"
+        },
+        {
+          "role": "template",
+          "sha256": "8819dcefe82728a9a407707195af5277527a65e842db63a831587d062ffad76c",
+          "version": "0.1.1"
+        }
+      ],
+      "kind": "dossier",
+      "path": "THE GLASSBLOWER-dossier.html",
+      "provenance": {
+        "notes": "Filled from template/ by tools/build_examples.py.",
+        "provider": "dossier-format fixtures"
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "derivedFrom": [
+        {
+          "path": "images/portrait-d0ca72f7.png",
+          "role": "portrait",
+          "sha256": "d0ca72f7d8e5df55bdf654477a12b5205c3cd0ec2abd92cd95386159ce7b5531"
+        }
+      ],
+      "kind": "face",
+      "path": "images/face-382f753b.png",
+      "provenance": {
+        "artStyle": "flat placeholder shapes",
+        "box": {
+          "height": 100,
+          "width": 80,
+          "x": 50,
+          "y": 60
+        },
+        "engine": "fixture",
+        "provider": "personaje"
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "kind": "portrait",
+      "path": "images/portrait-d0ca72f7.png",
+      "provenance": {
+        "artStyle": "flat placeholder shapes",
+        "engine": "fixture",
+        "provider": "vinetas"
+      },
+      "status": "selected"
+    }
+  ],
+  "character": "THE GLASSBLOWER",
+  "files": [
+    {
+      "path": "CHARACTER.md",
+      "sha256": "20e4da52aff2101dbceaa045714e5351feb20f66cfc73c91c0025b61c67d33d1",
+      "sizeBytes": 441
+    },
+    {
+      "path": "THE GLASSBLOWER-dossier.html",
+      "sha256": "c06093b5862724f46d47b767c64912482eee5438673fa697269dbc3394166662",
+      "sizeBytes": 330541
+    },
+    {
+      "path": "images/face-382f753b.png",
+      "sha256": "382f753b9e2fb5fe35dca52f906c791fa19839dcd10ee0498f19581c145b2ce6",
+      "sizeBytes": 704
+    },
+    {
+      "path": "images/portrait-d0ca72f7.png",
+      "sha256": "d0ca72f7d8e5df55bdf654477a12b5205c3cd0ec2abd92cd95386159ce7b5531",
+      "sizeBytes": 939
+    }
+  ],
+  "generator": {
+    "name": "dossier-format fixtures",
+    "version": "1"
+  },
+  "manifestChecksum": "f36c97c88af58206053e9b6c798345650b68dcb3ec2ffa23efbf466e788a35e3",
+  "manifestVersion": 2,
+  "role": "background",
+  "updatedAt": "2026-10-31T12:00:00Z"
+}

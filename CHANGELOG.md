@@ -1,9 +1,36 @@
 ---
 type: changelog
-updated: 2026-11-01
+updated: 2026-11-10
 ---
 
 # Changelog
+
+## Format 2, release candidate 8 (unreleased)
+
+Template 0.1.1, unchanged. No valid bundle becomes invalid, so `manifestVersion` stays 2.
+
+- **§11.1, DF-68 to DF-74: the preview.** A viewer shows a bundle by building the page from
+  what's on disk into `.preview/<key>.html`, a hidden store in the bundle, outside `files`,
+  `manifestChecksum` and validation. The key is the SHA-256 of `dossier-preview`, the preview
+  version (1), the hash of `manifest.json`'s bytes, the member's hash and the template's hash,
+  so checking it reads only `manifest.json` and `CAST.md`. A stored preview with that key is
+  shown with no write. Otherwise the viewer builds one leniently (a broken inventory goes on
+  the banner, unreadable files are left out, the member is optional, any page is ignored),
+  renames it into place, and only then removes everything else in the store but `.gitignore`.
+  A **rebuild**, which a person asks for, is a writer's refresh (§5.6) under an update marker,
+  followed by a build even when the key is unchanged. The store is kept out of git by
+  `.preview/.gitignore` containing `*`.
+- **§11:** the page is the only HTML file in the bundle's **inventory**. The rule that a broken
+  inventory refuses a render is the page's and doesn't apply to a preview.
+- **§12, DF-60, DF-61:** a host shows a version 2 bundle through its preview, and a version 1
+  bundle's page as before. Its only write in a bundle is the preview store, plus
+  `manifest.json` through a rebuild. A validator finding is shown above the preview, and in its
+  place only when no preview can be built. A host that can't build shows a matching stored
+  preview, or says none is stored.
+- **§4:** `.preview/` added to the layout.
+- **Fixtures:** `valid/preview-current` (a hit, beside an older preview and a leftover
+  temporary file) and `valid/preview-out-of-date` (a miss). `conformance.json` gives each one's
+  `preview.key` and `preview.hit`.
 
 ## Format 2, release candidate 7 (2026-11-01)
 
