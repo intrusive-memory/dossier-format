@@ -71,6 +71,34 @@
       "note": "Expired, too far ahead, a time zone offset, unreadable, a zero-byte hidden file, and names that aren't markers: none counts, and a validator reports none."
     },
     {
+      "path": "valid/preview-current",
+      "bundle": "characters/THE GLASSBLOWER.dossier",
+      "verdict": "valid",
+      "codes": [],
+      "mayAlso": [],
+      "complete": true,
+      "missingRequired": [],
+      "preview": {
+        "key": "b80f93f3d11e71c07f87d7bf8d80da2bd3a16aec33f3253cde51597400d34f81",
+        "hit": true
+      },
+      "note": "The store holds the preview for this key, an older one and a temporary file left by a write. A viewer shows the first and writes nothing; a validator reports none of them."
+    },
+    {
+      "path": "valid/preview-out-of-date",
+      "bundle": "characters/THE TIDEKEEPER.dossier",
+      "verdict": "valid",
+      "codes": [],
+      "mayAlso": [],
+      "complete": true,
+      "missingRequired": [],
+      "preview": {
+        "key": "08ad529b98183c9e242ac85371a45446ac6140d6688223f2ca33f29fbe9fc7b3",
+        "hit": false
+      },
+      "note": "The store holds only a preview for another key. A viewer builds this key's preview; after it is stored, .gitignore and that preview are all the store holds."
+    },
+    {
       "path": "valid/hand-edited-member",
       "bundle": "characters/THE FERRYMAN.dossier",
       "verdict": "valid",

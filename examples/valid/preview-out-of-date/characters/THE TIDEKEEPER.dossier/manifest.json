@@ -1,0 +1,109 @@
+{
+  "assets": [
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "kind": "description",
+      "path": "CHARACTER.md",
+      "provenance": {
+        "provider": "manual"
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T12:00:00Z",
+      "derivedFrom": [
+        {
+          "path": "CHARACTER.md",
+          "role": "description",
+          "sha256": "67d00b8b183b751948e0afe574a086774fdabcae77f1f0e79a8b127757dfb21b"
+        },
+        {
+          "role": "castMember",
+          "sha256": "62deee12324b5673d5d004ae14e26eb67550b854827668c79e0d1da44a8240af"
+        },
+        {
+          "role": "bundle",
+          "sha256": "574898283fdc8f9fa7d587d0c35db2fa158eea7d0b9f16c7634c54d36f338add"
+        },
+        {
+          "role": "template",
+          "sha256": "8819dcefe82728a9a407707195af5277527a65e842db63a831587d062ffad76c",
+          "version": "0.1.1"
+        }
+      ],
+      "kind": "dossier",
+      "path": "THE TIDEKEEPER-dossier.html",
+      "provenance": {
+        "notes": "Filled from template/ by tools/build_examples.py.",
+        "provider": "dossier-format fixtures"
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "derivedFrom": [
+        {
+          "path": "images/portrait-131a3da4.png",
+          "role": "portrait",
+          "sha256": "131a3da4cf590c90c729e7b24a798b396e8fd0ec794482f3b5310cac4b7bab85"
+        }
+      ],
+      "kind": "face",
+      "path": "images/face-26d36c99.png",
+      "provenance": {
+        "artStyle": "flat placeholder shapes",
+        "box": {
+          "height": 100,
+          "width": 80,
+          "x": 50,
+          "y": 60
+        },
+        "engine": "fixture",
+        "provider": "personaje"
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "kind": "portrait",
+      "path": "images/portrait-131a3da4.png",
+      "provenance": {
+        "artStyle": "flat placeholder shapes",
+        "engine": "fixture",
+        "provider": "vinetas"
+      },
+      "status": "selected"
+    }
+  ],
+  "character": "THE TIDEKEEPER",
+  "files": [
+    {
+      "path": "CHARACTER.md",
+      "sha256": "67d00b8b183b751948e0afe574a086774fdabcae77f1f0e79a8b127757dfb21b",
+      "sizeBytes": 439
+    },
+    {
+      "path": "THE TIDEKEEPER-dossier.html",
+      "sha256": "2c0b486f99111a6e8f83a876afa659eaf84aeec10b497d6e232c9771e007a3b3",
+      "sizeBytes": 341007
+    },
+    {
+      "path": "images/face-26d36c99.png",
+      "sha256": "26d36c99b93b8b27152c131806ab1c31d7e000f293b025c699c00fab9131c0bf",
+      "sizeBytes": 703
+    },
+    {
+      "path": "images/portrait-131a3da4.png",
+      "sha256": "131a3da4cf590c90c729e7b24a798b396e8fd0ec794482f3b5310cac4b7bab85",
+      "sizeBytes": 939
+    }
+  ],
+  "generator": {
+    "name": "dossier-format fixtures",
+    "version": "1"
+  },
+  "manifestChecksum": "3e300d25cca45ea2b9a70c4529702c2377e675af2af6b97489109b82d4e965d9",
+  "manifestVersion": 2,
+  "role": "background",
+  "updatedAt": "2026-10-31T12:00:00Z"
+}

@@ -1,6 +1,6 @@
 ---
 type: doc
-updated: 2026-11-01
+updated: 2026-11-10
 ---
 
 # Conformance fixtures
@@ -30,6 +30,7 @@ Validate it from its `CAST.md`.
 | `mayAlso` | Codes a validator MAY also report. Any other code is a failure. |
 | `complete`, `missingRequired` | The completeness result against the tier (§8.3). Absent where it isn't asserted. |
 | `updateStatus` | The update status of `bundle` (§5.7): `at` is the time to use as `now`, and `updating` is the answer. Absent where it isn't asserted. |
+| `preview` | The preview of `bundle` (§11.1): `key` is its key, against the template in `templateSha256`, and `hit` says whether `.preview/<key>.html` is already stored. Absent where it isn't asserted. |
 | `note` | What the fixture is testing, where the name doesn't say. |
 
 ## Limits
@@ -49,6 +50,11 @@ Validate it from its `CAST.md`.
   by *refresh* (§5.6) has no fixture for the same reason, and neither does a writer's
   rescan keeping a recorded hash, or *refresh* accepting a changed file or dropping a missing
   one: a fixture holds a bundle before or after, and a validator judges only that.
+- **Previews (§11.1) are asserted by key only.** A fixture can show a store and the key that
+  should find it, but not a viewer's build, clean-up or rebuild, which happen over time.
+  The stored preview in `valid/preview-current` is that bundle's page, and the store's other
+  files are what clean-up would remove. Each store's `.gitignore` holds `*`, as §11.1 says, so
+  git here ignores the store too: a new file in one needs `git add -f`.
 - **Check findings (§14) aren't asserted.** `C-` codes are outside validation results,
   so they aren't in `codes` or `mayAlso`. `valid/empty-background` and
   `valid/description-no-character-key` say in their notes which one a check reports.

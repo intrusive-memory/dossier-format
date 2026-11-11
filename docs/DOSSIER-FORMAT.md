@@ -2,7 +2,7 @@
 type: specification
 state: draft
 formatVersion: 2
-updated: 2026-11-01
+updated: 2026-11-10
 ---
 
 # The dossier format, version 2
@@ -12,7 +12,7 @@ holding the character's description, images, voice and a self-contained HTML
 page, inventoried by `manifest.json`.
 
 This document is normative. It implements [REQUIREMENTS.md](../REQUIREMENTS.md)
-(DF-1 to DF-67); the requirement each section satisfies is cited in brackets.
+(DF-1 to DF-74); the requirement each section satisfies is cited in brackets.
 Decisions D1–D10 and the evidence behind every property are in
 [PROPERTY-INVENTORY.md](PROPERTY-INVENTORY.md).
 
@@ -130,6 +130,7 @@ The format writes none of them except through a `CAST.md` writer.
   manifest.json                     the inventory (§5)
   CHARACTER.md                      the description (§9)
   <CHARACTER>-dossier.html          the page (§11)
+  .preview/                         a viewer's previews (§11.1): hidden, outside the inventory
   images/
     portrait-<sha8>.png
     face-<sha8>.png
@@ -766,8 +767,9 @@ It is a known file without an asset entry.
 
 ## 11. The dossier page [DF-42 to DF-53]
 
-`<CHARACTER>-dossier.html` is the only HTML file in the bundle and is
-registered as `kind: dossier`.
+`<CHARACTER>-dossier.html` is the only HTML file in the bundle's inventory (§5.2)
+and is registered as `kind: dossier`. A viewer's previews (§11.1) are hidden, so
+they are outside the inventory and aren't the page.
 
 - **Self-contained.** Styles, scripts, fonts, images and samples are
   embedded as `data:` URIs or inline. No network request, no reference to
@@ -805,6 +807,7 @@ registered as `kind: dossier`.
   change nothing, so a page is never made from a bundle whose manifest is behind its
   disk. It refuses until the finding clears, which for a changed file means until
   *refresh* has run (§5.6). Other errors and stale selections still go on the banner.
+  This rule is the page's. A preview (§11.1) is built from such a bundle anyway.
 - **Filling the template:** the sections "Template rules" and "Field rules" of
   [`template/README.md`](../template/README.md) are normative, as part of this
   section.
@@ -826,20 +829,162 @@ follows it, and a source can be cited by its address. Anything else is
 `W-PAGE-EXTERNAL`, including a relative `<a href>`. A script that makes a request
 can't be detected this way, and is still forbidden.
 
-## 12. Hosting [DF-58 to DF-63, DF-67]
+### 11.1 The preview [DF-68 to DF-74]
+
+A **preview** is the page as a **viewer** builds it to show a bundle, from the bundle as
+it is on disk. It is how a host (§12) shows a dossier, whether or not the bundle has a
+page, and whether or not that page is current. A viewer is any tool that builds
+previews; a host, a writer or both can be one.
+
+A preview isn't the page. It isn't registered as an asset, it is outside `files` and
+`manifestChecksum`, and a validator doesn't report it, because it lives in a hidden
+directory (§5.2).
+
+**The store.** A bundle's previews are kept in `.preview/`, a directory in the bundle's
+root. A **preview file** is a regular file directly in `.preview/` named `<key>.html`,
+where `<key>` is 64 lowercase hexadecimal characters (below). Nothing else in `.preview/`
+is a preview. The store SHOULD be left out of version control. A viewer SHOULD write
+`.preview/.gitignore` with the one line `*`, which keeps the store out of git with no
+change to the project. A viewer MUST NOT put anything in the bundle outside `.preview/`,
+except through a rebuild (below).
+
+**The key** names the preview that matches the bundle now. It is the SHA-256 (§1) of
+the UTF-8 text of these five lines, each ending in one LF (U+000A):
+
+```
+dossier-preview
+1
+<the SHA-256 of manifest.json, its bytes as stored>
+<the CAST.md member's hash (§7), or nothing when there is no member>
+<the current template's sha256 (§11)>
+```
+
+The second line is this section's version. It changes when the rules for building a
+preview change, and every key changes with it. The member is the one in the project's
+`CAST.md` whose `manifest:` points at the bundle (§3). When the viewer has no `CAST.md`,
+or no member points at the bundle, there is no member, and the fourth line is empty.
+
+Computing the key reads `manifest.json` and `CAST.md` and no other file, so it costs
+little enough to do every time a bundle is shown.
+
+**What the key doesn't see.** Only a writer changes `manifest.json` (§5.6). An edit made
+some other way, such as `CHARACTER.md` saved from a text editor or an image replaced in
+a file manager, leaves the key as it was, so the preview a viewer shows is the one from
+before the edit. A rebuild (below) brings it up to date. This is deliberate: comparing
+every file's bytes on every showing costs about as much as building the preview.
+
+**Showing a bundle.** A viewer does this each time it shows a bundle, and again when
+`manifest.json` changes:
+
+1. If the bundle is being updated (§5.7), it shows the preview file in the store, if
+   there is one, and goes no further until no marker is active.
+2. It computes the key.
+3. If `.preview/<key>.html` exists, it shows that file and writes nothing.
+4. Otherwise it builds a preview, stores it (below) and shows it.
+
+**Building.** A preview is the page §11 describes, filled from the template by the same
+rules, with these differences, so that it can be built from any bundle that has a
+description:
+
+- **The disk is read as a render reads it.** The embedded manifest is the one §11 gives
+  for a render at that moment: the manifest after a rescan (§5.6), leaving out every
+  `dossier` asset, the page, and every other HTML file in the bundle's root.
+- **A broken inventory doesn't stop it.** `E-FILE-HASH`, `E-FILE-MISSING` and
+  `E-ZERO-BYTE` go on the banner with the other findings, where a render refuses (§11).
+- **A file that can't be read is left out.** An image or a sample that is missing or
+  can't be decoded isn't shown, and its field shows its empty text, as if no asset were
+  selected.
+- **The member may be absent.** The record's `castMember` is then `null`, and the fields
+  that come from the member are empty.
+- **The description is `CHARACTER.md`** in the bundle's root, whether or not a
+  `description` asset is selected. Front matter that isn't a YAML mapping is read as
+  empty, and the body is shown.
+- **Any page in the bundle is neither read nor shown.**
+
+A viewer can't build a preview when `CHARACTER.md` is missing or isn't UTF-8. It says so
+where the preview would be, as a host shows a finding (§12).
+
+On a bundle a render accepts, with its member, a preview SHOULD be the same bytes as the
+page the same implementation renders, by §11's stable output.
+
+**Storing.** A viewer writes the preview to a temporary file in `.preview/` whose name
+isn't a preview file's, such as `<key>.html.<id>.tmp`, and renames it to `<key>.html`.
+Only after the rename succeeds does it remove everything else in `.preview/` except
+`.gitignore`: older previews, temporary files left by an earlier write, and anything
+else. If the build or the write fails, it removes nothing, so the last preview is still
+there to show. A viewer that can't write the store, on a read-only volume for example,
+MAY show the preview it built without storing it.
+
+**Viewers at the same time.** There is no lock. When two viewers build at once, each
+writes its own file, and the clean-up after the later rename removes the other's. If the
+file that's left was built from an older manifest, its name doesn't match the key, and
+the next showing builds again.
+
+**Rebuild.** A viewer MAY offer a **rebuild**, an action a person asks for, which makes
+the preview from what the bundle holds now. A rebuild writes `manifest.json`, so only a
+conforming writer does it, holding an update marker (§5.7) from step 1 to the end.
+
+1. Refresh (§5.6). This brings the manifest up to the disk, so an edit that the key
+   didn't see now changes it. If refresh refuses (a missing file that an asset points
+   at), the rebuild goes on with the manifest as it was, and reports the refusal.
+2. Compute the key, build the preview and store it as above, even when
+   `.preview/<key>.html` already exists.
+
+**Showing a preview.** A viewer shows a preview read-only. Nothing is loaded from
+outside the file. The links §11 allows (`http`, `https`, `mailto`) open outside the
+viewer, if at all. A click on a name or a field is handled as on a page (DF-51).
+
+**Worked example** (`examples/valid/preview-current`). THE GLASSBLOWER's `manifest.json`
+is 3039 bytes and hashes to
+`6fbd3b74b3d5fd170ed9bc8052a1a4f9fd99ef94b6b79dc03f9d9173aebe68fa`. Its member
+
+```yaml
+- character: THE GLASSBLOWER
+  role: background
+  voices: {}
+  manifest: characters/THE GLASSBLOWER.dossier/manifest.json
+```
+
+has the canonical JSON
+`{"character":"THE GLASSBLOWER","manifest":"characters/THE GLASSBLOWER.dossier/manifest.json","role":"background","voices":{}}`
+and the hash `b365a7e8d729791828a10dff1411ad0dde19c4408d84f2c8338d12e90313aa05`. The
+current template's `sha256` is
+`8819dcefe82728a9a407707195af5277527a65e842db63a831587d062ffad76c`. The key is the
+SHA-256 of these 213 bytes:
+
+```
+dossier-preview
+1
+6fbd3b74b3d5fd170ed9bc8052a1a4f9fd99ef94b6b79dc03f9d9173aebe68fa
+b365a7e8d729791828a10dff1411ad0dde19c4408d84f2c8338d12e90313aa05
+8819dcefe82728a9a407707195af5277527a65e842db63a831587d062ffad76c
+```
+
+which is `b80f93f3d11e71c07f87d7bf8d80da2bd3a16aec33f3253cde51597400d34f81`. So a viewer
+shows `.preview/b80f93f3d11e71c07f87d7bf8d80da2bd3a16aec33f3253cde51597400d34f81.html`,
+which is in the store, and writes nothing. With no member, the fourth line is empty, the
+text is 149 bytes, and the key is
+`96453d851afc67817e647ba4426e3b2c7756d31f4080c6122791f13a829b50c5`.
+
+## 12. Hosting [DF-58 to DF-63, DF-67, DF-74]
 
 A host (a project browser, a scene tool's cast view) presents a `.dossier`
-as one item, finds the page and the face through a reader's lookup (§8.1),
-shows the page read-only with the bundle as its base, and shows the
-validator's finding in place of the page when there is one. It never edits,
-repairs or deletes a bundle, and a bundle found on disk is not a cast member
+as one item and finds the face through a reader's lookup (§8.1). It shows a
+version 2 bundle as a viewer does, through its preview (§11.1), and a version 1
+bundle's page read-only with the bundle as its base. It shows the validator's
+finding above the preview, or in its place when no preview can be built. It never repairs or
+deletes a bundle. The only thing it writes in one is the preview store (§11.1),
+and it changes `manifest.json` only through a rebuild, which a conforming writer
+does. A host that can't build a preview shows the stored one when its name matches
+the key, and otherwise says that no current preview is stored. A host that links a
+conforming writer MAY offer a rebuild. A bundle found on disk is not a cast member
 unless `CAST.md` says so.
 
 A host that shows update status does this while a bundle is being updated
 (§5.7):
 
 - It indicates the update on the bundle's item.
-- It keeps showing the page it last loaded, if it has one, because a bundle
+- It keeps showing the preview or page it last loaded, if it has one, because a bundle
   being updated may be between consistent states. It doesn't report a problem
   it finds during the update.
 - When no marker is active, it reads the bundle again and shows the result,

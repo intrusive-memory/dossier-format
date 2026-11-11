@@ -1,6 +1,6 @@
 ---
 type: doc
-updated: 2026-10-31
+updated: 2026-11-10
 status: draft
 ---
 
@@ -17,7 +17,13 @@ characters/THE PRACTITIONER.dossier/
   THE PRACTITIONER-dossier.html    the dossier page: one file, everything embedded
   images/                          portrait, face crop, views, expressions
   voice/                           the .vox voice and playable samples
+  .preview/                        hidden: the page as a viewer last built it, outside the manifest
 ```
+
+A tool showing a dossier doesn't need the page to exist or to be current: it builds a
+**preview** from the bundle as it is on disk, stores it in `.preview/` under a key that
+changes when the manifest does, and shows the stored one while the key still matches
+([§11.1](docs/DOSSIER-FORMAT.md#111-the-preview-df-68-to-df-74)).
 
 > **Status: draft.** The specification is
 > [docs/DOSSIER-FORMAT.md](docs/DOSSIER-FORMAT.md) (format version 2), with

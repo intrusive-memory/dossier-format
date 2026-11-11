@@ -40,6 +40,7 @@ ART = "flat placeholder shapes"
 TEMPLATE = ROOT / "template"
 _VERSION = json.loads((TEMPLATE / "VERSION.json").read_text(encoding="utf-8"))
 TEMPLATE_VERSION, TEMPLATE_SHA = _VERSION["version"], _VERSION["sha256"]
+PREVIEW_VERSION = 1  # §11.1: the second line of a preview key
 FIELDS = json.loads((ROOT / "data/fields.json").read_text(encoding="utf-8"))
 TIERS = json.loads((ROOT / "data/tiers.json").read_text(encoding="utf-8"))
 COPIES = json.loads((TEMPLATE / "page-copies.json").read_text(encoding="utf-8"))
@@ -751,7 +752,7 @@ def code_for(name):
     return next(code for code in CODES if name == code or name.startswith(code + "-"))
 
 
-def fixture(group, name, bundles, members, codes=(), may_also=(), complete=None, missing=None, note="", cast_text=None, bundle_path=None, update_status=None):
+def fixture(group, name, bundles, members, codes=(), may_also=(), complete=None, missing=None, note="", cast_text=None, bundle_path=None, update_status=None, preview=None):
     project = OUT / group / name
     project.mkdir(parents=True)
     cast = cast_text or front_matter({"type": "cast", "schemaVersion": 1, "cast": members}) + "# Cast\n\nSynthetic data only.\n"
@@ -765,6 +766,8 @@ def fixture(group, name, bundles, members, codes=(), may_also=(), complete=None,
         entry["missingRequired"] = missing or []
     if update_status is not None:
         entry["updateStatus"] = update_status
+    if preview is not None:
+        entry["preview"] = preview
     if note:
         entry["note"] = note
     FIXTURES.append(entry)
@@ -892,6 +895,34 @@ def valid():
     b.loose[".update-bad_id.json"] = marker("2026-10-19T17:05:00Z")
     fixture("valid", "update-not-active", [b], [member(b)], complete=True, update_status={"at": update_at, "updating": False},
             note="Expired, too far ahead, a time zone offset, unreadable, a zero-byte hidden file, and names that aren't markers: none counts, and a validator reports none.")
+
+    # Previews (11.1): a viewer's store, hidden, so outside the inventory and never reported.
+    def preview_key(bundle, entry):
+        manifest = (json.dumps(bundle.manifest(), indent=2, sort_keys=True, ensure_ascii=False) + "\n").encode("utf-8")
+        member_hash = sha(canonical_json(normal_form(entry)).encode()) if entry else ""
+        text = f"dossier-preview\n{PREVIEW_VERSION}\n{sha(manifest)}\n{member_hash}\n{TEMPLATE_SHA}\n"
+        return sha(text.encode())
+
+    old_preview = b"<!doctype html>\n<title>An older preview</title>\n"
+    b = base("THE GLASSBLOWER")
+    m = member(b)
+    b.page(m)
+    key = preview_key(b, m)
+    b.loose[f".preview/{key}.html"] = b.files[f"{b.name}-dossier.html"]
+    b.loose[".preview/.gitignore"] = b"*\n"
+    b.loose[f".preview/{'0' * 64}.html"] = old_preview
+    b.loose[f".preview/{key}.html.1.tmp"] = b"<!doctype html>\n"
+    fixture("valid", "preview-current", [b], [m], complete=True, preview={"key": key, "hit": True},
+            note="The store holds the preview for this key, an older one and a temporary file left by a write. A viewer shows the first and writes nothing; a validator reports none of them.")
+
+    b = base("THE TIDEKEEPER")
+    m = member(b)
+    b.page(m)
+    key = preview_key(b, m)
+    b.loose[".preview/.gitignore"] = b"*\n"
+    b.loose[f".preview/{'0' * 64}.html"] = old_preview
+    fixture("valid", "preview-out-of-date", [b], [m], complete=True, preview={"key": key, "hit": False},
+            note="The store holds only a preview for another key. A viewer builds this key's preview; after it is stored, .gitignore and that preview are all the store holds.")
 
     # A hand-edited member: the hash is over its normal form (§7), so it isn't stale.
     b = base("THE FERRYMAN")

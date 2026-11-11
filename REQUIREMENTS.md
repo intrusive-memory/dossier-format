@@ -1,7 +1,7 @@
 ---
 type: requirements
 state: draft
-updated: 2026-11-01
+updated: 2026-11-10
 sequence: 1 — first on the critical path of the Personaje effort
 ---
 
@@ -174,6 +174,18 @@ characters/<CHARACTER>.dossier/
 | DF-52 | Only `selected` assets are shown. Missing required assets are listed by name. Integrity problems (a stale selection, a name mismatch) appear as a banner at the top. A missing file or a hash mismatch refuses the render, and nothing is changed (§11). Provenance is a line under each tab. |
 | DF-53 | A complete lead's page should be about 3 MB. A validator warns above 10 MB. |
 
+**Previews.** A bundle written by hand, or by a tool that never renders, has no page, and a page that exists can be behind its bundle. A viewer needs to show the bundle anyway, from what is on disk, at a cost it can pay on every selection.
+
+| ID | Requirement |
+|----|-------------|
+| DF-68 | **Previews live in the bundle, hidden.** A viewer keeps its previews in `.preview/` in the bundle's root, outside `files`, `manifestChecksum` and validation. A preview file is `.preview/<key>.html`. The store is left out of version control; a viewer writes `.preview/.gitignore` with `*`. A viewer puts nothing else in the bundle, except through a rebuild (DF-73). |
+| DF-69 | **The key is cheap and names the inputs a writer records.** It is the SHA-256 of five lines: `dossier-preview`, the preview rules' version, the hash of `manifest.json`'s bytes, the `CAST.md` member's hash (or nothing), and the current template's hash. It reads no image, voice or description bytes. An edit that no writer recorded isn't seen until a rebuild. |
+| DF-70 | **A current preview is shown with no write.** If `.preview/<key>.html` exists, the viewer shows it and writes nothing. Otherwise it builds, stores and shows. It doesn't build while the bundle is being updated (DF-64); it shows the preview it has and waits. |
+| DF-71 | **A preview can be built from any bundle with a description.** It is the page (§9), filled from the bundle as it is on disk. A broken inventory goes on the banner instead of refusing, a file that can't be read is left out, the member is optional, and any page in the bundle is ignored. Only a `CHARACTER.md` that is missing or isn't UTF-8 stops it. On a bundle a render accepts, it is the same bytes as that implementation's page. |
+| DF-72 | **Storing never loses the last preview.** The viewer writes to a temporary name, renames it into place, and only then removes everything else in the store but `.gitignore`. A failed build or write removes nothing. Viewers need no lock: a preview that loses a race is rebuilt at the next showing. |
+| DF-73 | **A rebuild is explicit and goes through a writer.** A person asks for it. A conforming writer, holding an update marker, refreshes the manifest from the disk and then builds and stores the preview even when one with that key exists. A refresh that refuses is reported, and the preview is built anyway. |
+| DF-74 | **A host shows the preview.** Selecting a version 2 bundle shows its preview (DF-60), read-only, loading nothing from outside the file. A host that links a conforming writer MAY offer a rebuild. One that links only a reader still shows a stored preview and says when none matches the key. |
+
 ## 10. Hosting
 
 A **host** is any application that shows a project's files and comes upon a
@@ -186,8 +198,8 @@ does and does not know.
 |----|-------------|
 | DF-58 | **One item.** A host that scans directories presents `<CHARACTER>.dossier` as a single item, named for the directory, and never lists or offers its contents. The package type reserved in DF-19 is how the operating system tells the host it is a bundle; where the type isn't registered a host MAY recognize the `dossier` extension directly. |
 | DF-59 | **The manifest is the map.** A host locates the page, the face crop and every other asset through the manifest's `assets` entries (`kind: dossier`, `face`, …) by way of a reader, never by file name. A `<CHARACTER>-dossier.html` or a version 1 `dossier.html` found by listing the directory is not the page; the manifest says which file is. |
-| DF-60 | **Selecting the item shows the page.** The host renders the dossier page (§9) read-only in a web view, with the bundle directory as the page's base so a version 1 page's relative references still resolve. The host does not edit the bundle. A host that wants a character changed hands off to a writer (DF-30), for example through a URL scheme carrying the bundle path and a field key (DF-51). |
-| DF-61 | **The host shows what the validator finds, in place of the page.** A bundle with no page, an unknown `manifestVersion`, a name mismatch (DF-8) or an orphan (DF-10) is still one item; the host names the problem where the page would be, with the validator's code (DF-57), and never hides, deletes or repairs the bundle. |
+| DF-60 | **Selecting the item shows the bundle.** The host shows a version 2 bundle through its preview (DF-74), read-only in a web view, and a version 1 bundle's page with the bundle directory as the page's base, so its relative references still resolve. The host doesn't edit the bundle: the only thing it writes in one is the preview store (DF-68), and it changes `manifest.json` only through a rebuild (DF-73). A host that wants a character changed hands off to a writer (DF-30), for example through a URL scheme carrying the bundle path and a field key (DF-51). |
+| DF-61 | **The host shows what the validator finds.** A bundle with an unknown `manifestVersion`, a name mismatch (DF-8) or an orphan (DF-10) is still one item. The host names the problem with the validator's code (DF-57): above the preview when one can be built, and in its place when none can (DF-71). It never hides, deletes or repairs the bundle. |
 | DF-62 | **Hosts carry no format knowledge beyond the type.** Every rule above is answered by the reader the host links. A host that cannot link a reader shows the item and says a reader is needed. The reader MAY supply the item's icon (the selected `face` crop where there is one); the host's default icon is a person. |
 | DF-63 | **Discovery stays with `CAST.md`.** A host's scan is presentation only (DF-7). Finding a bundle on disk does not make it a cast member; a bundle no `CAST.md` member points at is an orphan (DF-10) and is shown as one. |
 
