@@ -1,9 +1,45 @@
 ---
 type: changelog
-updated: 2026-11-10
+updated: 2026-11-12
 ---
 
 # Changelog
+
+## Format 2, release candidate 9 (unreleased)
+
+Template 0.1.1, unchanged. No valid bundle becomes invalid, so `manifestVersion` stays 2:
+each change below allows something rc.8 refused, and the one schema rule added states a
+requirement §7 already made.
+
+- **§6, DF-75: `provenance.instructMethod`** on a `voiceSample` records how the delivery
+  instruction reached the engine: `parameter` (a separate value alongside the text) or
+  `audio-tag` (inline tags in the text), or a tool's own word. `instructApplied` keeps its
+  values and still records only whether the delivery was honoured. A tool that sends audio
+  tags and doesn't check the result writes `audio-tag` and `unverified`.
+- **§7, §8.2, DF-76: a hosted voice.** A new `derivedFrom` record,
+  `{"role": "voice", "provider": "<provider>", "voiceId": "<id>"}`, with no `path` and no
+  `sha256`, names a voice a service keeps. `provider` is lowercase, as the member's
+  normal-form `voices` keys are. A `voiceSample` now needs a `vox` **or** a `voice` input:
+  `voice` when the member's `voices` entry is a bare voice ID, `vox` when the ID is inside a
+  `.vox`. A selected asset with a `voice` input is stale when the member's normal-form
+  `voices[provider]` doesn't contain `voiceId`, including when the key is absent; with no
+  member, the input isn't checked. §7 has a worked example. A bundle with no selected `vox`
+  has neither `W-VOICE-ELSEWHERE` nor `W-VOICE-PROMPT`, which §8.2 now says.
+- **§6, §7, DF-77: imported assets.** `provenance.copiedFrom` is allowed on any kind, not
+  only `vox`: the file was brought in unchanged from elsewhere in the project. A `face`,
+  `view` or `expression` with `copiedFrom` isn't derived: it needs no `derivedFrom`, and it
+  is never stale, `artStyle` included. Open question Q8 asks whether a separate kind would be
+  better.
+- **DF-27** names `voiceSample` and the hosted-voice record, and points to DF-77.
+- **`schemas/manifest-v2.schema.json`:** `instructMethod`; the `voice` record in
+  `derivedFrom`; a `voiceSample`'s `derivedFrom` must contain a `vox` or `voice` record,
+  which §7 already required of `vox` and the schema didn't check; the `derivedFrom`
+  requirement on `face`, `view` and `expression` applies only when `provenance.copiedFrom`
+  is absent.
+- **Fixtures (114):** `valid/hosted-voice`, `valid/imported-view`,
+  `warnings/W-STALE-input-voice`, `warnings/W-STALE-input-voice-provider-absent`,
+  `errors/E-SCHEMA-sample-no-voice-input` and `errors/E-SCHEMA-voice-input-provider-case`.
+  No existing fixture changed.
 
 ## Format 2, release candidate 8 (unreleased)
 

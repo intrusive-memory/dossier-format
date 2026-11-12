@@ -799,6 +799,30 @@ def add_sample(b, variant, model, text, suffix=False):
           derivedFrom=[b.input("vox")], model=model, language="en-US", sampleText=text)
 
 
+HOSTED = "elevenlabs"  # A hosted provider's key, as vox-format and CAST.md spell it (§7).
+HOSTED_VOICE = "FIXTURE0VOICE0000001"  # Invented: no service has this voice.
+
+
+def hosted_voice_bundle(name):
+    """§7, DF-76: samples made with a hosted voice, named by the member as a bare voice ID. No vox."""
+    b = base(name)
+    voice = [{"role": "voice", "provider": HOSTED, "voiceId": HOSTED_VOICE}]
+    b.put("voice/sample-neutral.m4a", SILENCE, "voiceSample", variant="neutral",
+          provenance={"provider": "diga", "model": "fixture-hosted-tts", "instruct": "[calm]", "instructMethod": "audio-tag",
+                      "instructApplied": "unverified", "source": "sampleLine"},
+          derivedFrom=copy.deepcopy(voice), model="fixture-hosted-tts", language="en-US", sampleText="Line three is open. Go ahead.")
+    b.put("voice/sample-wry.m4a", SILENCE, "voiceSample", variant="wry",
+          provenance={"provider": "diga", "model": "fixture-hosted-tts", "instruct": "Dry, a little amused.", "instructMethod": "parameter",
+                      "instructApplied": "yes", "source": "sampleLine"},
+          derivedFrom=copy.deepcopy(voice), model="fixture-hosted-tts", language="en-US", sampleText="Nobody calls at this hour to say hello.")
+    return b
+
+
+def hosted_member(b, voice_id=HOSTED_VOICE):
+    """The member holds the bare voice ID under a mixed-case key, as a scalar: §7's normal form gives the lowercase key and an array."""
+    return {**member(b), "voices": {"ElevenLabs": voice_id}}
+
+
 def add_visuals(b):
     portrait = png(180, 320, b.name + "portrait")
     b.image("portrait", portrait, provenance={"seed": 7, "steps": 4, "width": 180, "height": 320, "round": "v1", "prompt": "A tall woman in a grey coat."})
@@ -1087,6 +1111,19 @@ Said the way it's spelled.[^one]
     fixture("valid", "description-no-character-key", [b], [member(b)], complete=True,
             note="CHARACTER.md has no character key, which isn't E-NAME-MISMATCH (§3). A check reports C-KEY-MISSING (§14), outside these results.")
 
+    # §7, DF-75, DF-76: a hosted voice. The samples' input is the member's bare voice ID, and there is no vox.
+    b = hosted_voice_bundle("THE NIGHT CALLER")
+    fixture("valid", "hosted-voice", [b], [hosted_member(b)], complete=True,
+            note="Two samples with a voice input and no vox: one sent its instruction as audio tags and didn't check it (audio-tag, unverified), one as a parameter (parameter, yes). The member writes the provider key as ElevenLabs and the ID as a scalar; its normal form is {\"elevenlabs\": [\"FIXTURE0VOICE0000001\"]}, which holds the input, so neither is stale. No W-VOICE-ELSEWHERE: there is no selected vox.")
+
+    # §7, DF-77: a view brought in unchanged from elsewhere in the project is imported, not derived.
+    b = base("THE SURVEYOR")
+    front = png(180, 320, b.name + "imported front")
+    b.put(f"images/view-front-{sha(front)[:8]}.png", front, "view", variant="front",
+          provenance={"provider": "import", "copiedFrom": "references/surveyor-front.png", "artStyle": "pencil sketch"})
+    fixture("valid", "imported-view", [b], [member(b)], complete=True,
+            note="The front view has provenance.copiedFrom and no derivedFrom, which the schema allows only because of copiedFrom. Its artStyle differs from the front matter's, and it still isn't stale: an imported asset never is (§7). The copiedFrom file isn't in the fixture; nothing reads it.")
+
     # Exactly at §11's limit.
     b = base("THE PORTER"); m = member(b); b.page(m, padding=10_000_000)
     fixture("valid", "page-at-size-limit", [b], [m], complete=True, note="10,000,000 bytes, nearly all of it a comment.")
@@ -1222,6 +1259,19 @@ def errors():
     b = base(); b.mutate = lambda m: m.pop("updatedAt")
     err("E-SCHEMA", b)
 
+    # §7: a voiceSample's derivedFrom needs a vox or a voice record. This one has only the description.
+    b = base(); b.put("voice/sample-neutral.m4a", SILENCE, "voiceSample", variant="neutral", provenance={"provider": "diga", "source": "sampleLine"},
+                      derivedFrom=[b.input("description")], model="1.7b", language="en-US", sampleText="One line.")
+    err("E-SCHEMA-sample-no-voice-input", b, note="The sample's only input is the description: neither vox nor voice (§7's kind table).")
+
+    # §7: a voice record's provider is lowercase, as the member's normal form writes it.
+    b = hosted_voice_bundle(PELL)
+    for asset in b.assets:
+        for record in asset.get("derivedFrom", []):
+            if record["role"] == "voice":
+                record["provider"] = "ElevenLabs"
+    err("E-SCHEMA-voice-input-provider-case", b, members=[hosted_member(b)], may_also=["W-STALE"], note="The voice records' provider is ElevenLabs, not elevenlabs.")
+
 
 # --- warnings ----------------------------------------------------------------
 
@@ -1249,6 +1299,12 @@ def warnings():
     warn("W-STALE-input-member", b, members=[{**m, "bio": "Changed after the page was rendered."}], codes=["W-STALE"])
     b = base(); m = member(b); b.page(m); b.selected("dossier")["derivedFrom"][2]["sha256"] = "0" * 64
     warn("W-STALE-input-bundle", b, members=[m], codes=["W-STALE"])
+    b = hosted_voice_bundle("THE NIGHT CALLER")
+    warn("W-STALE-input-voice", b, members=[hosted_member(b, "FIXTURE0VOICE0000002")], codes=["W-STALE"],
+         note="valid/hosted-voice with the member's voice ID changed: both samples are stale (§7's worked example).")
+    b = hosted_voice_bundle("THE NIGHT CALLER")
+    warn("W-STALE-input-voice-provider-absent", b, members=[{**member(b), "voices": {}}], codes=["W-STALE"],
+         note="The member's voices has no elevenlabs key, so both samples' voice input is stale.")
 
     # A portrait has been rejected and nothing replaces it.
     b = base(); b.selected("portrait")["status"] = "rejected"

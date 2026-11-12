@@ -205,6 +205,26 @@
       "note": "CHARACTER.md has no character key, which isn't E-NAME-MISMATCH (§3). A check reports C-KEY-MISSING (§14), outside these results."
     },
     {
+      "path": "valid/hosted-voice",
+      "bundle": "characters/THE NIGHT CALLER.dossier",
+      "verdict": "valid",
+      "codes": [],
+      "mayAlso": [],
+      "complete": true,
+      "missingRequired": [],
+      "note": "Two samples with a voice input and no vox: one sent its instruction as audio tags and didn't check it (audio-tag, unverified), one as a parameter (parameter, yes). The member writes the provider key as ElevenLabs and the ID as a scalar; its normal form is {\"elevenlabs\": [\"FIXTURE0VOICE0000001\"]}, which holds the input, so neither is stale. No W-VOICE-ELSEWHERE: there is no selected vox."
+    },
+    {
+      "path": "valid/imported-view",
+      "bundle": "characters/THE SURVEYOR.dossier",
+      "verdict": "valid",
+      "codes": [],
+      "mayAlso": [],
+      "complete": true,
+      "missingRequired": [],
+      "note": "The front view has provenance.copiedFrom and no derivedFrom, which the schema allows only because of copiedFrom. Its artStyle differs from the front matter's, and it still isn't stale: an imported asset never is (§7). The copiedFrom file isn't in the fixture; nothing reads it."
+    },
+    {
       "path": "valid/page-at-size-limit",
       "bundle": "characters/THE PORTER.dossier",
       "verdict": "valid",
@@ -651,6 +671,28 @@
       "mayAlso": []
     },
     {
+      "path": "errors/E-SCHEMA-sample-no-voice-input",
+      "bundle": "characters/PELL ARDEN.dossier",
+      "verdict": "invalid",
+      "codes": [
+        "E-SCHEMA"
+      ],
+      "mayAlso": [],
+      "note": "The sample's only input is the description: neither vox nor voice (§7's kind table)."
+    },
+    {
+      "path": "errors/E-SCHEMA-voice-input-provider-case",
+      "bundle": "characters/PELL ARDEN.dossier",
+      "verdict": "invalid",
+      "codes": [
+        "E-SCHEMA"
+      ],
+      "mayAlso": [
+        "W-STALE"
+      ],
+      "note": "The voice records' provider is ElevenLabs, not elevenlabs."
+    },
+    {
       "path": "warnings/W-UNCLASSIFIED",
       "bundle": "characters/PELL ARDEN.dossier",
       "verdict": "warnings",
@@ -727,6 +769,30 @@
       "mayAlso": [],
       "complete": true,
       "missingRequired": []
+    },
+    {
+      "path": "warnings/W-STALE-input-voice",
+      "bundle": "characters/THE NIGHT CALLER.dossier",
+      "verdict": "warnings",
+      "codes": [
+        "W-STALE"
+      ],
+      "mayAlso": [],
+      "complete": true,
+      "missingRequired": [],
+      "note": "valid/hosted-voice with the member's voice ID changed: both samples are stale (§7's worked example)."
+    },
+    {
+      "path": "warnings/W-STALE-input-voice-provider-absent",
+      "bundle": "characters/THE NIGHT CALLER.dossier",
+      "verdict": "warnings",
+      "codes": [
+        "W-STALE"
+      ],
+      "mayAlso": [],
+      "complete": true,
+      "missingRequired": [],
+      "note": "The member's voices has no elevenlabs key, so both samples' voice input is stale."
     },
     {
       "path": "warnings/W-STALE-no-selection",

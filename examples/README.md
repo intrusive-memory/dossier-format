@@ -1,6 +1,6 @@
 ---
 type: doc
-updated: 2026-11-10
+updated: 2026-11-12
 ---
 
 # Conformance fixtures
@@ -62,6 +62,10 @@ Validate it from its `CAST.md`.
   Linux and APFS keep that, and HFS+ doesn't. Git on a Mac stores such a name as NFC unless
   it's added with `git -c core.precomposeunicode=false add`, and reports it as untracked
   in NFC form, which is why the repository's `.gitignore` names that form.
+- **A `voice` input with no member has no fixture.** Every fixture is validated from its
+  `CAST.md`, so there is always a member to check against. §7's worked example covers a
+  bundle opened without one. The `copiedFrom` path in `valid/imported-view` names a file
+  that isn't in the fixture, since nothing reads it.
 - **Face detection has no fixture.** Images are shapes, not faces, so the face
   crops use `provenance.box`. §8.5's worked example is the portrait and box
   these fixtures use.
