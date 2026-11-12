@@ -7,7 +7,8 @@ updated: 2026-11-12
 
 ## Format 2.1.0 (unreleased)
 
-Template 0.1.1, unchanged. A minor release: everything below is new and optional, so
+Template 0.1.1, unchanged. New: the LOCATIONS page template, `template-locations/`, version
+0.1.0. A minor release: everything below is new and optional, so
 `manifestVersion` stays 2 and no 2.0.0 fixture's result changes. It standardizes the shapes
 a production's bundles already use that 2.0.0 didn't define: location bundles, two view
 variant families, imported images of any shape and in JPEG, and six fields the schema let
@@ -23,19 +24,44 @@ gaps are closed too.
   `schemaVersion: 1`, `locations: [{location, manifest?}]`, schema
   `schemas/locations.schema.json`), with orphans looked for in `locations/`. Its name is
   canonical and is held in the manifest's `character`, so the manifest keeps its 2.0.0 shape.
+  *(The index was first found beside `CAST.md`; see the next item.)*
   Its description is **`LOCATION.md`** (`type: location`, `location`, optional `theme`; a free
   body, `## Blocking` and `## Views` recommended). It holds `description`, `plate`, `view`
   (always imported) and `sourcePhoto`, and any other kind is `E-SCHEMA`. A **plate** has a
   required lowercase slug `variant` naming its view, is 16:9, lives at
   `images/plate-<variant>-<sha8>.png`, isn't derived and is never stale. The optional
   **`location`** object records the location's `name`, `description`, `theme` and the
-  producing tool's recipe per view. A location has no tier, no completeness, no member and
-  **no page**: a viewer shows its name, `LOCATION.md`, its selected plates and its views,
-  read-only, and builds no preview. `plate` in a character bundle is still `E-SCHEMA`.
+  producing tool's recipe per view. A location has no tier, no completeness, no member, and
+  no page or preview of its own. `plate` in a character bundle is still `E-SCHEMA`.
+- **§16.2, DF-80, DF-96: `PROJECT.md` declares the locations** (Q9, decided by the user on
+  2026-11-12). Location discovery starts at `PROJECT.md`'s front-matter key `locations`, a
+  path relative to `PROJECT.md` naming the index, `LOCATIONS.md` by convention, and only there.
+  `PROJECT.md` belongs to SwiftProyecto; the format reads `locations` and `title` and writes
+  neither. No `PROJECT.md`, no front matter or no key: the project has no locations, and
+  nothing is read, listed or reported. A `PROJECT.md` that can't be read, or a `locations`
+  that isn't a valid index path (empty, starting with `/`, or leaving the project directory):
+  `E-CAST`. A path that reaches no file, or a directory: `W-POINTER`, and no locations. An
+  index that can't be read, now including one whose `type` isn't `locations`: `E-CAST`.
+  Orphans are looked for in `locations/` beside the index, and only once it has been read.
+  Character discovery never reads `PROJECT.md`, so no character bundle's result changes.
+  Project-relative paths are now relative to the *project directory*: the directory holding
+  `CAST.md` as before, or the one holding `PROJECT.md` when there is no `CAST.md`.
+- **§16.6, §16.7, DF-84, DF-97 to DF-99: one synthesized LOCATIONS page** (Q10, decided by
+  the user on 2026-11-12). A viewer builds one self-contained page showing every entry of the
+  index, in its order: the name, `LOCATION.md`'s body (with tables, code spans and its
+  footnotes as sources), the selected plates as JPEG 1280×720 copies in `location.views`
+  order, and the selected views fitted inside 1280×720. It is derived, in no bundle, and not
+  validated. It is built on demand and cached as a preview is, in `.locations-page/<key>.html`
+  beside the index, under a key over the index's bytes, `PROJECT.md`'s title, each entry's
+  `manifest.json` and the template's hash. A host shows it when the index or `locations/` is
+  selected, and at the location's section (`#location-<sha8 of the name>`) when a location
+  bundle is. **`template-locations/`** is its template, versioned and hashed apart from
+  `template/` so that neither makes the other's pages stale; it carries `template/dossier.css`
+  and `template/fonts.css` unchanged, and its hash covers them.
 - **New codes.** `E-TYPE-MISMATCH`: a `CAST.md` member points at a location bundle, or a
   `LOCATIONS.md` entry at a character bundle. `W-DISPLAY-NAME`: below. `E-CAST` also covers a
-  `LOCATIONS.md` that can't be read, and `E-NAME-MISMATCH`, `W-ORPHAN` and `W-POINTER` cover
-  locations.
+  `PROJECT.md` or a locations index that can't be read, `W-POINTER` a `locations` key that
+  reaches no file, and `E-NAME-MISMATCH` and `W-ORPHAN` cover locations.
 - **§8.1, DF-85: view variant families.** `storyboard` and `storyboard-<slug>` (a storyboard's
   reference image of the character) and `look-<slug>` (the character in another look, framed
   like the portrait) aren't `W-VARIANT`. A slug is lowercase ASCII letters and digits joined by
@@ -86,8 +112,13 @@ gaps are closed too.
   `creditsUsed`, `voiceId`, `postProcess`; `references[].source`; the generated `provider`
   pattern; a location bundle's kinds, and its views required to have `copiedFrom`; `plate`
   only in a location bundle. **New:** `schemas/locations.schema.json`.
-- **Q9 and Q10** are open: who owns `LOCATIONS.md`, and a page for locations.
-- **Fixtures (141):** `valid/location`, `valid/view-families`, `valid/display-name`,
+- **Q9 and Q10** are closed by the user's decision of 2026-11-12: "locations needs to be
+  defined in PROJECT.md. a LOCATIONS page showing all of them should be synthesized from the
+  LOCATIONS.md".
+- **What SwiftProyecto must add:** `locations`, an optional string, to `PROJECT.md`'s model and
+  serializer. Until it does, SwiftProyecto keeps the key as an unknown key and writes it back
+  at the end of the front matter.
+- **Fixtures (154):** `valid/location`, `valid/view-families`, `valid/display-name`,
   `valid/display-name-no-member-copy`, `valid/hosted-voice-provenance`,
   `valid/hosted-voice-non-ascii-provider`; `errors/E-SCHEMA-voice-input-provider-non-ascii-case`,
   `errors/E-SCHEMA-voice-input-malformed`, `errors/E-SCHEMA-location-kind`,
@@ -98,8 +129,16 @@ gaps are closed too.
   `errors/E-NAME-MISMATCH-location`; `warnings/W-SHAPE-plate`,
   `warnings/W-SHAPE-imported-portrait`, `warnings/W-VARIANT-view-one-off`,
   `warnings/W-VARIANT-view-bare-look`, `warnings/W-VARIANT-view-family-not-slug`,
-  `warnings/W-DISPLAY-NAME` and `warnings/W-ORPHAN-location`. A fixture project may now have a
-  `LOCATIONS.md`. No existing fixture changed.
+  `warnings/W-DISPLAY-NAME` and `warnings/W-ORPHAN-location`; for `PROJECT.md` and the page,
+  `valid/locations-no-key`, `valid/locations-no-project`, `valid/locations-index-elsewhere`,
+  `valid/locations-page-current`, `valid/locations-page-out-of-date`,
+  `errors/E-CAST-project-yaml`, `errors/E-CAST-project-locations-type`,
+  `errors/E-CAST-project-locations-absolute`, `errors/E-CAST-project-locations-outside`,
+  `errors/E-CAST-locations-yaml`, `errors/E-CAST-locations-type`,
+  `warnings/W-POINTER-locations-missing` and `warnings/W-POINTER-locations-directory`. A fixture
+  project with locations has a `PROJECT.md` naming its index, and `conformance.json` gains
+  `locationsTemplateVersion`, `locationsTemplateSha256` and `locationsPage`. No 2.0.0 fixture
+  changed.
 
 ## Format 2.0.0 (2026-11-12)
 

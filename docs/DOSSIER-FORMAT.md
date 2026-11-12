@@ -11,10 +11,12 @@ A **dossier** is one dramatic character, as a folder: a `.dossier` bundle
 holding the character's description, images, voice and a self-contained HTML
 page, inventoried by `manifest.json`. Since 2.1.0 a bundle can hold a **location**
 instead: its description and its plates, the empty sets a scene is painted onto (§16).
-Every section but §16 is about a character bundle unless it says otherwise.
+A project's locations are declared in its `PROJECT.md` and shown together on one
+synthesized **LOCATIONS page** (§16.6). Every section but §16 is about a character bundle
+unless it says otherwise.
 
 This document is normative. It implements [REQUIREMENTS.md](../REQUIREMENTS.md)
-(DF-1 to DF-95); the requirement each section satisfies is cited in brackets.
+(DF-1 to DF-100); the requirement each section satisfies is cited in brackets.
 Decisions D1–D10 and the evidence behind every property are in
 [PROPERTY-INVENTORY.md](PROPERTY-INVENTORY.md).
 
@@ -39,7 +41,8 @@ the schema is a bug.
   and are stored unencoded (spaces as spaces). A path MUST NOT be empty,
   start with `/`, or contain an empty, `.` or `..` segment. [DF-5, DF-21]
 - **Project-relative paths** (in provenance: `copiedFrom`, `source`) are
-  relative to the directory holding `CAST.md`.
+  relative to the **project directory**: the directory holding `CAST.md`, or, in a
+  project with no `CAST.md`, the directory holding `PROJECT.md` (§16.2).
 - **No absolute paths** anywhere in a bundle: not in the manifest, not in
   `CHARACTER.md`, not in the page. A path from another machine is noise to
   every other reader.
@@ -83,7 +86,7 @@ bundle's only by case.
 | `AC/DC` | error `E-NAME` |
 | `.HIDDEN` | error `E-NAME` |
 
-## 3. Discovery [DF-7 to DF-12, DF-63, DF-80]
+## 3. Discovery [DF-7 to DF-12, DF-63, DF-80, DF-96]
 
 - **`CAST.md`** is a Markdown file. Its YAML front matter, between `---` lines at
   the top, has `type: cast`, `schemaVersion: 1` and a `cast` list, and each entry
@@ -113,8 +116,8 @@ bundle's only by case.
 - A `.dossier` directory no member points at is an **orphan** (`W-ORPHAN`):
   reported, never loaded, never deleted. A validator looks for orphans only in
   `characters/` beside `CAST.md` and in each directory holding a bundle a member
-  points at, not recursively, and for locations as §16.2 says. This is the only
-  directory listing the format uses. A `.dossier` directory is an orphan only when no
+  points at, not recursively, and for locations as §16.2 says. These are the only
+  directory listings the format uses. A `.dossier` directory is an orphan only when no
   entry of either index points at it, so a bundle that `LOCATIONS.md` points at isn't
   one for want of a `CAST.md` member. A writer's *refresh* MAY adopt an orphan whose name equals a member that
   has no `manifest:`, by setting the pointer. It never adopts on a near match.
@@ -128,10 +131,12 @@ bundle's only by case.
 `voices.<provider>` for a hosted voice (§7, §8.2), and `displayName` (§5.1).
 The format writes none of them except through a `CAST.md` writer.
 
-**Locations** have an index of their own, `LOCATIONS.md`, beside `CAST.md` (§16.2). A
-project's **indexes** are `CAST.md` and, when it exists, `LOCATIONS.md` in the same
-directory. A `CAST.md` member points at character bundles only, and a `LOCATIONS.md`
-entry at location bundles only (§16.1).
+**Locations** have an index of their own, `LOCATIONS.md`, which `PROJECT.md`'s
+`locations` key names (§16.2). Nothing else finds it: not its name, and not its being
+beside `CAST.md`. A project's **indexes** are `CAST.md` and, when `PROJECT.md` declares one,
+the locations index. A `CAST.md` member points at character bundles only, and a
+`LOCATIONS.md` entry at location bundles only (§16.1). Character discovery never reads
+`PROJECT.md`.
 
 ## 4. The bundle [DF-13 to DF-20, DF-87]
 
@@ -991,7 +996,8 @@ It is a known file without an asset entry.
 ## 11. The dossier page [DF-42 to DF-53]
 
 `<CHARACTER>-dossier.html` is the only HTML file in the bundle's inventory (§5.2)
-and is registered as `kind: dossier`. A location bundle has no page (§16.6). A viewer's previews (§11.1) are hidden, so
+and is registered as `kind: dossier`. A location bundle has no page of its own; a project's
+locations share one LOCATIONS page, which isn't in any bundle (§16.6). A viewer's previews (§11.1) are hidden, so
 they are outside the inventory and aren't the page.
 
 - **Self-contained.** Styles, scripts, fonts, images and samples are
@@ -1060,7 +1066,7 @@ page, and whether or not that page is current. A viewer is any tool that builds
 previews; a host, a writer or both can be one.
 
 Previews are for character bundles. A viewer builds none for a location bundle and
-writes nothing in one; it shows it as §16.6 says.
+writes nothing in one; a host shows it as §16.7 says.
 
 A preview isn't the page. It isn't registered as an asset, it is outside `files` and
 `manifestChecksum`, and a validator doesn't report it, because it lives in a hidden
@@ -1192,7 +1198,7 @@ which is in the store, and writes nothing. With no member, the fourth line is em
 text is 149 bytes, and the key is
 `96453d851afc67817e647ba4426e3b2c7756d31f4080c6122791f13a829b50c5`.
 
-## 12. Hosting [DF-58 to DF-63, DF-67, DF-74]
+## 12. Hosting [DF-58 to DF-63, DF-67, DF-74, DF-99]
 
 A host (a project browser, a scene tool's cast view) presents a `.dossier`
 as one item and finds the face through a reader's lookup (§8.1). It shows a
@@ -1204,8 +1210,8 @@ and it changes `manifest.json` only through a rebuild, which a conforming writer
 does. A host that can't build a preview shows the stored one when its name matches
 the key, and otherwise says that no current preview is stored. A host that links a
 conforming writer MAY offer a rebuild. A bundle found on disk is not a cast member
-unless `CAST.md` says so. A location bundle is an item too, shown as §16.6 says, and it is
-a location only when `LOCATIONS.md` says so (§16.2).
+unless `CAST.md` says so. A location bundle is an item too, shown as §16.7 says, and it is
+a location only when the index `PROJECT.md` declares says so (§16.2).
 
 A host that shows update status does this while a bundle is being updated
 (§5.7):
@@ -1229,7 +1235,7 @@ storyboard panel recording its references) records their `sha256`, and finds the
 by `sha256` through the manifest. A recorded hash names those bytes, so after refresh
 accepts a change to the file, that hash no longer finds it.
 
-## 14. Validation [DF-54 to DF-57, DF-80, DF-88]
+## 14. Validation [DF-54 to DF-57, DF-80, DF-88, DF-96]
 
 A validator never changes anything. Each finding has a stable code. A fault
 that a specific code below names may also break the schema; the specific code
@@ -1240,7 +1246,7 @@ MUST be reported and `E-SCHEMA` MAY be reported with it.
 | `E-VERSION` | error | Unknown `manifestVersion` |
 | `E-NAME` | error | Name invalid (§2) |
 | `E-NAME-MISMATCH` | error | Bundle name, manifest `character`, `CAST.md` member and `CHARACTER.md` disagree (§3), or, for a location, bundle name, manifest `character`, `LOCATIONS.md` entry and `LOCATION.md` (§16.1) |
-| `E-CAST` | error | `CAST.md` can't be read: its YAML doesn't parse, or a member has no `character`, a `role` that isn't a tier (§8.3), a `gender` other than `M`, `F`, `NB` or `NS`, or a `voices` that isn't a map. Or `LOCATIONS.md` can't be read: its YAML doesn't parse, it has no `locations` list, or an entry has no `location` (§16.2). No other check of that index is possible. |
+| `E-CAST` | error | `CAST.md` can't be read: its YAML doesn't parse, or a member has no `character`, a `role` that isn't a tier (§8.3), a `gender` other than `M`, `F`, `NB` or `NS`, or a `voices` that isn't a map. Or `PROJECT.md` can't be read for its `locations` key, or the locations index it names can't be read (§16.2). No other check of that index is possible. |
 | `E-MANIFEST` | error | A directory a member points at has no `manifest.json`, or it isn't a JSON object. No other check of that bundle is possible. |
 | `E-NOT-BUNDLE` | error | A version 2 manifest in a directory without `.dossier` |
 | `E-TYPE-MISMATCH` | error | A `CAST.md` member points at a location bundle, or a `LOCATIONS.md` entry at a character bundle (§16.1) |
@@ -1260,7 +1266,7 @@ MUST be reported and `E-SCHEMA` MAY be reported with it.
 | `W-VARIANT` | warning | An `expression` variant outside the standard set, or a `view` variant outside the standard set and its families (§8.1) |
 | `W-SIDECAR` | warning | A `.json` sidecar in `images/` |
 | `W-ORPHAN` | warning | No index entry points at the bundle (§3, §16.2) |
-| `W-POINTER` | warning | The member's or entry's `manifest:` doesn't point at this bundle (§3) |
+| `W-POINTER` | warning | The member's or entry's `manifest:` doesn't point at this bundle (§3), or `PROJECT.md`'s `locations` reaches no file (§16.2) |
 | `W-ROLE` | warning | A member with a `manifest:` has no `role` |
 | `W-DISPLAY-NAME` | warning | The manifest's `displayName` differs from the member's (§5.1) |
 | `W-VOICE-ELSEWHERE` | warning | `voices.voxalta` doesn't name the selected `vox` |
@@ -1287,20 +1293,22 @@ bundle with either can be valid.
 ## 15. Versions
 
 The format version is `manifestVersion`. A change that makes a valid bundle
-invalid is a new version. The template is versioned separately. Changes are
+invalid is a new version. The dossier template and the LOCATIONS page template
+(§16.6) are each versioned separately. Changes are
 listed in `CHANGELOG.md`. A minor release (2.1.0) adds only what is optional, so a
 2.0.0 reader still opens every 2.1.0 character bundle that uses nothing new; it reports a
 location bundle's plates as `E-SCHEMA`, which is why §16 marks location bundles with
 `dossierType`.
 
-## 16. Location bundles [DF-79 to DF-84]
+## 16. Location bundles [DF-79 to DF-84, DF-96 to DF-99]
 
 A **location** is a place a story happens in, kept as a `.dossier` bundle the way a
 character is. Its main job is to hold **plates**: empty sets, one per camera setup (a
 **view** of the location), that an image tool paints a scene's people onto. A location
 bundle is a version 2 bundle, and §1 and §4 to §7 apply to it as written, except where
 this section says otherwise: names, paths, `files`, `manifestChecksum`, assets and
-statuses, provenance, the writes, update markers and the validation codes.
+statuses, provenance, the writes, update markers and the validation codes. A project
+declares its locations in `PROJECT.md` (§16.2), and they share one synthesized page (§16.6).
 
 ### 16.1 Telling the bundle types apart [DF-79, DF-80]
 
@@ -1319,11 +1327,49 @@ bundle is in, its name or its files.
   that bundle isn't checked further from that index. A character and a location may
   have the same name, in different bundles.
 
-### 16.2 `LOCATIONS.md` [DF-80]
+### 16.2 Finding locations: `PROJECT.md` and the index [DF-80, DF-96]
 
-Discovery starts at `LOCATIONS.md`, as it does at `CAST.md` for characters (§3). It is a
-Markdown file beside `CAST.md`; when a project has no `CAST.md`, the directory holding
-`LOCATIONS.md` is the project directory. Its YAML front matter
+Discovery of locations starts at **`PROJECT.md`**, as discovery of characters starts at
+`CAST.md` (§3). `PROJECT.md` is the project's own description; its format belongs to
+SwiftProyecto. It is read from the project directory: the directory holding `CAST.md`, or,
+in a project with no `CAST.md`, the directory a tool opens as the project.
+
+**`PROJECT.md` fields read** (the format belongs to SwiftProyecto): `locations` and `title`.
+The format writes neither of them except through a `PROJECT.md` writer.
+
+| Key | Type | Required | Meaning |
+|-----|------|----------|---------|
+| `locations` | string | no | The project's **locations index**, a path relative to the directory holding `PROJECT.md`. `LOCATIONS.md` by convention, and any name is allowed. |
+| `title` | string | no | The project's title. Only the LOCATIONS page shows it (§16.6). |
+
+The front matter is YAML between `---` lines at the top of the file, as in `CAST.md`.
+Nothing else in `PROJECT.md` is read. A reader finds a project's locations this way, and
+the outcome is one of five:
+
+1. **No key.** When there is no `PROJECT.md`, when it has no front matter, or when its front
+   matter has no `locations` key, the project has **no locations**. Nothing more happens:
+   no index is read, no directory is listed, and nothing is reported. A file named
+   `LOCATIONS.md` and a `locations/` directory are then ordinary files, and a location bundle
+   in them is neither a location nor an orphan. (A `CAST.md` member that points at a location
+   bundle is still `E-TYPE-MISMATCH`, §16.1.)
+2. **`PROJECT.md` can't be read** for the key: it isn't UTF-8, its front matter doesn't parse
+   as YAML or isn't a mapping, or `locations` is present and isn't a **valid index path**. A
+   valid index path is a non-empty string that doesn't start with `/` and that, resolved as
+   §3 resolves a pointer, against the project directory, neither ends empty nor has a `..`
+   left over that would leave it. This is `E-CAST`. The project's locations are unknown: no
+   index is read and nothing is listed.
+3. **No file.** The path is resolved as in case 2. When nothing is there, or a directory is,
+   it is `W-POINTER`, and the project has no locations, as in case 1.
+4. **The index can't be read:** it isn't UTF-8, its front matter doesn't parse as YAML, its
+   `type` isn't `locations`, it has no `locations` list, or an entry has no `location`. This
+   is `E-CAST`. No location is checked from it, and nothing is listed.
+5. Otherwise the file is the project's locations index, and the rest of this section applies.
+
+`E-CAST` and `W-POINTER` here are about the project's locations. Character discovery doesn't
+read `PROJECT.md`, so none of these outcomes changes a character bundle's findings. Below,
+`LOCATIONS.md` means the locations index, whatever its name.
+
+**The index** is a Markdown file. Its YAML front matter
 ([`schemas/locations.schema.json`](../schemas/locations.schema.json)) has:
 
 | Key | Required | Meaning |
@@ -1344,14 +1390,21 @@ bundles SHOULD rewrite it from them.
 
 An entry is read as a `CAST.md` member is for discovery: resolving its pointer,
 `W-POINTER`, `E-MANIFEST`, `E-NOT-BUNDLE` and `W-V1` are §3's, with "entry" for
-"member". `E-CAST` covers a `LOCATIONS.md` that can't be read. **Orphans:** a validator
-looks in `locations/` beside `LOCATIONS.md`, when there is a `LOCATIONS.md`, and in each
-directory holding a bundle an entry points at. A location bundle no entry points at is
-`W-ORPHAN`. A location bundle that only a directory listing finds is never one of the
+"member". **Orphans:** once the index has been read, a validator looks in `locations/`
+beside `LOCATIONS.md` and in each directory holding a bundle an entry points at. A location
+bundle no entry points at is `W-ORPHAN`. A validator lists no directory for locations in any
+other case. A location bundle that only a directory listing finds is never one of the
 project's locations.
 
 A location has no member, so nothing is checked against one: a location bundle has no
 `castMember` or `voice` input, no `role` or `W-ROLE`, no voice and no `W-VOICE-*`.
+
+**Worked example** (`examples/valid/locations-index-elsewhere`). `PROJECT.md` has
+`locations: world/PLACES.md`. That file is the index, and its entry's
+`manifest: locations/HARBOR-LIGHT.dossier/manifest.json` is relative to `world/`, so the
+bundle is `world/locations/HARBOR-LIGHT.dossier`. Orphans are looked for in
+`world/locations/`. A `DRY-DOCK.dossier` in the project directory's own `locations/` isn't
+listed, so it isn't `W-ORPHAN`.
 
 ### 16.3 The manifest and `LOCATION.md` [DF-81, DF-83]
 
@@ -1435,7 +1488,7 @@ it, there is no completeness report, and `W-INCOMPLETE` is never reported for it
 
 ### 16.5 Worked example
 
-`examples/valid/location`. `LOCATIONS.md` has
+`examples/valid/location`. `PROJECT.md` has `locations: LOCATIONS.md`, and `LOCATIONS.md` has
 
 ```yaml
 locations:
@@ -1454,22 +1507,159 @@ each, one `selected` and one `candidate`; `lamp-room` has one, painted from the 
 there is no completeness to report. The project's `CAST.md` has a member whose bundle is
 in `characters/`; it plays no part in the location's findings.
 
-### 16.6 No page [DF-84]
+### 16.6 The LOCATIONS page [DF-84, DF-97, DF-98]
 
-A location bundle has no page in 2.1.0. `dossier` isn't one of its kinds, the template
-and `data/fields.json` are about characters, and a viewer builds no preview of one
-(§11.1). A **viewer** or **host** (§12) shows a location bundle read-only and writes
-nothing in it. It shows, in this order:
+A location bundle has no page and no preview of its own: `dossier` isn't one of its kinds,
+the dossier template and `data/fields.json` are about characters, and a viewer builds no
+preview of one (§11.1). Instead a project's locations share **one page**, the **LOCATIONS
+page**, which shows every location in the index.
 
-1. the location's name: `location.name`, or the bundle name when there is none;
-2. `LOCATION.md`'s body, as text or as Markdown;
-3. each selected plate, labelled with its variant, in the order of `location.views` and
-   then the remaining variants in byte order;
-4. the selected views.
+The LOCATIONS page is **synthesized**: a viewer builds it from `LOCATIONS.md` and the
+bundles its entries point at. Nobody writes it by hand, and it is never the authority for
+anything. It isn't in any bundle, in any manifest or in any index, and a validator neither
+reads nor reports it.
 
-How it lays these out is its own. The validator's findings go above, as for a character
-(§12). A host MAY use the first selected plate as the item's icon; its default icon is a
-place. A page for locations needs a template of its own and is left for a later version.
+**Content.** The page is filled from the LOCATIONS page template,
+[`template-locations/`](../template-locations), by the rules in its README, which are
+normative as part of this section. It has the project's `title` from `PROJECT.md`, when that
+is a non-empty string, and a section per entry of the index, in the index's order. Each
+section shows, in this order:
+
+1. the location's name: `location.name`, or the entry's `location` when there is none, with
+   the entry's `location` above it;
+2. `LOCATION.md`'s body, as Markdown, and its footnotes as a numbered list of sources;
+3. each selected plate, labelled with its variant, in the order of the keys of
+   `location.views` as they are written in `manifest.json`, then the remaining variants in byte
+   order;
+4. each selected view, labelled with its variant, in byte order of `variant`.
+
+A reader that doesn't keep the order of a JSON object's keys as written can't follow step 3,
+and MUST read `location.views` with one that does.
+
+An entry with no `manifest:` has a section that says it has no bundle yet. An entry whose
+pointer doesn't reach a `manifest.json` that is a JSON object with `manifestVersion` 2 and
+`dossierType` `location`, in a `.dossier` directory, has a section that says the bundle can't
+be shown. The page is built from the bundle as it is on disk, as a preview is (§11.1): its
+`manifest.json` as stored says which assets are selected; a broken inventory doesn't stop
+it; a file that is missing or can't be decoded is left out, with its step left out when
+nothing in it remains; and a `LOCATION.md` that is missing or isn't UTF-8 is left out. The
+page has no findings banner: a host shows the validator's findings beside it (§16.7).
+
+**The page** follows §11's rules for a page where they apply. It is self-contained, with
+images as `data:` URIs and no reference outside itself (§11's `W-PAGE-EXTERNAL` rules
+describe what it MUST NOT have, though no validator checks it). It has no script. Images are
+copies: a plate is a JPEG of 1280×720, the 16:9 counterpart of the portrait's 720×1280, and
+a view is a JPEG that fits inside 1280×720, keeping its shape, both at quality 80
+(`template-locations/page-copies.json`). The copies are not stored. Its output is **stable**,
+as DF-45 says: the same inputs and template give the same bytes, per implementation, and a
+renderer MUST NOT write the time. The page records its template, as
+`<meta name="dossier-locations-template" content="<version> <sha256>">`, and its key, as
+`<meta name="dossier-locations-key" content="<key>">`.
+
+A page of many locations is large. Each plate copy is about 100 to 300 KB, so a project with
+fifty plates has a page of about 10 MB. `W-PAGE-SIZE` is about a bundle's page and doesn't
+apply to it.
+
+**The store.** The page is built on demand, as a preview is, and kept beside the index, in
+`.locations-page/`, a directory in the directory holding `LOCATIONS.md`. A **page file** is a
+regular file directly in `.locations-page/` named `<key>.html`, where `<key>` is 64
+lowercase hexadecimal characters. Nothing else in the store is a page. The store SHOULD be
+left out of version control, and a viewer SHOULD write `.locations-page/.gitignore` with the
+one line `*`. A viewer writes nothing for the page anywhere else, and nothing at all in a
+bundle.
+
+**The key** is the SHA-256 (§1) of the UTF-8 text of these lines, each ending in one LF:
+
+```
+dossier-locations-page
+1
+<the SHA-256 of LOCATIONS.md, its bytes as stored>
+<the SHA-256 of PROJECT.md's title as UTF-8, or nothing when it has no title>
+<one line per entry of the index, in its order: the SHA-256 of the manifest.json its manifest: reaches, its bytes as stored, or nothing when it has no manifest: or no file is there>
+<the current LOCATIONS page template's sha256>
+```
+
+The second line is this section's version. It changes when the rules for building the page
+change. The number of entry lines is the number of entries in the index, which the third
+line fixes. The template's `sha256` is the one `template-locations/README.md` rule 1 defines
+and `template-locations/VERSION.json` publishes. It covers `template/dossier.css` and
+`template/fonts.css` too, because the page carries them, so a change to how dossier pages
+look changes the key as well.
+
+Computing the key reads `PROJECT.md`, `LOCATIONS.md` and each entry's `manifest.json`, and no
+image or description. As with a preview, an edit that no writer recorded in a `manifest.json`,
+such as `LOCATION.md` saved from a text editor, leaves the key as it was until a rebuild.
+
+**Showing the page.** A viewer does this each time it shows the page:
+
+1. If a bundle an entry points at is being updated (§5.7), it shows the page file in the
+   store, if there is one, and goes no further until no marker is active in any of them.
+2. It computes the key.
+3. If `.locations-page/<key>.html` exists, it shows that file and writes nothing.
+4. Otherwise it builds the page, stores it and shows it.
+
+**Storing** is §11.1's, with `.locations-page/` for `.preview/` and a page for a preview: a
+temporary file renamed into place, and only then everything else in the store removed
+except `.gitignore`; nothing removed when the build or the write fails; no lock; and a
+viewer that can't write the store MAY show the page it built without storing it.
+
+**Rebuild.** A viewer MAY offer a rebuild, which builds and stores the page even when
+`.locations-page/<key>.html` exists. It writes nothing in a bundle, so any viewer may do it. A
+conforming writer MAY first refresh each bundle (§5.6), holding its marker (§5.7), so that
+edits no writer recorded reach the key.
+
+**Export.** A viewer MAY copy the page anywhere a person asks, to hand on as one file. The
+copy is an ordinary file. The format gives it no meaning, nothing reads it, and its
+`dossier-locations-key` says which inputs it was built from.
+
+**Worked example** (`examples/valid/locations-page-current`). `PROJECT.md` has
+`title: The Fixture Coast` and `locations: LOCATIONS.md`. `LOCATIONS.md`, 376 bytes, hashes to
+`f143de63336a65c049bd24a3cbe24dbe715155455d2128228786fe1016accbb1` and has three entries:
+HARBOR-LIGHT, whose `manifest.json` hashes to
+`7ad512c25aa81918dc40517f7d661aa6c78fb4da2cf9176d6f28c7bd00e9d37d`; THE OLD QUAY, with no
+`manifest:`; and SALT-STORE, `a7dceaa556aa7de428b846386825a1a1ab047bd0d7be79677e54c2c86aba0ba6`.
+The title hashes to `f7edce5619feb31b32ba5fd687d2b8c9abee1407543092b97da76004108ea4e5`, and the
+current LOCATIONS page template's `sha256` is
+`effb622f4b8cb19f9b64363b74f341c7df1300bccddb043f8b86ac1d2c45c90f`. The key is the SHA-256 of
+these 351 bytes, the fifth line empty:
+
+```
+dossier-locations-page
+1
+f143de63336a65c049bd24a3cbe24dbe715155455d2128228786fe1016accbb1
+f7edce5619feb31b32ba5fd687d2b8c9abee1407543092b97da76004108ea4e5
+7ad512c25aa81918dc40517f7d661aa6c78fb4da2cf9176d6f28c7bd00e9d37d
+
+a7dceaa556aa7de428b846386825a1a1ab047bd0d7be79677e54c2c86aba0ba6
+effb622f4b8cb19f9b64363b74f341c7df1300bccddb043f8b86ac1d2c45c90f
+```
+
+which is `95898bc7b519d3d5437542fe6d66f8666c7738cb22d1c49ad3d0bd49914c85a6`. The store holds
+that file, so a viewer shows it and writes nothing. Its sections are HARBOR-LIGHT
+(`id="location-64a891cc"`: `LOCATION.md`, one source, the `dock` and `lamp-room` plates and the
+`storyboard-design` view), THE OLD QUAY (no bundle yet) and SALT-STORE.
+
+### 16.7 Hosting locations [DF-99]
+
+A host (§12) shows the LOCATIONS page read-only, as it shows a preview (§11.1, "Showing a
+preview"), and writes nothing but the page's store.
+
+- **Selecting `LOCATIONS.md`,** the file `PROJECT.md`'s `locations` names, or the
+  `locations/` directory beside it, shows the LOCATIONS page. The validator's findings about
+  the index and its entries go above it. When the index can't be read (§16.2, `E-CAST`), there
+  is no page, and the finding goes in its place.
+- **Selecting a location bundle** an entry points at shows the LOCATIONS page at that
+  location's section, whose `id` is `location-` and the first 8 hexadecimal characters of the
+  SHA-256 of the entry's `location` as UTF-8. That bundle's findings go above it. The bundle
+  is one item, as a character's is (DF-58).
+- **A location bundle no entry points at,** an orphan or a bundle in a project with no
+  locations, is still one item. The host shows its finding, if it has one, and says it isn't
+  one of the project's locations. It builds no page for it.
+- A host MAY use a location's first selected plate, in the page's order, as its item's icon.
+  The default icon is a place.
+
+How a host lays out its findings and its items is its own. Selecting `PROJECT.md` itself is
+outside this format.
 
 ---
 

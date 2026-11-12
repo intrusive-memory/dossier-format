@@ -49,13 +49,13 @@ The standard, and only the standard:
   `tools/build_examples.py` regenerates the fixtures, broken ones included, so
   that rule 9 can be met; it fills the template for those fixtures' own pages and
   for nothing else. `tools/build_template_css.py`, `template_version.py` and
-  `check_template.py` generate and check `template/`. None is an implementation,
+  `check_template.py` generate and check `template/` and `template-locations/`. None is an implementation,
   and nothing should depend on them.
 - **Not a generator.** How an image or a voice is made, and by which model, is
   outside the standard.
-- **Not the owner of neighbouring formats.** `CAST.md` belongs to SwiftReparto
-  and `.vox` to vox-format. The standard says which of their fields it reads
-  and nothing more.
+- **Not the owner of neighbouring formats.** `CAST.md` belongs to SwiftReparto,
+  `PROJECT.md` to SwiftProyecto and `.vox` to vox-format. The standard says which
+  of their fields it reads and nothing more.
 
 ## Status
 
@@ -63,9 +63,11 @@ Version 2.0.0, released 2026-11-12. Written: the specification (`docs/DOSSIER-FO
 data files (`data/`), the conformance fixtures (`examples/`) and the page template
 (`template/`, version 0.1.1), whose rules §11 makes normative. The fixture pages are
 filled from that template. [REQUIREMENTS.md](REQUIREMENTS.md) is what the standard must
-say (DF-1 to DF-95), with the deliverables and the open questions. 2.1.0, on
-`development` and not yet released, adds location bundles (§16) and the fields
-a production's bundles already use (DF-79 to DF-95).
+say (DF-1 to DF-100), with the deliverables and the open questions. 2.1.0, on
+`development` and not yet released, adds location bundles (§16), declared in
+`PROJECT.md` and shown on one synthesized LOCATIONS page whose template is
+`template-locations/` (version 0.1.0), and the fields a production's bundles already
+use (DF-79 to DF-99).
 
 ## Rules for working here
 
@@ -117,4 +119,5 @@ a production's bundles already use (DF-79 to DF-95).
 | [SwiftDossier](https://github.com/intrusive-memory/SwiftDossier) | The Swift implementation of this standard: a reader, writer, validator and viewer. |
 | [vox-format](https://github.com/intrusive-memory/vox-format) | The voice file a dossier carries. The model for how this repository is laid out. |
 | [SwiftReparto](https://github.com/intrusive-memory/SwiftReparto) | Owns `CAST.md`, where discovery starts, and implements the name canonicalization rule in Swift. |
+| [SwiftProyecto](https://github.com/intrusive-memory/SwiftProyecto) | Owns `PROJECT.md`, whose `locations` key is where location discovery starts (§16.2). |
 | Personaje | The app that builds dossiers. The first source of these requirements. |

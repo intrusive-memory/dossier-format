@@ -41,6 +41,13 @@ TEMPLATE = ROOT / "template"
 _VERSION = json.loads((TEMPLATE / "VERSION.json").read_text(encoding="utf-8"))
 TEMPLATE_VERSION, TEMPLATE_SHA = _VERSION["version"], _VERSION["sha256"]
 PREVIEW_VERSION = 1  # §11.1: the second line of a preview key
+LOCATIONS_TEMPLATE = ROOT / "template-locations"
+_LOCATIONS_VERSION = json.loads((LOCATIONS_TEMPLATE / "VERSION.json").read_text(encoding="utf-8"))
+LOCATIONS_TEMPLATE_VERSION, LOCATIONS_TEMPLATE_SHA = _LOCATIONS_VERSION["version"], _LOCATIONS_VERSION["sha256"]
+LOCATIONS_PAGE_VERSION = 1  # §16.6: the second line of a LOCATIONS page key
+LOCATIONS_COPIES = json.loads((LOCATIONS_TEMPLATE / "page-copies.json").read_text(encoding="utf-8"))
+LOCATIONS_FRAGMENTS = {chunk.split(" -->\n", 1)[0]: chunk.split(" -->\n", 1)[1].rstrip("\n")
+                       for chunk in re.split(r"^<!-- fragment: ", (LOCATIONS_TEMPLATE / "fragments.html").read_text(encoding="utf-8"), flags=re.M)[1:]}
 FIELDS = json.loads((ROOT / "data/fields.json").read_text(encoding="utf-8"))
 TIERS = json.loads((ROOT / "data/tiers.json").read_text(encoding="utf-8"))
 COPIES = json.loads((TEMPLATE / "page-copies.json").read_text(encoding="utf-8"))
@@ -755,17 +762,26 @@ def code_for(name):
 
 
 def fixture(group, name, bundles, members, codes=(), may_also=(), complete=None, missing=None, note="", cast_text=None, bundle_path=None, update_status=None, preview=None,
-            locations=None, locations_text=None):
+            locations=None, locations_text=None, project_text=None, locations_at="LOCATIONS.md", files=None, locations_page=None):
+    """One project. With `locations`, it also has a PROJECT.md whose `locations` key names the index (§16.2),
+    unless `project_text` says otherwise: False for no PROJECT.md, or the file's text."""
     project = OUT / group / name
     project.mkdir(parents=True)
     cast = cast_text or front_matter({"type": "cast", "schemaVersion": 1, "cast": members}) + "# Cast\n\nSynthetic data only.\n"
     (project / "CAST.md").write_text(cast, encoding="utf-8")
-    if locations is not None or locations_text is not None:
-        # §16.2: the second index, beside CAST.md.
-        text = locations_text or front_matter({"type": "locations", "schemaVersion": 1, "locations": locations}) + "# Locations\n\nSynthetic data only.\n"
-        (project / "LOCATIONS.md").write_text(text, encoding="utf-8")
+    has_index = locations is not None or locations_text is not None
+    if project_text is None and has_index:
+        project_text = project_md(locations_at)
+    if project_text:
+        (project / "PROJECT.md").write_text(project_text, encoding="utf-8")
+    if has_index:
+        (project / locations_at).parent.mkdir(parents=True, exist_ok=True)
+        (project / locations_at).write_text(locations_text or locations_index(locations), encoding="utf-8")
     for bundle in bundles:
         bundle.write(project)
+    for path, data in (files or {}).items():
+        (project / path).parent.mkdir(parents=True, exist_ok=True)
+        (project / path).write_bytes(data)
     entry = {"path": f"{group}/{name}", "bundle": bundle_path or bundles[0].dir, "verdict": {"valid": "valid", "warnings": "warnings", "errors": "invalid"}[group],
              "codes": sorted(codes), "mayAlso": sorted(may_also)}
     if complete is not None:
@@ -775,6 +791,8 @@ def fixture(group, name, bundles, members, codes=(), may_also=(), complete=None,
         entry["updateStatus"] = update_status
     if preview is not None:
         entry["preview"] = preview
+    if locations_page is not None:
+        entry["locationsPage"] = locations_page
     if note:
         entry["note"] = note
     FIXTURES.append(entry)
@@ -937,6 +955,210 @@ def add_plate(b, variant, data, status="selected", references=None, **extra):
 def location_entry(b):
     """A LOCATIONS.md entry (§16.2), with the copies for people that the index may carry."""
     return {"location": b.name, "name": b.extra_top.get("location", {}).get("name", b.name), "manifest": f"{b.dir}/manifest.json"}
+
+
+def salt_store_bundle():
+    """A second location, with one view, one plate and a LOCATION.md with no table."""
+    b = Bundle("SALT-STORE", parent="locations")
+    b.extra_top = {"dossierType": "location", "location": {
+        "name": "The salt store on the quay", "theme": "COAST",
+        "views": {"floor": {"prompt": "The store's floor from the door, sacks stacked to the right.", "exterior": False}}}}
+    b.put("LOCATION.md", (front_matter({"type": "location", "location": b.name}) + """
+# The salt store on the quay
+
+A low shed of tarred planks. *Invented* for these fixtures.
+
+## Blocking
+
+- People come in by the door, at the camera.
+- The sacks are **always** on the right.
+""").encode(), "description")
+    add_plate(b, "floor", png(320, 180, b.name + "floor", (200, 40, 80, 100)))
+    return b
+
+
+def project_md(locations="LOCATIONS.md", title="A fixture project"):
+    """PROJECT.md (§16.2). Its format is SwiftProyecto's: this has the four keys SwiftProyecto requires, and
+    `locations` unless it is None. The format reads only `locations` and `title`."""
+    fields = {"type": "project", "title": title, "author": "dossier-format fixtures", "created": "2026-10-31T00:00:00Z"}
+    if locations is not None:
+        fields["locations"] = locations
+    return front_matter(fields) + "# Project\n\nSynthetic data only.\n"
+
+
+def locations_index(entries):
+    return front_matter({"type": "locations", "schemaVersion": 1, "locations": entries}) + "# Locations\n\nSynthetic data only.\n"
+
+
+def manifest_bytes(b):
+    """manifest.json as Bundle.write stores it."""
+    return (json.dumps(b.manifest(), indent=2, sort_keys=True, ensure_ascii=False) + "\n").encode()
+
+
+class LocationMarkdown(FilledPage):
+    """template-locations/README.md rules 3 and 4: the dossier template's Markdown, code spans, and marks with no links."""
+
+    def __init__(self, body):
+        self.notes = dict(re.findall(r"^\[\^([^\]]+)\]: *(.*)$", body, re.M))
+        body = re.sub(r"^\[\^[^\]]+\]:.*$", "", body, flags=re.M)
+        referenced = list(dict.fromkeys(re.findall(r"\[\^([^\]]+)\]", body)))
+        self.cited = [label for label in referenced if label in self.notes]
+        self.cited += [label for label in self.notes if label not in referenced]
+        self.body = body
+
+    def inline(self, text):
+        out = []
+        for part in re.split(r"(`[^`\n]+`)", text):
+            if len(part) > 2 and part.startswith("`") and part.endswith("`"):
+                out.append(f"<code>{esc(part[1:-1])}</code>")
+                continue
+            out.append(super().inline(part))
+        return "".join(out).replace('<sup class="mark"><a href="#page.sources">', '<sup class="mark">').replace("</a></sup>", "</sup>")
+
+    def sources(self):
+        items = "".join(substitute(LOCATIONS_FRAGMENTS["sourceItem"], {"text": esc(self.notes[label])}) for label in self.cited)
+        return substitute(LOCATIONS_FRAGMENTS["sources"], {"items": items}) if items else ""
+
+
+def table_cells(line):
+    text = line.strip()[1:]
+    if text.endswith("|"):
+        text = text[:-1]
+    return [cell.strip() for cell in text.split("|")]
+
+
+def is_table_row(line):
+    return line.strip().startswith("|")
+
+
+def is_delimiter_row(line):
+    return is_table_row(line) and all(re.fullmatch(r":?-+:?", cell) for cell in table_cells(line))
+
+
+def location_markdown(body):
+    """LOCATION.md's body as markup (template-locations/README.md rule 3)."""
+    md = LocationMarkdown(body)
+    lines = md.body.split("\n")
+    out, run = [], []
+
+    def flush():
+        if run:
+            out.append(md.markdown(run))
+            run.clear()
+    index = 0
+    while index < len(lines):
+        line = lines[index]
+        if is_table_row(line) and index + 1 < len(lines) and is_delimiter_row(lines[index + 1]):
+            flush()
+            header = table_cells(line)
+            end = index + 2
+            rows = []
+            while end < len(lines) and is_table_row(lines[end]):
+                cells = table_cells(lines[end])[:len(header)]
+                rows.append(cells + [""] * (len(header) - len(cells)))
+                end += 1
+            out.append("<table><thead><tr>" + "".join(f"<th>{md.inline(cell)}</th>" for cell in header) + "</tr></thead><tbody>"
+                       + "".join("<tr>" + "".join(f"<td>{md.inline(cell)}</td>" for cell in row) + "</tr>" for row in rows)
+                       + "</tbody></table>")
+            index = end
+            continue
+        if line.startswith("# "):
+            run.append("")  # The location's own title: the section's heading already shows the name.
+        elif line.startswith("## "):
+            run.append("### " + line[3:])
+        else:
+            run.append(line)
+        index += 1
+    flush()
+    return "".join(out), md.sources()
+
+
+def jpeg_inside(data, box):
+    """template-locations/page-copies.json, fit `inside`: the largest size inside the box, keeping the shape."""
+    image = Image.open(io.BytesIO(data)).convert("RGB")
+    scale = min(box[0] / image.width, box[1] / image.height)
+    size = (max(1, int(image.width * scale + 0.5)), max(1, int(image.height * scale + 0.5)))
+    image = image.resize(size)
+    buffer = io.BytesIO()
+    image.save(buffer, "JPEG", quality=LOCATIONS_COPIES["quality"], optimize=False)
+    return buffer.getvalue(), size
+
+
+def locations_page_key(title, index_text, entries, bundles):
+    """§16.6: the key. One line per entry, in index order, holds the hash of the manifest its pointer reaches."""
+    by_manifest = {f"{b.dir}/manifest.json": b for b in bundles}
+    lines = ["dossier-locations-page", str(LOCATIONS_PAGE_VERSION), sha(index_text.encode()),
+             sha(title.encode()) if title else ""]
+    for entry in entries:
+        b = by_manifest.get(entry.get("manifest"))
+        lines.append(sha(manifest_bytes(b)) if b else "")
+    lines.append(LOCATIONS_TEMPLATE_SHA)
+    return sha(("\n".join(lines) + "\n").encode())
+
+
+def locations_page(title, index_text, entries, bundles):
+    """§16.6: the LOCATIONS page, filled from template-locations/ for these fixtures. Test data, not a renderer."""
+    fill = lambda fragment_name, **values: substitute(LOCATIONS_FRAGMENTS[fragment_name], values)
+    by_manifest = {f"{b.dir}/manifest.json": b for b in bundles}
+    sizes = LOCATIONS_COPIES["sizes"]
+    seen = set()
+    sections = []
+    for entry in entries:
+        name = entry["location"]
+        anchor = "location-" + sha(name.encode())[:8]
+        identifier = fill("id", id=anchor) if anchor not in seen else ""
+        seen.add(anchor)
+        b = by_manifest.get(entry.get("manifest"))
+        heading = name
+        if "manifest" not in entry:
+            content = fill("missing", text=esc("No bundle yet."))
+        elif b is None:
+            content = fill("missing", text=esc("This location's bundle can't be shown."))
+        else:
+            manifest = json.loads(manifest_bytes(b))  # Document order, as manifest.json has it.
+            record = manifest.get("location") or {}
+            heading = record.get("name") or name
+            content = ""
+            _, _, body = b.files["LOCATION.md"].decode().split("---\n", 2)
+            markup, sources = location_markdown(body)
+            if markup:
+                content += fill("description", markup=markup)
+            content += sources
+            selected = [a for a in manifest["assets"] if a["status"] == "selected"]
+            plates = {a["variant"]: a for a in selected if a["kind"] == "plate"}
+            order = [v for v in record.get("views", {}) if v in plates]
+            order += sorted((v for v in plates if v not in order), key=lambda v: v.encode())
+            items = []
+            for variant in order:
+                size = sizes["plate"]
+                data = jpeg_copy(b.files[plates[variant]["path"]], (size["width"], size["height"]))
+                img = fill("img", label=esc(variant), src="data:image/jpeg;base64," + base64.b64encode(data).decode(),
+                           width=str(size["width"]), height=str(size["height"]))
+                items.append(fill("imageItem", img=img, label=esc(variant)))
+            if items:
+                content += fill("plates", items="".join(items))
+            items = []
+            for view in sorted((a for a in selected if a["kind"] == "view"), key=lambda a: a["variant"].encode()):
+                data, (width, height) = jpeg_inside(b.files[view["path"]], (sizes["view"]["width"], sizes["view"]["height"]))
+                img = fill("img", label=esc(view["variant"]), src="data:image/jpeg;base64," + base64.b64encode(data).decode(),
+                           width=str(width), height=str(height))
+                items.append(fill("imageItem", img=img, label=esc(view["variant"])))
+            if items:
+                content += fill("views", items="".join(items))
+        sections.append(fill("location", id=identifier, name=esc(name), heading=esc(heading), content=content))
+    include = lambda path: (ROOT / path).read_text(encoding="utf-8")
+    count = len(entries)
+    key = locations_page_key(title, index_text, entries, bundles)
+    page = substitute(include("template-locations/skeleton.html"), {
+        "template.version": esc(LOCATIONS_TEMPLATE_VERSION), "template.sha256": esc(LOCATIONS_TEMPLATE_SHA), "key": key,
+        "title": esc(f"{title} · Locations" if title else "Locations"),
+        "include:fonts.css": include("template/fonts.css"), "include:dossier.css": include("template/dossier.css"),
+        "include:locations.css": include("template-locations/locations.css"),
+        "project": fill("project", text=esc(title)) if title else "",
+        "count": esc(f"{count} location" + ("" if count == 1 else "s")),
+        "locations": "\n".join(sections),
+    })
+    return key, page.encode()
 
 
 # --- valid -------------------------------------------------------------------
@@ -1251,6 +1473,42 @@ Said the way it's spelled.[^one]
             bundle_path=loc.dir,
             note="§16.5's worked example. dossierType location; the name in character; a location record whose views are dock and lamp-room; LOCATION.md; two dock plates (one candidate) and a lamp-room plate painted from the dock plate (role plate:dock), all 320×180, within 1% of 16:9; an imported 200×100 JPEG storyboard-design view, which isn't W-SHAPE. No completeness: a location has no tier. A LOCATIONS.md entry with no manifest has no bundle. The CAST.md member's bundle is in characters/ and isn't under test.")
 
+    # §16.2, DF-80, DF-96: discovery starts at PROJECT.md's locations key, and only there.
+    def unread_locations():
+        return location_bundle(), location_bundle("DRY-DOCK"), base("THE KEEPER")
+    loc, stray, keeper = unread_locations()
+    fixture("valid", "locations-no-key", [keeper, loc, stray], [member(keeper)], locations=[location_entry(loc)], project_text=project_md(None),
+            note="PROJECT.md has no locations key, so the project has no locations: LOCATIONS.md isn't read and locations/ isn't listed. HARBOR-LIGHT and DRY-DOCK are neither locations nor orphans, and a validator reports nothing about them.")
+    loc, stray, keeper = unread_locations()
+    fixture("valid", "locations-no-project", [keeper, loc, stray], [member(keeper)], locations=[location_entry(loc)], project_text=False,
+            note="There is no PROJECT.md, so the project has no locations, as with no key. LOCATIONS.md and locations/ are ordinary files.")
+    loc = location_bundle(); loc.dir = "world/locations/HARBOR-LIGHT.dossier"
+    stray = location_bundle("DRY-DOCK")
+    fixture("valid", "locations-index-elsewhere", [loc, stray], [], locations_at="world/PLACES.md", bundle_path=loc.dir,
+            locations=[{"location": loc.name, "name": loc.extra_top["location"]["name"], "manifest": "locations/HARBOR-LIGHT.dossier/manifest.json"}],
+            note="PROJECT.md says locations: world/PLACES.md. The index may have any name. Its entry's manifest is relative to world/, and orphans are looked for in world/locations/, so DRY-DOCK in the project's own locations/ isn't listed and isn't W-ORPHAN.")
+
+    # §16.6, DF-97, DF-98: the LOCATIONS page, built from the index and the bundles its entries point at, stored under its key.
+    title = "The Fixture Coast"
+
+    def coast():
+        harbor, salt, keeper = location_bundle(), salt_store_bundle(), base("THE KEEPER")
+        entries = [location_entry(harbor), {"location": "THE OLD QUAY", "name": "Not built yet"}, location_entry(salt)]
+        key, page = locations_page(title, locations_index(entries), entries, [harbor, salt])
+        return harbor, salt, keeper, entries, key, page
+    old_page = b"<!doctype html>\n<title>An older LOCATIONS page</title>\n"
+    harbor, salt, keeper, entries, key, page = coast()
+    store = {".locations-page/.gitignore": b"*\n", f".locations-page/{key}.html": page, f".locations-page/{'0' * 64}.html": old_page,
+             f".locations-page/{key}.html.1.tmp": b"<!doctype html>\n"}
+    fixture("valid", "locations-page-current", [harbor, salt, keeper], [member(keeper)], locations=entries, project_text=project_md(title=title),
+            files=store, bundle_path=harbor.dir, locations_page={"key": key, "hit": True},
+            note="§16.6's worked example. The store beside LOCATIONS.md holds the page for this key, an older page and a temporary file left by a write. A viewer shows the first and writes nothing; a validator reports none of them. The page has three sections in index order: HARBOR-LIGHT (LOCATION.md, the dock and lamp-room plates in the order of location.views, the storyboard-design view), THE OLD QUAY (no bundle yet) and SALT-STORE.")
+    harbor, salt, keeper, entries, key, page = coast()
+    fixture("valid", "locations-page-out-of-date", [harbor, salt, keeper], [member(keeper)], locations=entries, project_text=project_md(title=title),
+            files={".locations-page/.gitignore": b"*\n", f".locations-page/{'0' * 64}.html": old_page}, bundle_path=harbor.dir,
+            locations_page={"key": key, "hit": False},
+            note="The store holds only a page for another key. A viewer builds this key's page; after it is stored, .gitignore and that page are all the store holds.")
+
     # §8.1, DF-85 to DF-87, DF-89, DF-90: the view families, imported JPEG views of any shape, storyboardLabel, copiedFromSha256.
     b = base("THE ARCHIVIST")
     imported(b, "view", "storyboard", jpeg(128, 128, b.name + "storyboard"), "jpg", "storyboards/fixture/archivist.jpg",
@@ -1489,6 +1747,23 @@ def errors():
     fixture("errors", "E-CAST-locations-no-location", [loc], [], ["E-CAST"], locations=[{"name": "An entry with no location", "manifest": f"{loc.dir}/manifest.json"}],
             may_also=["W-ORPHAN"], note="An entry of LOCATIONS.md has no location key.")
 
+    # §16.2, DF-96: PROJECT.md, or the file its locations key reaches, can't be read.
+    def broken(name, note, **kwargs):
+        loc = location_bundle()
+        fixture("errors", name, [loc], [], ["E-CAST"], bundle_path=loc.dir, note=note, **kwargs)
+    broken("E-CAST-project-yaml", "PROJECT.md's front matter doesn't parse as YAML, so its locations are unknown. Nothing is listed, so HARBOR-LIGHT isn't W-ORPHAN.",
+           project_text="---\ntype: project\ntitle: [an unclosed list\nlocations: LOCATIONS.md\n---\n", locations=[location_entry(location_bundle())])
+    broken("E-CAST-project-locations-type", "PROJECT.md's locations is a list, not a path.",
+           project_text=project_md(["LOCATIONS.md"]), locations=[location_entry(location_bundle())])
+    broken("E-CAST-project-locations-absolute", "PROJECT.md's locations starts with /.",
+           project_text=project_md("/LOCATIONS.md"), locations=[location_entry(location_bundle())])
+    broken("E-CAST-project-locations-outside", "PROJECT.md's locations, ../LOCATIONS.md, leaves the project directory.",
+           project_text=project_md("../LOCATIONS.md"), locations=[location_entry(location_bundle())])
+    broken("E-CAST-locations-yaml", "The file PROJECT.md's locations reaches has front matter that doesn't parse as YAML.",
+           locations_text="---\ntype: locations\nschemaVersion: 1\nlocations: [\n---\n")
+    broken("E-CAST-locations-type", "PROJECT.md's locations reaches CAST.md, whose type is cast, not locations.",
+           project_text=project_md("CAST.md"))
+
     # §16.1: the location's names disagree.
     loc = location_bundle(description_name="HARBOR LIGHT")
     fixture("errors", "E-NAME-MISMATCH-location", [loc], [], ["E-NAME-MISMATCH"], locations=[location_entry(loc)],
@@ -1716,6 +1991,14 @@ def warnings():
     fixture("warnings", "W-ORPHAN-location", [loc, stray], [], ["W-ORPHAN"], locations=[location_entry(loc)],
             note="DRY-DOCK is in locations/ beside LOCATIONS.md, and no entry points at it.")
 
+    # §16.2, DF-96: PROJECT.md's locations key reaches no file.
+    loc = location_bundle()
+    fixture("warnings", "W-POINTER-locations-missing", [loc], [], ["W-POINTER"], project_text=project_md("LOCATIONS.md"), bundle_path=loc.dir,
+            note="PROJECT.md says locations: LOCATIONS.md, and there is no such file. The project has no locations, so locations/ isn't listed and HARBOR-LIGHT isn't W-ORPHAN.")
+    loc = location_bundle()
+    fixture("warnings", "W-POINTER-locations-directory", [loc], [], ["W-POINTER"], project_text=project_md("locations"), bundle_path=loc.dir,
+            note="PROJECT.md's locations reaches a directory, not a file.")
+
 
 # --- data --------------------------------------------------------------------
 
@@ -1733,7 +2016,9 @@ def main():
     valid()
     errors()
     warnings()
-    (OUT / "conformance.json").write_text(json.dumps({"formatVersion": 2, "templateVersion": TEMPLATE_VERSION, "templateSha256": TEMPLATE_SHA, "fixtures": FIXTURES}, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    (OUT / "conformance.json").write_text(json.dumps({"formatVersion": 2, "templateVersion": TEMPLATE_VERSION, "templateSha256": TEMPLATE_SHA,
+                                                         "locationsTemplateVersion": LOCATIONS_TEMPLATE_VERSION, "locationsTemplateSha256": LOCATIONS_TEMPLATE_SHA,
+                                                         "fixtures": FIXTURES}, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     names = [{"input": i, "canonical": c} if c else {"input": i, "error": "E-NAME"} for i, c in NAMES]
     (OUT / "names.json").write_text(json.dumps({"formatVersion": 2, "names": names}, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     print(f"{len(FIXTURES)} fixtures")
