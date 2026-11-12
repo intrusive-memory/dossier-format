@@ -1,7 +1,7 @@
 ---
 type: doc
 title: dossier-format — Agent Instructions
-updated: 2026-11-01
+updated: 2026-11-12
 ---
 
 # AGENTS.md
@@ -63,7 +63,7 @@ Draft. Written: the specification (`docs/DOSSIER-FORMAT.md`), the schemas, the
 data files (`data/`), the conformance fixtures (`examples/`) and the page template
 (`template/`, version 0.1.0), whose rules §11 makes normative. The fixture pages are
 filled from that template. [REQUIREMENTS.md](REQUIREMENTS.md) is what the standard must
-say (DF-1 to DF-67), with the deliverables and the open questions.
+say (DF-1 to DF-78), with the deliverables and the open questions.
 
 ## Rules for working here
 
