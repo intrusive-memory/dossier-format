@@ -59,7 +59,7 @@ The standard, and only the standard:
 
 ## Status
 
-Draft. Written: the specification (`docs/DOSSIER-FORMAT.md`), the schemas, the
+Version 2.0.0, released 2026-11-12. Written: the specification (`docs/DOSSIER-FORMAT.md`), the schemas, the
 data files (`data/`), the conformance fixtures (`examples/`) and the page template
 (`template/`, version 0.1.0), whose rules §11 makes normative. The fixture pages are
 filled from that template. [REQUIREMENTS.md](REQUIREMENTS.md) is what the standard must

@@ -1,7 +1,7 @@
 ---
 type: doc
-updated: 2026-11-10
-status: draft
+updated: 2026-11-12
+status: released
 ---
 
 # dossier-format
@@ -25,13 +25,13 @@ A tool showing a dossier doesn't need the page to exist or to be current: it bui
 changes when the manifest does, and shows the stored one while the key still matches
 ([§11.1](docs/DOSSIER-FORMAT.md#111-the-preview-df-68-to-df-74)).
 
-> **Status: draft.** The specification is
+> **Status: 2.0.0.** The specification is
 > [docs/DOSSIER-FORMAT.md](docs/DOSSIER-FORMAT.md) (format version 2), with
 > JSON Schemas in [schemas/](schemas) and the tier table in
 > [data/tiers.json](data/tiers.json). Conformance fixtures are in
 > [examples/](examples). Every property and the decision behind it is in
-> [docs/PROPERTY-INVENTORY.md](docs/PROPERTY-INVENTORY.md). The page template,
-> field list and design tokens are not written yet. Requirements:
+> [docs/PROPERTY-INVENTORY.md](docs/PROPERTY-INVENTORY.md). The page template is in
+> [template/](template); the field list and design tokens are in [data/](data). Requirements:
 > [REQUIREMENTS.md](REQUIREMENTS.md).
 
 ## Purpose

@@ -5,7 +5,9 @@ updated: 2026-11-12
 
 # Changelog
 
-## Format 2, release candidate 9 (unreleased)
+## Format 2.0.0 (2026-11-12)
+
+Format 2 is released. The changes since rc.8:
 
 Template 0.1.1, unchanged. No valid bundle becomes invalid, so `manifestVersion` stays 2:
 each change below allows something rc.8 refused or warned about, or states a rule rc.8
@@ -51,7 +53,7 @@ left open, and the one schema rule added states a requirement §7 already made.
   `errors/E-SCHEMA-sample-no-voice-input` and `errors/E-SCHEMA-voice-input-provider-case`.
   No existing fixture changed.
 
-## Format 2, release candidate 8 (unreleased)
+## Format 2, release candidate 8 (2026-11-10)
 
 Template 0.1.1, unchanged. No valid bundle becomes invalid, so `manifestVersion` stays 2.
 
