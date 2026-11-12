@@ -65,7 +65,7 @@ data files (`data/`), the conformance fixtures (`examples/`) and the page templa
 filled from that template. [REQUIREMENTS.md](REQUIREMENTS.md) is what the standard must
 say (DF-1 to DF-95), with the deliverables and the open questions. 2.1.0, on
 `development` and not yet released, adds location bundles (§16) and the fields
-synchronized-worlds' bundles use (DF-79 to DF-95).
+a production's bundles already use (DF-79 to DF-95).
 
 ## Rules for working here
 
