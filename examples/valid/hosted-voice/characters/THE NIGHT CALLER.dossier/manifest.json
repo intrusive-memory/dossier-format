@@ -48,7 +48,7 @@
       "createdAt": "2026-10-31T11:00:00Z",
       "derivedFrom": [
         {
-          "provider": "elevenlabs",
+          "provider": "vocalsmith",
           "role": "voice",
           "voiceId": "FIXTURE0VOICE0000001"
         }
@@ -73,7 +73,7 @@
       "createdAt": "2026-10-31T11:00:00Z",
       "derivedFrom": [
         {
-          "provider": "elevenlabs",
+          "provider": "vocalsmith",
           "role": "voice",
           "voiceId": "FIXTURE0VOICE0000001"
         }

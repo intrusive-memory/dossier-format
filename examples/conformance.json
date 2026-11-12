@@ -212,7 +212,17 @@
       "mayAlso": [],
       "complete": true,
       "missingRequired": [],
-      "note": "Two samples with a voice input and no vox: one sent its instruction as audio tags and didn't check it (audio-tag, unverified), one as a parameter (parameter, yes). The member writes the provider key as ElevenLabs and the ID as a scalar; its normal form is {\"elevenlabs\": [\"FIXTURE0VOICE0000001\"]}, which holds the input, so neither is stale. No W-VOICE-ELSEWHERE: there is no selected vox."
+      "note": "Two samples with a voice input and no vox: one sent its instruction as audio tags and didn't check it (audio-tag, unverified), one as a parameter (parameter, yes). The member writes the provider key as VocalSmith and the ID as a scalar; its normal form is {\"vocalsmith\": [\"FIXTURE0VOICE0000001\"]}, which holds the input, so neither is stale. No W-VOICE-ELSEWHERE: there is no selected vox."
+    },
+    {
+      "path": "valid/hosted-voice-supporting",
+      "bundle": "characters/NELL TARRANT.dossier",
+      "verdict": "valid",
+      "codes": [],
+      "mayAlso": [],
+      "complete": true,
+      "missingRequired": [],
+      "note": "A supporting character with no vox: her selected samples have a current voice input, so the voice is hosted. vox.1.7b and vox.0.6b are satisfied, and the one neutral sample (model fixture-hosted-tts) satisfies both neutral rows (§8.3's worked example)."
     },
     {
       "path": "valid/imported-view",
@@ -690,7 +700,7 @@
       "mayAlso": [
         "W-STALE"
       ],
-      "note": "The voice records' provider is ElevenLabs, not elevenlabs."
+      "note": "The voice records' provider is VocalSmith, not vocalsmith."
     },
     {
       "path": "warnings/W-UNCLASSIFIED",
@@ -792,7 +802,7 @@
       "mayAlso": [],
       "complete": true,
       "missingRequired": [],
-      "note": "The member's voices has no elevenlabs key, so both samples' voice input is stale."
+      "note": "The member's voices has no vocalsmith key, so both samples' voice input is stale."
     },
     {
       "path": "warnings/W-STALE-no-selection",
@@ -1256,6 +1266,21 @@
         "views"
       ],
       "note": "Neutral reads don't count toward the range."
+    },
+    {
+      "path": "warnings/W-INCOMPLETE-hosted-no-neutral",
+      "bundle": "characters/NELL TARRANT.dossier",
+      "verdict": "warnings",
+      "codes": [
+        "W-INCOMPLETE"
+      ],
+      "mayAlso": [],
+      "complete": false,
+      "missingRequired": [
+        "sample.neutral.0.6b",
+        "sample.neutral.1.7b"
+      ],
+      "note": "valid/hosted-voice-supporting without its neutral sample. The wry sample's current voice input keeps the voice hosted, so the vox rows are met, and the two neutral rows aren't."
     },
     {
       "path": "warnings/W-V1",

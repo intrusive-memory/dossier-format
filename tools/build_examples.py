@@ -435,15 +435,17 @@ class FilledPage:
         vox = self.selected("vox")
         models = vox["provenance"].get("models", []) if vox else []
         samples = [a for a in self.assets if a["kind"] == "voiceSample" and a["status"] == "selected"]
+        voices = self.member.get("voices", {})  # Already the normal form (§7).
+        hosted = [a for a in samples if any(r["role"] == "voice" and r["voiceId"] in voices.get(r["provider"], []) for r in a.get("derivedFrom", []))]
         if name in ("description.full", "description.short"):
             wanted = FULL_SECTIONS if name.endswith("full") else SHORT_SECTIONS
             return bool(self.selected("description")) and all(self.matching(s) for s in wanted)
         if name == "voicePrompt":
             return bool(self.member.get("voicePrompt"))
         if name.startswith("vox."):
-            return any(name[4:] in m.lower() for m in models)
+            return bool(hosted) or any(name[4:] in m.lower() for m in models)  # §8.3: a hosted voice meets the vox rows.
         if name.startswith("sample.neutral."):
-            return any(a["variant"] == "neutral" and a["model"] == name[15:] for a in samples)
+            return any(a["variant"] == "neutral" and a["model"] == name[15:] for a in samples) or any(a["variant"] == "neutral" for a in hosted)
         if name == "sample.range":
             return sum(a["variant"] != "neutral" for a in samples) >= 3
         if name == "pronunciation":
@@ -799,14 +801,14 @@ def add_sample(b, variant, model, text, suffix=False):
           derivedFrom=[b.input("vox")], model=model, language="en-US", sampleText=text)
 
 
-HOSTED = "elevenlabs"  # A hosted provider's key, as vox-format and CAST.md spell it (§7).
+HOSTED = "vocalsmith"  # An invented hosted provider; its key, as CAST.md writes it after the normal form (§7).
 HOSTED_VOICE = "FIXTURE0VOICE0000001"  # Invented: no service has this voice.
 
 
-def hosted_voice_bundle(name):
+def hosted_voice_bundle(name, voice_id=HOSTED_VOICE, b=None):
     """§7, DF-76: samples made with a hosted voice, named by the member as a bare voice ID. No vox."""
-    b = base(name)
-    voice = [{"role": "voice", "provider": HOSTED, "voiceId": HOSTED_VOICE}]
+    b = b or base(name)
+    voice = [{"role": "voice", "provider": HOSTED, "voiceId": voice_id}]
     b.put("voice/sample-neutral.m4a", SILENCE, "voiceSample", variant="neutral",
           provenance={"provider": "diga", "model": "fixture-hosted-tts", "instruct": "[calm]", "instructMethod": "audio-tag",
                       "instructApplied": "unverified", "source": "sampleLine"},
@@ -818,9 +820,37 @@ def hosted_voice_bundle(name):
     return b
 
 
-def hosted_member(b, voice_id=HOSTED_VOICE):
+def hosted_member(b, voice_id=HOSTED_VOICE, prompt=None):
     """The member holds the bare voice ID under a mixed-case key, as a scalar: §7's normal form gives the lowercase key and an array."""
-    return {**member(b), "voices": {"ElevenLabs": voice_id}}
+    return {**member(b, prompt=prompt), "voices": {"VocalSmith": voice_id}}
+
+
+def hosted_supporting(name, neutral=True):
+    """§8.3, DF-78: a supporting character with a hosted voice and everything else the tier requires."""
+    voice_id = "FIXTURE0VOICE0000003"
+    b = Bundle(name, "supporting")
+    sections = {"Logline": "A night operator at the coast exchange who hears every call twice.",
+                "Appearance": "Short, dark-haired, a headset pushed back over one ear.",
+                "Personality": "Polite to callers and blunt with everyone else.",
+                "Backstory": "Took the night shift because nobody else wanted it.",
+                "Arc": "From connecting calls to deciding which ones go through.",
+                "Relationships": "Patches **WREN HALLOWAY** through to the mainland on Thursdays.",
+                "Voice & Speech": "Quick and level, and slower when the line is bad.",
+                "Pronunciation": "Tarrant: TARR-unt.",
+                "Wardrobe": "A cardigan with a pencil in the pocket."}
+    body = "".join(f"\n## {heading}\n\n{text}[^a-nell]\n" for heading, text in sections.items())
+    description = front_matter({"type": "character", "character": name, "role": "supporting", "artStyle": ART}) + body + "\n[^a-nell]: Author. Invented for the dossier-format fixtures, 2026-11-12.\n"
+    b.put("CHARACTER.md", description.encode(), "description")
+    add_visuals(b)
+    for variant in ("front", "profile", "back"):
+        b.image("view", png(180, 320, name + variant), variant, derivedFrom=[b.input("portrait"), b.input("face")])
+    hosted_voice_bundle(name, voice_id, b)
+    if not neutral:
+        b.assets = [a for a in b.assets if a["path"] != "voice/sample-neutral.m4a"]
+        del b.files["voice/sample-neutral.m4a"]
+    m = hosted_member(b, voice_id, VOICE_PROMPT)
+    b.page(m)
+    return b, m
 
 
 def add_visuals(b):
@@ -1114,7 +1144,12 @@ Said the way it's spelled.[^one]
     # §7, DF-75, DF-76: a hosted voice. The samples' input is the member's bare voice ID, and there is no vox.
     b = hosted_voice_bundle("THE NIGHT CALLER")
     fixture("valid", "hosted-voice", [b], [hosted_member(b)], complete=True,
-            note="Two samples with a voice input and no vox: one sent its instruction as audio tags and didn't check it (audio-tag, unverified), one as a parameter (parameter, yes). The member writes the provider key as ElevenLabs and the ID as a scalar; its normal form is {\"elevenlabs\": [\"FIXTURE0VOICE0000001\"]}, which holds the input, so neither is stale. No W-VOICE-ELSEWHERE: there is no selected vox.")
+            note="Two samples with a voice input and no vox: one sent its instruction as audio tags and didn't check it (audio-tag, unverified), one as a parameter (parameter, yes). The member writes the provider key as VocalSmith and the ID as a scalar; its normal form is {\"vocalsmith\": [\"FIXTURE0VOICE0000001\"]}, which holds the input, so neither is stale. No W-VOICE-ELSEWHERE: there is no selected vox.")
+
+    # §8.3, DF-78: a hosted voice meets the voice rows of a voiced tier.
+    b, m = hosted_supporting("NELL TARRANT")
+    fixture("valid", "hosted-voice-supporting", [b], [m], complete=True,
+            note="A supporting character with no vox: her selected samples have a current voice input, so the voice is hosted. vox.1.7b and vox.0.6b are satisfied, and the one neutral sample (model fixture-hosted-tts) satisfies both neutral rows (§8.3's worked example).")
 
     # §7, DF-77: a view brought in unchanged from elsewhere in the project is imported, not derived.
     b = base("THE SURVEYOR")
@@ -1269,8 +1304,8 @@ def errors():
     for asset in b.assets:
         for record in asset.get("derivedFrom", []):
             if record["role"] == "voice":
-                record["provider"] = "ElevenLabs"
-    err("E-SCHEMA-voice-input-provider-case", b, members=[hosted_member(b)], may_also=["W-STALE"], note="The voice records' provider is ElevenLabs, not elevenlabs.")
+                record["provider"] = "VocalSmith"
+    err("E-SCHEMA-voice-input-provider-case", b, members=[hosted_member(b)], may_also=["W-STALE"], note="The voice records' provider is VocalSmith, not vocalsmith.")
 
 
 # --- warnings ----------------------------------------------------------------
@@ -1304,7 +1339,7 @@ def warnings():
          note="valid/hosted-voice with the member's voice ID changed: both samples are stale (§7's worked example).")
     b = hosted_voice_bundle("THE NIGHT CALLER")
     warn("W-STALE-input-voice-provider-absent", b, members=[{**member(b), "voices": {}}], codes=["W-STALE"],
-         note="The member's voices has no elevenlabs key, so both samples' voice input is stale.")
+         note="The member's voices has no vocalsmith key, so both samples' voice input is stale.")
 
     # A portrait has been rejected and nothing replaces it.
     b = base(); b.selected("portrait")["status"] = "rejected"
@@ -1423,6 +1458,10 @@ def warnings():
         add_sample(b, variant, model, "One line.", suffix=suffix)
     warn("W-INCOMPLETE-two-range-samples", b, members=[member(b, voice=voice, prompt=VOICE_PROMPT)], codes=["W-INCOMPLETE"], complete=False,
          missing=["dossier", "expressions", "face", "portrait", "sample.range", "views"], note="Neutral reads don't count toward the range.")
+
+    b, m = hosted_supporting("NELL TARRANT", neutral=False)
+    warn("W-INCOMPLETE-hosted-no-neutral", b, members=[m], codes=["W-INCOMPLETE"], complete=False, missing=["sample.neutral.0.6b", "sample.neutral.1.7b"],
+         note="valid/hosted-voice-supporting without its neutral sample. The wry sample's current voice input keeps the voice hosted, so the vox rows are met, and the two neutral rows aren't.")
 
     # Version 1, in both shapes Appendix A describes.
     def v1(dirname, second_selected=False):

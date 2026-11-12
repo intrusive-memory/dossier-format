@@ -5,7 +5,7 @@ cast:
 - character: THE NIGHT CALLER
   role: background
   voices:
-    ElevenLabs: FIXTURE0VOICE0000002
+    VocalSmith: FIXTURE0VOICE0000002
   manifest: characters/THE NIGHT CALLER.dossier/manifest.json
 ---
 # Cast

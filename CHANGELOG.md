@@ -8,8 +8,8 @@ updated: 2026-11-12
 ## Format 2, release candidate 9 (unreleased)
 
 Template 0.1.1, unchanged. No valid bundle becomes invalid, so `manifestVersion` stays 2:
-each change below allows something rc.8 refused, and the one schema rule added states a
-requirement §7 already made.
+each change below allows something rc.8 refused or warned about, or states a rule rc.8
+left open, and the one schema rule added states a requirement §7 already made.
 
 - **§6, DF-75: `provenance.instructMethod`** on a `voiceSample` records how the delivery
   instruction reached the engine: `parameter` (a separate value alongside the text) or
@@ -23,21 +23,31 @@ requirement §7 already made.
   `voice` when the member's `voices` entry is a bare voice ID, `vox` when the ID is inside a
   `.vox`. A selected asset with a `voice` input is stale when the member's normal-form
   `voices[provider]` doesn't contain `voiceId`, including when the key is absent; with no
-  member, the input isn't checked. §7 has a worked example. A bundle with no selected `vox`
+  member, neither a `voice` nor a `castMember` input is checked, one shared rule in §7 that
+  rc.8 left unstated for `castMember`. §7 has a worked example. A bundle with no selected `vox`
   has neither `W-VOICE-ELSEWHERE` nor `W-VOICE-PROMPT`, which §8.2 now says.
 - **§6, §7, DF-77: imported assets.** `provenance.copiedFrom` is allowed on any kind, not
   only `vox`: the file was brought in unchanged from elsewhere in the project. A `face`,
   `view` or `expression` with `copiedFrom` isn't derived: it needs no `derivedFrom`, and it
-  is never stale, `artStyle` included. Open question Q8 asks whether a separate kind would be
-  better.
+  is never stale, `artStyle` included. A portrait with `copiedFrom` keeps its `artStyle`
+  check. Q8 is closed: the user chose this waiver over a separate kind on 2026-11-12.
+- **§8.3, DF-78, `data/tiers.json`: a hosted voice meets the voice rows.** When a selected
+  sample has a current `voice` input, the voice is hosted: `vox.1.7b` and `vox.0.6b` are
+  satisfied, and one `neutral` sample with a current `voice` input, whatever its `model`,
+  satisfies both neutral rows. The existing check rows take the case, so the table keeps its
+  rows and IDs; only four labels and the `$comment` change. DF-38 says so.
+- **Not yet on the page:** the Samples tab's provenance line reads only a `vox` record, so it
+  shows no input for a hosted-voice sample. `template/` and `data/fields.json` don't change
+  in rc.9.
 - **DF-27** names `voiceSample` and the hosted-voice record, and points to DF-77.
 - **`schemas/manifest-v2.schema.json`:** `instructMethod`; the `voice` record in
   `derivedFrom`; a `voiceSample`'s `derivedFrom` must contain a `vox` or `voice` record,
   which §7 already required of `vox` and the schema didn't check; the `derivedFrom`
   requirement on `face`, `view` and `expression` applies only when `provenance.copiedFrom`
   is absent.
-- **Fixtures (114):** `valid/hosted-voice`, `valid/imported-view`,
-  `warnings/W-STALE-input-voice`, `warnings/W-STALE-input-voice-provider-absent`,
+- **Fixtures (116):** `valid/hosted-voice`, `valid/hosted-voice-supporting`,
+  `valid/imported-view`, `warnings/W-STALE-input-voice`,
+  `warnings/W-STALE-input-voice-provider-absent`, `warnings/W-INCOMPLETE-hosted-no-neutral`,
   `errors/E-SCHEMA-sample-no-voice-input` and `errors/E-SCHEMA-voice-input-provider-case`.
   No existing fixture changed.
 
