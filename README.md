@@ -25,7 +25,8 @@ A tool showing a dossier doesn't need the page to exist or to be current: it bui
 changes when the manifest does, and shows the stored one while the key still matches
 ([§11.1](docs/DOSSIER-FORMAT.md#111-the-preview-df-68-to-df-74)).
 
-> **Status: 2.0.0.** The specification is
+> **Status: 2.0.0, released 2026-11-12.** Implementations pin the tag `v2.0.0`; what
+> changed in each release is in [CHANGELOG.md](CHANGELOG.md). The specification is
 > [docs/DOSSIER-FORMAT.md](docs/DOSSIER-FORMAT.md) (format version 2), with
 > JSON Schemas in [schemas/](schemas) and the tier table in
 > [data/tiers.json](data/tiers.json). Conformance fixtures are in
@@ -68,7 +69,7 @@ can conform to it.
 
 | Implementation | Language | Status |
 |----------------|----------|--------|
-| SwiftDossier | Swift | planned |
+| [SwiftDossier](https://github.com/intrusive-memory/SwiftDossier) | Swift | Reader, writer, validator and viewer |
 
 ## Related formats
 
@@ -80,7 +81,8 @@ can conform to it.
 ## Contributing
 
 Work lands on `development`, the default branch. `main` changes only by a pull
-request from `development`, and is what implementations pin to. See
+request from `development`, and is what implementations pin to: each release is
+a tag on `main` with a GitHub release. See
 [AGENTS.md](AGENTS.md) for the rules.
 
 ## License
