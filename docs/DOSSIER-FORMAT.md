@@ -1,6 +1,6 @@
 ---
 type: specification
-state: draft
+state: released
 formatVersion: 2
 updated: 2026-11-12
 ---
