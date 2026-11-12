@@ -61,7 +61,7 @@ The standard, and only the standard:
 
 Version 2.0.0, released 2026-11-12. Written: the specification (`docs/DOSSIER-FORMAT.md`), the schemas, the
 data files (`data/`), the conformance fixtures (`examples/`) and the page template
-(`template/`, version 0.1.0), whose rules §11 makes normative. The fixture pages are
+(`template/`, version 0.1.1), whose rules §11 makes normative. The fixture pages are
 filled from that template. [REQUIREMENTS.md](REQUIREMENTS.md) is what the standard must
 say (DF-1 to DF-78), with the deliverables and the open questions.
 
@@ -97,14 +97,22 @@ say (DF-1 to DF-78), with the deliverables and the open questions.
   from a short-lived branch.
 - **`main`** is what implementations pin to. It changes only by a pull request
   from `development`. Direct pushes are blocked.
-- A merge to `main` that changes the format or the template is tagged with the
-  version it defines.
+- A merge to `main` that changes the format or the template is tagged
+  `v<major>.<minor>.<patch>` and gets a GitHub release whose notes are that
+  version's `CHANGELOG.md` entry. The major number is the format version.
+  - **Patch** (`v2.0.1`): a correction. Wording, a schema that disagrees with the
+    text, a wrong fixture. No valid bundle becomes invalid.
+  - **Minor** (`v2.1.0`): something new and optional. No valid bundle becomes
+    invalid.
+  - **Major**: a breaking change, which raises `manifestVersion` (rule 7).
+- Release candidates were tagged `v2.0.0-rc.<n>` before 2.0.0. Implementations
+  pin a release tag, not an RC.
 
 ## Related repositories
 
 | Repository | Relation |
 |------------|----------|
-| SwiftDossier | The Swift implementation of this standard (planned). |
+| [SwiftDossier](https://github.com/intrusive-memory/SwiftDossier) | The Swift implementation of this standard: a reader, writer, validator and viewer. |
 | [vox-format](https://github.com/intrusive-memory/vox-format) | The voice file a dossier carries. The model for how this repository is laid out. |
 | [SwiftReparto](https://github.com/intrusive-memory/SwiftReparto) | Owns `CAST.md`, where discovery starts, and implements the name canonicalization rule in Swift. |
 | Personaje | The app that builds dossiers. The first source of these requirements. |
