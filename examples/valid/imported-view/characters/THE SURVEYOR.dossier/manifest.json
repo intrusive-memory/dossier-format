@@ -1,0 +1,91 @@
+{
+  "assets": [
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "kind": "description",
+      "path": "CHARACTER.md",
+      "provenance": {
+        "provider": "manual"
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "derivedFrom": [
+        {
+          "path": "images/portrait-f634bb2f.png",
+          "role": "portrait",
+          "sha256": "f634bb2fe658bff3a38d64168bf80ae2bbfcc3b450c62bae8ad2abdc1258996c"
+        }
+      ],
+      "kind": "face",
+      "path": "images/face-a3db826a.png",
+      "provenance": {
+        "artStyle": "flat placeholder shapes",
+        "box": {
+          "height": 100,
+          "width": 80,
+          "x": 50,
+          "y": 60
+        },
+        "engine": "fixture",
+        "provider": "personaje"
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "kind": "portrait",
+      "path": "images/portrait-f634bb2f.png",
+      "provenance": {
+        "artStyle": "flat placeholder shapes",
+        "engine": "fixture",
+        "provider": "vinetas"
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "kind": "view",
+      "path": "images/view-front-7893acce.png",
+      "provenance": {
+        "artStyle": "pencil sketch",
+        "copiedFrom": "references/surveyor-front.png",
+        "provider": "import"
+      },
+      "status": "selected",
+      "variant": "front"
+    }
+  ],
+  "character": "THE SURVEYOR",
+  "files": [
+    {
+      "path": "CHARACTER.md",
+      "sha256": "d549b15d5ead8b3f6f1703f3d713645fd49aa2af44346a44316fdcd51a7c5580",
+      "sizeBytes": 435
+    },
+    {
+      "path": "images/face-a3db826a.png",
+      "sha256": "a3db826aab4f83bd1168fb36cc3afe882ca188cca90a3a5ea154ab6797903115",
+      "sizeBytes": 705
+    },
+    {
+      "path": "images/portrait-f634bb2f.png",
+      "sha256": "f634bb2fe658bff3a38d64168bf80ae2bbfcc3b450c62bae8ad2abdc1258996c",
+      "sizeBytes": 940
+    },
+    {
+      "path": "images/view-front-7893acce.png",
+      "sha256": "7893accee56ad0c742443654da12a78e908dd82b1afca81b9b7f1e307d8802bc",
+      "sizeBytes": 940
+    }
+  ],
+  "generator": {
+    "name": "dossier-format fixtures",
+    "version": "1"
+  },
+  "manifestChecksum": "e69753159d5791bc37f61aaa5d853adfc1d7681b7a4bf14a7afeb628022ec8e2",
+  "manifestVersion": 2,
+  "role": "background",
+  "updatedAt": "2026-10-31T12:00:00Z"
+}

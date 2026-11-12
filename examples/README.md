@@ -1,6 +1,6 @@
 ---
 type: doc
-updated: 2026-11-10
+updated: 2026-11-12
 ---
 
 # Conformance fixtures
@@ -62,6 +62,16 @@ Validate it from its `CAST.md`.
   Linux and APFS keep that, and HFS+ doesn't. Git on a Mac stores such a name as NFC unless
   it's added with `git -c core.precomposeunicode=false add`, and reports it as untracked
   in NFC form, which is why the repository's `.gitignore` names that form.
+- **Inputs read from the member, with no member, have no fixture.** Every fixture is
+  validated from its `CAST.md`, and `conformance.json` has no way to say "open the bundle
+  without one", so there is always a member to check a `castMember` or `voice` input
+  against. §7 states the rule (neither is checked) and its worked example covers a bundle
+  opened without a `CAST.md`.
+- **The Samples tab shows no input for a hosted-voice sample yet.** Its provenance line
+  reads only a `vox` record (`data/fields.json`), so on the pages of
+  `valid/hosted-voice-supporting` and `warnings/W-INCOMPLETE-hosted-no-neutral` the samples
+  say nothing about the voice they were made with. The template change is deferred. The `copiedFrom` path in `valid/imported-view` names a file
+  that isn't in the fixture, since nothing reads it.
 - **Face detection has no fixture.** Images are shapes, not faces, so the face
   crops use `provenance.box`. §8.5's worked example is the portrait and box
   these fixtures use.

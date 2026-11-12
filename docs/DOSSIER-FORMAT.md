@@ -1,8 +1,8 @@
 ---
 type: specification
-state: draft
+state: released
 formatVersion: 2
-updated: 2026-11-10
+updated: 2026-11-12
 ---
 
 # The dossier format, version 2
@@ -12,7 +12,7 @@ holding the character's description, images, voice and a self-contained HTML
 page, inventoried by `manifest.json`.
 
 This document is normative. It implements [REQUIREMENTS.md](../REQUIREMENTS.md)
-(DF-1 to DF-74); the requirement each section satisfies is cited in brackets.
+(DF-1 to DF-78); the requirement each section satisfies is cited in brackets.
 Decisions D1–D10 and the evidence behind every property are in
 [PROPERTY-INVENTORY.md](PROPERTY-INVENTORY.md).
 
@@ -120,7 +120,8 @@ bundle's only by case.
   `characters/`); the format only requires that `manifest:` points there.
 
 **`CAST.md` fields read** (the format belongs to SwiftReparto): `character`,
-`role`, `manifest`, `voicePrompt`, `voices.voxalta`, `language`, `actor`.
+`role`, `manifest`, `voicePrompt`, `voices.voxalta`, `language`, `actor`, and
+`voices.<provider>` for a hosted voice (§7, §8.2).
 The format writes none of them except through a `CAST.md` writer.
 
 ## 4. The bundle [DF-13 to DF-20]
@@ -425,7 +426,7 @@ key is still active.
 | `2026-10-19T17:00:00Z` | no | `now` is not before it |
 | `2026-10-19T12:00:00+05:00` | no | Not a timestamp under §1 |
 
-## 6. Provenance [DF-28]
+## 6. Provenance [DF-28, DF-75, DF-77]
 
 `provenance` records how a file was made, well enough to make it again.
 Every key except `provider` is optional; producers record what they know.
@@ -453,12 +454,28 @@ Unknown keys are preserved.
 | `round` | `portrait` | string | The prompt round (`v3`, `v3-ref`), which a content-hash file name no longer carries. |
 | `box` | `face` | `{x, y, width, height}` | A hand-set **face** box (§8.5), not the crop, in source pixels, origin top-left. Absent when detected. |
 | `voicePrompt` | `vox` | string | The voice-design prompt. |
-| `copiedFrom` | `vox` | project-relative path | Set when an existing `.vox` was brought in unchanged. |
+| `copiedFrom` | all | project-relative path | Set when the file was brought in unchanged from elsewhere in the project. A `face`, `view` or `expression` with `copiedFrom` isn't derived (§7). |
 | `instruct` | `voiceSample` | string | The delivery instruction sent. |
-| `instructApplied` | `voiceSample` | `yes` \| `no` \| `unverified` | |
+| `instructMethod` | `voiceSample` | string | How `instruct` reached the engine (below). |
+| `instructApplied` | `voiceSample` | `yes` \| `no` \| `unverified` | Whether the delivery was honoured, however it was sent. |
 | `source` | `voiceSample` | string | Where the line comes from: project-relative `file:line[-line]`, or `sampleLine`. |
 | `gateOverridden` | any | string | A producing tool's process gate that was skipped. |
 | `notes` | any | string | Free text. |
+
+**`instructMethod`** [DF-75] records how the delivery instruction was sent, and
+`instructApplied` whether the engine honoured it. The two are independent: neither
+implies a value of the other. The known values of `instructMethod` are:
+
+| Value | Meaning |
+|-------|---------|
+| `parameter` | The instruction was sent as a separate value alongside the text. |
+| `audio-tag` | The instruction was written into the text as inline tags that the engine interprets. |
+
+A tool MAY record a word of its own for another method, and a reader MUST accept any
+string. `instruct` holds the instruction as sent, whichever the method. A tool that sends
+an instruction as audio tags and doesn't check the result writes
+`instructMethod: audio-tag` and `instructApplied: unverified`. A sample with no
+`instructMethod` says nothing about how its instruction was sent.
 
 **`references`** [D8]: one entry per image sent, in the order sent.
 
@@ -469,7 +486,7 @@ Unknown keys are preserved.
 | `role` | no | Why it was sent: `portrait`, `face`, `view:<variant>`, `expression:<variant>`, or a tool's own word. |
 | `originalWidth`, `originalHeight`, `effectiveWidth`, `effectiveHeight` | no | As the engine reports them. |
 
-## 7. `derivedFrom` and staleness [DF-27, DF-46, D4]
+## 7. `derivedFrom` and staleness [DF-27, DF-46, DF-76, DF-77, D4]
 
 `derivedFrom` is an array of input records. Each is one of:
 
@@ -479,14 +496,32 @@ Unknown keys are preserved.
 | `{"role": "castMember", "sha256": "<hash>"}` | The `CAST.md` member, hashed as its canonical JSON (below). |
 | `{"role": "bundle", "sha256": "<hash>"}` | The `manifestChecksum` computed over every file except the page itself. |
 | `{"role": "template", "version": "<v>", "sha256": "<hash>"}` | The page template. |
+| `{"role": "voice", "provider": "<provider>", "voiceId": "<id>"}` | A hosted voice, named by the `CAST.md` member (below). No `path` and no `sha256`. |
 
 | Kind | `derivedFrom` MUST include |
 |------|----------------------------|
-| `face` | `portrait` |
-| `view` | `portrait`, and `face` when it was sent |
-| `expression` | `face`, `portrait` |
-| `voiceSample` | `vox` |
+| `face` | `portrait`, unless the asset is imported (below) |
+| `view` | `portrait`, and `face` when it was sent, unless the asset is imported |
+| `expression` | `face`, `portrait`, unless the asset is imported |
+| `voiceSample` | `vox` or `voice` |
 | `dossier` | `description`, `castMember`, `bundle`, `template` |
+
+**A hosted voice** [DF-76] is one a service keeps, which a tool names by an identifier
+instead of holding a file. A `voice` record names it: `provider` is the member's `voices`
+key for that service, lowercased as in the normal form below, and `voiceId` is the
+identifier the tool sent, a non-empty string. A sample records a `voice` input when the
+member's `voices` entry for that provider is a bare voice ID. It records a `vox` input
+when the voice ID lives inside a `.vox` file: vox-format has an entry per provider, so a
+`.vox` can carry a hosted voice's ID too, and then the `.vox` is the input. A sample made
+from a `.vox` never records a `voice` input for the ID inside it.
+
+**An imported asset** [DF-77] is a `face`, `view` or `expression` whose `provenance` has
+`copiedFrom` (§6): the file was brought in unchanged from elsewhere in the project, not
+made from this bundle's assets. It isn't derived. The table above doesn't apply to it, so
+it MAY have no `derivedFrom`, and it is never stale: neither its `derivedFrom`, if it has
+one, nor its `provenance.artStyle` is compared. Any other kind with `copiedFrom` is read
+as before, and a `voiceSample` still needs its input. **A portrait with `copiedFrom` keeps
+its `artStyle` check.**
 
 **The hash of a member** is the SHA-256 of the canonical JSON of its normal form,
 so it doesn't depend on how `CAST.md` is written, or change when a writer
@@ -538,7 +573,9 @@ and the hash `bf956f8fe4278f30b800f8899b3a634ef1ac15ad101796b31e9d592fa0b73168`.
 
 A `selected` asset is **stale** when any input's `sha256` differs from the current
 selected asset of that role, read from its `files` entry (or the current member,
-bundle, template), or when that role has no selected asset. A `candidate` or `rejected` asset is never reported.
+bundle, template), or when that role has no selected asset, or when a `voice` input
+(below) is stale. A `candidate` or `rejected` asset is never reported, and neither is an
+imported asset (above).
 The current template is defined in §11. Changing the character's `artStyle` (§9.1)
 also makes its images stale: a selected image with a `provenance.artStyle` that differs from the current
 front-matter `artStyle` is stale. An image with no `provenance.artStyle` isn't
@@ -564,6 +601,47 @@ view records
 The selected portrait's `files` entry has the hash
 `b4ea7922e4584d539d0db374f8380c3ee7ba42b3f070f080fe296a262d959bfb`. It differs from the
 input's, so the view is stale.
+
+**Inputs read from the member.** A `castMember` input and a `voice` input are checked
+against the member, not the bundle: the one in the project's `CAST.md` whose `manifest:`
+points at the bundle (§3). When there is no member, because the bundle was opened without
+a `CAST.md` or no member points at it, neither is checked, and neither makes the asset
+stale. A `castMember` input is current when its `sha256` is the member's hash (above).
+
+**A `voice` input**, when there is a member:
+
+1. Take the member's normal form (above) and its `voices` map.
+2. The input is current when that map has the key equal to the input's `provider` and
+   that key's array has an element equal to the input's `voiceId`. Both compare exactly,
+   as strings.
+3. Otherwise it is stale. That includes a member whose `voices` has no key for that
+   provider.
+
+Only the member's `voices` is read. A change to any other field of the member, such as
+`voicePrompt`, doesn't make a sample with a `voice` input stale.
+
+Worked example (`examples/valid/hosted-voice` and
+`examples/warnings/W-STALE-input-voice`). A sample of THE NIGHT CALLER records
+
+```json
+{"role": "voice", "provider": "vocalsmith", "voiceId": "FIXTURE0VOICE0000001"}
+```
+
+and `CAST.md` has
+
+```yaml
+- character: THE NIGHT CALLER
+  voices: {VocalSmith: FIXTURE0VOICE0000001}
+```
+
+The normal form lowercases the key and makes the scalar an array:
+`{"vocalsmith": ["FIXTURE0VOICE0000001"]}`. The key `vocalsmith` is there, and its array
+holds `FIXTURE0VOICE0000001`, so the input is current. When the member is changed to
+`voices: {VocalSmith: FIXTURE0VOICE0000002}`, the array no longer holds the input's
+`voiceId`, so the selected sample is stale (`W-STALE`). When the member is changed to
+`voices: {}` (`examples/warnings/W-STALE-input-voice-provider-absent`), there is no
+`vocalsmith` key, so it is stale too. Opened without a `CAST.md`, the same bundle has no
+member, the input isn't checked, and the sample isn't stale.
 
 ## 8. Kinds
 
@@ -606,15 +684,21 @@ that `kind`, that `variant` (or no `variant`, when none is asked for) and
   `voices.voxalta` has no entry that resolves as in §3 to the bundle's selected
   `vox`, the validator
   reports `W-VOICE-ELSEWHERE`; when `voicePrompt` differs from the selected
-  vox's `provenance.voicePrompt`, `W-VOICE-PROMPT`.
+  vox's `provenance.voicePrompt`, `W-VOICE-PROMPT`. A bundle with no selected `vox`
+  has neither.
+- **A hosted voice** is named in the member's `voices` under its provider's key, as a
+  bare voice ID. A sample made with it records a `voice` input (§7), and `vox` isn't
+  needed for it. Whether the voice ID is still the member's is §7's staleness rule, not
+  `W-VOICE-ELSEWHERE`.
 - The sizes a `.vox` holds are in `provenance.models`; the file itself
   (vox-format) is authoritative.
-- **Samples:** a `neutral` read for each model size the tier requires, plus
+- **Samples:** a `neutral` read for each model size the tier requires (one, whatever its
+  model, for a hosted voice: §8.3), plus
   three or more range samples from the character's own lines. Range variants
   are any names except `neutral`. Each sample records `model` and `sampleText`,
   and `language` when it isn't the default (§5.4).
 
-### 8.3 Tiers [DF-35 to DF-37]
+### 8.3 Tiers [DF-35 to DF-37, DF-78]
 
 Tiers: `lead`, `supporting`, `guest`, `narrator`, `costar`, `underfive`,
 `background`. **Major** tiers: `lead`, `supporting`, `guest`, `narrator`.
@@ -635,11 +719,45 @@ completeness isn't defined.
 | `description.full` | `CHARACTER.md` is selected and has every full section (§9.2). |
 | `description.short` | `CHARACTER.md` is selected and has Logline, Appearance, Voice & Speech. |
 | `voicePrompt` | The `CAST.md` member has a non-empty `voicePrompt`. |
-| `vox.1.7b`, `vox.0.6b` | The selected `vox` holds that size: an entry of its `provenance.models` contains the size, compared case-insensitively (`Qwen3-TTS-12Hz-1.7B-Base-bf16` holds `1.7b`). |
-| `sample.neutral.1.7b`, `sample.neutral.0.6b` | A selected `voiceSample` with variant `neutral` and that `model`. |
+| `vox.1.7b`, `vox.0.6b` | The selected `vox` holds that size: an entry of its `provenance.models` contains the size, compared case-insensitively (`Qwen3-TTS-12Hz-1.7B-Base-bf16` holds `1.7b`). Or the voice is hosted (below). |
+| `sample.neutral.1.7b`, `sample.neutral.0.6b` | A selected `voiceSample` with variant `neutral` and that `model`. Or the voice is hosted, and a selected `voiceSample` with variant `neutral` has a current `voice` input, whatever its `model`. |
 | `sample.range` | Three or more selected `voiceSample`s with variants other than `neutral`. |
 | `pronunciation` | `CHARACTER.md` has a non-empty Pronunciation section. |
 | `training.withLora` | When a `lora` is selected, at least one `training` asset exists. |
+
+**A hosted voice** [DF-78] meets the voice rows without a `vox`. The character's voice
+is **hosted** when at least one selected `voiceSample` has a `voice` input (§7) that is
+current: the member's normal-form `voices[provider]` holds its `voiceId`. Completeness is
+only defined with a member, so a hosted voice always has one to check. Then:
+
+- `vox.1.7b` and `vox.0.6b` are satisfied. A hosted service has no model sizes for the
+  bundle to hold.
+- `sample.neutral.1.7b` and `sample.neutral.0.6b` are both satisfied by one selected
+  `neutral` sample with a current `voice` input, whatever its `model`. A neutral sample
+  made from a `vox` still satisfies only the row for its own size.
+- `sample.range` is unchanged: it never depended on the model.
+- `voicePrompt` is unchanged and still required where the table says so.
+
+The existing rows take the hosted case, rather than new model-free rows, because the
+table has no way to say "this row or that one": a new required row would fail every
+character with a local voice, and making it conditional would need a new kind of cell
+that every reader implements. `data/tiers.json` keeps its rows and IDs, and only the
+check definitions above change.
+
+Worked example (`examples/valid/hosted-voice-supporting`). NELL TARRANT is
+`supporting`. Her member has `voices: {VocalSmith: FIXTURE0VOICE0000003}`, and there is no
+`vox`. Her selected samples are `neutral` and `wry`, both with model
+`fixture-hosted-tts` and the input
+`{"role": "voice", "provider": "vocalsmith", "voiceId": "FIXTURE0VOICE0000003"}`. The
+normal form's `voices.vocalsmith` is `["FIXTURE0VOICE0000003"]`, which holds the ID, so the
+voice is hosted. `vox.1.7b` and `vox.0.6b` are satisfied; the `neutral` sample satisfies
+`sample.neutral.1.7b` and `sample.neutral.0.6b`; `sample.range` is only recommended for
+`supporting`. With every other row met, she is complete. Remove the `neutral` sample
+(`examples/warnings/W-INCOMPLETE-hosted-no-neutral`) and the `wry` sample still makes the
+voice hosted, so the `vox` rows stay satisfied, but both neutral rows fail: `W-INCOMPLETE`
+lists `sample.neutral.0.6b` and `sample.neutral.1.7b`. Change the member's ID instead and
+no input is current, so the voice isn't hosted, the `vox` and neutral-sample rows fail,
+and the samples are `W-STALE` too.
 
 ### 8.4 LoRA and training [D7]
 
@@ -1027,7 +1145,7 @@ MUST be reported and `E-SCHEMA` MAY be reported with it.
 | `E-KIND-RETIRED` | error | A retired kind in a version 2 manifest |
 | `E-SCHEMA` | error | The manifest fails its schema |
 | `W-UNCLASSIFIED` | warning | A file with no asset entry |
-| `W-STALE` | warning | A derived asset's inputs changed |
+| `W-STALE` | warning | A derived asset's inputs changed, or the member no longer names its hosted voice (§7) |
 | `W-SHAPE` | warning | Wrong aspect ratio for the kind (§8.1) |
 | `W-VARIANT` | warning | An `expression` or `view` variant outside the standard set |
 | `W-SIDECAR` | warning | A `.json` sidecar in `images/` |

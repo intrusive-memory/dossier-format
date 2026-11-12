@@ -1,7 +1,7 @@
 ---
 type: requirements
 state: draft
-updated: 2026-11-10
+updated: 2026-11-12
 sequence: 1 — first on the critical path of the Personaje effort
 ---
 
@@ -117,11 +117,14 @@ characters/<CHARACTER>.dossier/
 | DF-24 | Top-level fields: `manifestVersion` (required), `character` (required), `role` (a copy of the `CAST.md` tier; `CAST.md` wins), `updatedAt` (required, ISO 8601), `generator` (name and version of the writing tool), `files` (required), `assets` (required, may be empty), `manifestChecksum` (required). |
 | DF-25 | **`manifestVersion` is 2.** A reader MUST reject an unknown version. A reader MAY read version 1; a writer MUST NOT write it. |
 | DF-26 | **`status`** is `selected`, `candidate` or `rejected`. At most one `selected` per `kind` + `variant` (for `voiceSample`, per `kind` + `variant` + `model`, because DF-38 asks for a neutral read on each model size). Selecting one demotes the previous selection of that combination to `candidate`. Nothing is ever deleted implicitly. |
-| DF-27 | **`derivedFrom`** on `face`, `view`, `expression` and `dossier` records the SHA-256 of every input. When an input's selected file changes, the derived asset is **stale**: flagged, never deleted. |
+| DF-27 | **`derivedFrom`** on `face`, `view`, `expression`, `voiceSample` and `dossier` records every input: the SHA-256 of each file and record, or, for a hosted voice, its provider and voice ID (DF-76). When an input's selected file changes, the derived asset is **stale**: flagged, never deleted. An imported `face`, `view` or `expression` isn't derived (DF-77). |
 | DF-28 | **`provenance`** records `provider`, `model`, `prompt` (the prompt actually sent), `seed`, and `references`: `{path, sha256}` for every reference image sent. An imported file has `provider: "import"`. A hand-set face-crop box is recorded here. |
 | DF-29 | **Writes are atomic and verified:** write to a temporary file, replace, re-read, and check. Output is pretty-printed with sorted keys. |
 | DF-30 | **Single writer.** Only a conforming writer changes `manifest.json`. Other tools may put files in the bundle (a voice tool writing a `.vox`); they appear as unclassified until a writer's `refresh` adopts them. `refresh` is also the one way to accept a changed file; an ordinary write keeps the recorded hash. `refresh` drops the entry of a missing file with no asset, refuses a missing file an asset points at, and reports each (§5.6). |
 | DF-31 | The standard ships a JSON Schema for version 2 and one for version 1. |
+| DF-75 | **How a delivery instruction was sent** is `provenance.instructMethod` on a `voiceSample`: `parameter` (sent alongside the text) or `audio-tag` (written into the text as inline tags the engine interprets), or a tool's own word. `instructApplied` still records only whether the delivery was honoured, `yes`, `no` or `unverified`. A tool that sends audio tags and doesn't check the result writes `audio-tag` and `unverified`. |
+| DF-76 | **A hosted voice** is a `derivedFrom` record `{role: voice, provider, voiceId}`, with no path and no hash. `provider` is lowercase, matching the member's normal-form `voices` key, and `voiceId` is non-empty. A `voiceSample` needs a `vox` or a `voice` input: `voice` when the member's `voices` entry for that provider is a bare voice ID, `vox` when the ID lives in a `.vox`. A selected asset with a `voice` input is stale when the member's normal-form `voices[provider]` doesn't contain `voiceId`, the key's absence included. With no member, neither a `voice` nor a `castMember` input is checked, and neither makes the asset stale. The specification gives a worked example. |
+| DF-77 | **An imported asset.** `provenance.copiedFrom`, a project-relative path, is allowed on any kind, set when the file was brought in unchanged from elsewhere in the project. A `face`, `view` or `expression` with `copiedFrom` isn't derived: it needs no `derivedFrom` and is never stale. The schema expresses this as a conditional. A `portrait` with `copiedFrom` keeps its `artStyle` check. Decided: Q8. |
 
 ## 7. Asset kinds and tiers
 
@@ -133,7 +136,7 @@ characters/<CHARACTER>.dossier/
 | `view` | `front`, `profile`, `back` | 9:16, framed like the portrait | `portrait`, `face` |
 | `expression` | an emotion name | square, framed like `face` | `face`, `portrait` |
 | `vox` | none | a `.vox` file | none |
-| `voiceSample` | `neutral`, or a register name | `.m4a` | the `.vox` |
+| `voiceSample` | `neutral`, or a register name | `.m4a` | the `.vox`, or a hosted voice (DF-76) |
 | `dossier` | none | the dossier page | everything else (DF-46) |
 | `sourcePhoto`, `lora`, `training`, `crowdRef` | | unchanged from version 1 | |
 
@@ -145,7 +148,8 @@ characters/<CHARACTER>.dossier/
 | DF-35 | **Role tiers:** `lead`, `supporting`, `guest`, `narrator`, `costar`, `underfive`, `background`. Major is `lead`, `supporting`, `guest`, `narrator`. |
 | DF-36 | **The requirements table is data,** shipped as a file in this repository, with each kind marked required, recommended or not needed per tier. **Complete** means every required asset for the tier exists as `selected`. Implementations read the table; they don't restate it. |
 | DF-37 | The version 2 table is version 1's (SwiftSemblanzas §5.4) with these changes: where it required a turnaround it requires the view set; `expression` is required for `lead` (the four), recommended for `supporting` and `guest`, and not needed otherwise; `wardrobe` and `palette` rows are removed. The `face` row is open (Q3). |
-| DF-38 | **Voice samples:** a neutral read on each model size, plus three or more range samples drawn from the character's own lines. The lines are listed in `voice/samples.yaml`. There is no fixed list of registers. |
+| DF-38 | **Voice samples:** a neutral read on each model size (one neutral read for a hosted voice, DF-78), plus three or more range samples drawn from the character's own lines. The lines are listed in `voice/samples.yaml`. There is no fixed list of registers. |
+| DF-78 | **A hosted voice meets the voice rows.** A character's voice is hosted when a selected `voiceSample` has a `voice` input that is current (DF-76). Then `vox.1.7b` and `vox.0.6b` are satisfied, and one selected `neutral` sample with a current `voice` input, whatever its `model`, satisfies both `sample.neutral.1.7b` and `sample.neutral.0.6b`. `sample.range` and `voicePrompt` are unchanged. The table keeps its rows and IDs; the specification states the rule in the check definitions, with a worked example. |
 
 ## 8. CHARACTER.md and the face crop
 
@@ -289,3 +293,4 @@ Nothing. The source text is already written (§1).
 | Q5 | *Decided 2026-10-19 (D9; DOSSIER-FORMAT §9.3): footnoted claims with the classes Stated, Inferred, Author; generated values listed in `draft.generated`.* **Canon facts.** The Profile tab shows facts with a source (Stated, Inferred, Author) and marks generated values. Where and how `CHARACTER.md` stores them is defined in Personaje's CHARACTER_CREATION.md and isn't carried into this document yet. | Bring the storage rule into §8 before the specification is written. |
 | Q6 | **The type identifier.** The draft uses `io.intrusive-memory.dossier`. A vendor-neutral standard may want a neutral one. | Keep the draft identifier until someone outside the organization implements the format. |
 | Q7 | **Version 1 in the specification.** Only two version 1 records exist. | Describe version 1 in an appendix for readers; give it a schema; don't write fixtures beyond those two. |
+| Q8 | *Decided 2026-11-12 by the user (DF-77; DOSSIER-FORMAT §7): the `copiedFrom` waiver.* **Imported reference images.** A reference image brought into the bundle unchanged, such as a drawing of the character from elsewhere in the project, is filed as a `view` (or `face`, `expression`) with `provenance.copiedFrom` and no `derivedFrom`, which waives the kind's `derivedFrom` requirement and staleness. The alternative is a separate kind for imported reference images, leaving `view` always derived. | Keep the `copiedFrom` waiver: it adds no kind, so the kind list, `data/tiers.json`, `data/fields.json` and the page don't change, and a reader changes only by the one conditional. The cost is that "is this view derived?" is answered by `copiedFrom`, not by `kind`, and an imported view counts toward completeness and is shown on the Views tab like a generated one. |
