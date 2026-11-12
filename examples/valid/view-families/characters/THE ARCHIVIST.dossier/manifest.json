@@ -1,0 +1,171 @@
+{
+  "assets": [
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "kind": "description",
+      "path": "CHARACTER.md",
+      "provenance": {
+        "provider": "manual"
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "derivedFrom": [
+        {
+          "path": "images/portrait-8c4006cb.png",
+          "role": "portrait",
+          "sha256": "8c4006cb13f65077a0a8ade7ada00650dc1b31d783600e13f362abfa6944c6c0"
+        }
+      ],
+      "kind": "face",
+      "path": "images/face-35c29e17.png",
+      "provenance": {
+        "artStyle": "flat placeholder shapes",
+        "box": {
+          "height": 100,
+          "width": 80,
+          "x": 50,
+          "y": 60
+        },
+        "engine": "fixture",
+        "provider": "personaje"
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "kind": "portrait",
+      "path": "images/portrait-8c4006cb.png",
+      "provenance": {
+        "artStyle": "flat placeholder shapes",
+        "engine": "fixture",
+        "provider": "vinetas"
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "derivedFrom": [
+        {
+          "path": "images/portrait-8c4006cb.png",
+          "role": "portrait",
+          "sha256": "8c4006cb13f65077a0a8ade7ada00650dc1b31d783600e13f362abfa6944c6c0"
+        },
+        {
+          "path": "images/face-35c29e17.png",
+          "role": "face",
+          "sha256": "35c29e17738cf7c753db4ff70ff343d9cdaacdd011aa7222d21baf85e559e57b"
+        }
+      ],
+      "kind": "view",
+      "path": "images/view-look-clockwork-body-89c93d9a.png",
+      "provenance": {
+        "artStyle": "flat placeholder shapes",
+        "engine": "fixture",
+        "provider": "vinetas"
+      },
+      "status": "selected",
+      "variant": "look-clockwork-body"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "derivedFrom": [
+        {
+          "path": "images/portrait-8c4006cb.png",
+          "role": "portrait",
+          "sha256": "8c4006cb13f65077a0a8ade7ada00650dc1b31d783600e13f362abfa6944c6c0"
+        },
+        {
+          "path": "images/face-35c29e17.png",
+          "role": "face",
+          "sha256": "35c29e17738cf7c753db4ff70ff343d9cdaacdd011aa7222d21baf85e559e57b"
+        }
+      ],
+      "kind": "view",
+      "path": "images/view-look-evening-4eb31eff.png",
+      "provenance": {
+        "artStyle": "flat placeholder shapes",
+        "engine": "fixture",
+        "provider": "vinetas"
+      },
+      "status": "selected",
+      "storyboardLabel": "the archivist in evening dress",
+      "variant": "look-evening"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "kind": "view",
+      "path": "images/view-storyboard-796da79b.jpg",
+      "provenance": {
+        "copiedFrom": "storyboards/fixture/archivist.jpg",
+        "copiedFromSha256": "796da79b9c2b978d24cd8777d616b8571583a5dbe41aad7f183dc14806d02997",
+        "provider": "import",
+        "source": "storyboards/fixture/archivist.jpg"
+      },
+      "status": "selected",
+      "storyboardLabel": "the archivist's design",
+      "variant": "storyboard"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "kind": "view",
+      "path": "images/view-storyboard-ink-stained-91f035ab.jpg",
+      "provenance": {
+        "copiedFrom": "storyboards/fixture/archivist-ink.jpg",
+        "copiedFromSha256": "91f035abbbfca6d682763f07c1957f3ac222e69f23da98554995a5028e872b04",
+        "provider": "import",
+        "source": "storyboards/fixture/archivist-ink.jpg"
+      },
+      "status": "selected",
+      "storyboardLabel": "the archivist with ink on both hands, for the flood scene",
+      "variant": "storyboard-ink-stained"
+    }
+  ],
+  "character": "THE ARCHIVIST",
+  "files": [
+    {
+      "path": "CHARACTER.md",
+      "sha256": "ab7310cb4c4ef73432ab2ddade8a7f413b6cba38d89022ff7dc30e992784b4eb",
+      "sizeBytes": 437
+    },
+    {
+      "path": "images/face-35c29e17.png",
+      "sha256": "35c29e17738cf7c753db4ff70ff343d9cdaacdd011aa7222d21baf85e559e57b",
+      "sizeBytes": 704
+    },
+    {
+      "path": "images/portrait-8c4006cb.png",
+      "sha256": "8c4006cb13f65077a0a8ade7ada00650dc1b31d783600e13f362abfa6944c6c0",
+      "sizeBytes": 939
+    },
+    {
+      "path": "images/view-look-clockwork-body-89c93d9a.png",
+      "sha256": "89c93d9a51e1e7daed83dba4988e8d569f3b699085371133c769fb13ce22064a",
+      "sizeBytes": 940
+    },
+    {
+      "path": "images/view-look-evening-4eb31eff.png",
+      "sha256": "4eb31eff8d79340bcc0c69204d697440a0e68a70373016f24efc1cea0cfabedf",
+      "sizeBytes": 938
+    },
+    {
+      "path": "images/view-storyboard-796da79b.jpg",
+      "sha256": "796da79b9c2b978d24cd8777d616b8571583a5dbe41aad7f183dc14806d02997",
+      "sizeBytes": 1255
+    },
+    {
+      "path": "images/view-storyboard-ink-stained-91f035ab.jpg",
+      "sha256": "91f035abbbfca6d682763f07c1957f3ac222e69f23da98554995a5028e872b04",
+      "sizeBytes": 1486
+    }
+  ],
+  "generator": {
+    "name": "dossier-format fixtures",
+    "version": "1"
+  },
+  "manifestChecksum": "f57574e8b13c015f992734f18701ab512a4efffcf87bb455abe08afde2537238",
+  "manifestVersion": 2,
+  "role": "background",
+  "updatedAt": "2026-10-31T12:00:00Z"
+}

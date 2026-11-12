@@ -26,7 +26,9 @@ changes when the manifest does, and shows the stored one while the key still mat
 ([§11.1](docs/DOSSIER-FORMAT.md#111-the-preview-df-68-to-df-74)).
 
 > **Status: 2.0.0, released 2026-11-12.** Implementations pin the tag `v2.0.0`; what
-> changed in each release is in [CHANGELOG.md](CHANGELOG.md). The specification is
+> changed in each release is in [CHANGELOG.md](CHANGELOG.md). 2.1.0, in development,
+> adds **location bundles**: a place's description and its plates, found from `LOCATIONS.md`
+> ([§16](docs/DOSSIER-FORMAT.md#16-location-bundles-df-79-to-df-84)). The specification is
 > [docs/DOSSIER-FORMAT.md](docs/DOSSIER-FORMAT.md) (format version 2), with
 > JSON Schemas in [schemas/](schemas) and the tier table in
 > [data/tiers.json](data/tiers.json). Conformance fixtures are in

@@ -37,7 +37,9 @@ wins. The differences are listed in §12.
 **In the standard:** names; discovery; the bundle layout; file naming; the
 manifest; asset kinds, shapes and statuses; role tiers and what each requires;
 CHARACTER.md; the face-crop rule; voice files; the dossier page's contents and
-its template; validation results; versioning.
+its template; validation results; versioning. Since 2.1.0, location bundles too: a
+second bundle type that holds a location's description and plates, with its own index,
+`LOCATIONS.md` (DF-79 to DF-84).
 
 **Not in the standard:**
 
@@ -125,6 +127,14 @@ characters/<CHARACTER>.dossier/
 | DF-75 | **How a delivery instruction was sent** is `provenance.instructMethod` on a `voiceSample`: `parameter` (sent alongside the text) or `audio-tag` (written into the text as inline tags the engine interprets), or a tool's own word. `instructApplied` still records only whether the delivery was honoured, `yes`, `no` or `unverified`. A tool that sends audio tags and doesn't check the result writes `audio-tag` and `unverified`. |
 | DF-76 | **A hosted voice** is a `derivedFrom` record `{role: voice, provider, voiceId}`, with no path and no hash. `provider` is lowercase, matching the member's normal-form `voices` key, and `voiceId` is non-empty. A `voiceSample` needs a `vox` or a `voice` input: `voice` when the member's `voices` entry for that provider is a bare voice ID, `vox` when the ID lives in a `.vox`. A selected asset with a `voice` input is stale when the member's normal-form `voices[provider]` doesn't contain `voiceId`, the key's absence included. With no member, neither a `voice` nor a `castMember` input is checked, and neither makes the asset stale. The specification gives a worked example. |
 | DF-77 | **An imported asset.** `provenance.copiedFrom`, a project-relative path, is allowed on any kind, set when the file was brought in unchanged from elsewhere in the project. A `face`, `view` or `expression` with `copiedFrom` isn't derived: it needs no `derivedFrom` and is never stale. The schema expresses this as a conditional. A `portrait` with `copiedFrom` keeps its `artStyle` check. Decided: Q8. |
+| DF-88 | **`displayName`** is an optional top-level manifest string: how people name the character in prose, captions and prompts. It is display text, never a key and never canonicalized. The `CAST.md` member's `displayName` wins, as its `role` does; the manifest's is a copy for a reader with no member. When both are present and differ, `W-DISPLAY-NAME`. |
+| DF-89 | **`storyboardLabel`** is an optional asset string: the phrase a storyboard or image tool uses for the image when it sends it as a reference. Display text, like `label`; nothing in the format reads it. |
+| DF-90 | **`provenance.copiedFromSha256`** is the SHA-256 of the file at `copiedFrom` when it was copied. It is valid only with `copiedFrom`. It is informational, since the source is outside the bundle. A writer that recorded it as `provenance.sha256` moves it; until then `provenance.sha256` is an unknown key. |
+| DF-91 | **`provenance.voiceId` and `provenance.creditsUsed`** on a generated asset: the hosted voice's identifier as sent (a non-empty string), whether it came from the member or from a `.vox`, and what the service charged, in its own units (a number, 0 or more). Both are informational; staleness reads `derivedFrom`. |
+| DF-92 | **`provenance.postProcess`** records processing applied to a generated file after it was made: `{tool, chain, dry?, notes?}`, with `tool` an object as in `provenance.tool`, `chain` the tool's identifier for the processing, and `dry` the project-relative path of the unprocessed original, kept outside the bundle. The file in the bundle is the processed one. Processing doesn't affect staleness. A writer that recorded this as `provenance.machineVoice` moves it. |
+| DF-93 | **Lowercase is Unicode's default full lowercase mapping,** in the member's normal form and in a `voice` record's `provider`. A `provider` is lowercase when lowercasing it changes nothing; `vÖx` isn't. The schema states this as a generated pattern, exact for Unicode 17.0; the text decides for later code points. |
+| DF-94 | **A malformed `voice` record is stale.** A `voice` record with no `provider` or `voiceId`, with either not a non-empty string, or with a `provider` that isn't lowercase is `E-SCHEMA`, and, when there is a member, its asset is also `W-STALE`, because it can't match the member's `voices`. It never makes a voice hosted. |
+| DF-95 | **Project-relative sources.** `provenance.source` is allowed on any kind: on a `voiceSample` the line's `file:line` or `sampleLine`, as before, and on another kind the project-relative path the content came from. A `references` entry may carry `source`, the project-relative path of an image sent that isn't in the bundle. Both are informational. |
 
 ## 7. Asset kinds and tiers
 
@@ -150,6 +160,20 @@ characters/<CHARACTER>.dossier/
 | DF-37 | The version 2 table is version 1's (SwiftSemblanzas §5.4) with these changes: where it required a turnaround it requires the view set; `expression` is required for `lead` (the four), recommended for `supporting` and `guest`, and not needed otherwise; `wardrobe` and `palette` rows are removed. The `face` row is open (Q3). |
 | DF-38 | **Voice samples:** a neutral read on each model size (one neutral read for a hosted voice, DF-78), plus three or more range samples drawn from the character's own lines. The lines are listed in `voice/samples.yaml`. There is no fixed list of registers. |
 | DF-78 | **A hosted voice meets the voice rows.** A character's voice is hosted when a selected `voiceSample` has a `voice` input that is current (DF-76). Then `vox.1.7b` and `vox.0.6b` are satisfied, and one selected `neutral` sample with a current `voice` input, whatever its `model`, satisfies both `sample.neutral.1.7b` and `sample.neutral.0.6b`. `sample.range` and `voicePrompt` are unchanged. The table keeps its rows and IDs; the specification states the rule in the check definitions, with a worked example. |
+| DF-85 | **View variant families.** Besides `front`, `profile` and `back`, a `view` variant may be `storyboard` or `storyboard-<slug>` (a storyboard's reference image of the character) or `look-<slug>` (the character in another look, framed like the portrait). A slug is lowercase ASCII letters and digits in runs joined by single hyphens. Anything else, `look` alone included, is `W-VARIANT`. The vocabulary is closed: a one-off is a look. |
+| DF-86 | **An imported image isn't checked for shape.** A `face`, `view`, `expression` or `plate` with `provenance.copiedFrom` is never `W-SHAPE`, as DF-77 makes it never stale. A `portrait` with `copiedFrom` keeps its shape check, as it keeps its `artStyle` check. |
+| DF-87 | **An imported image keeps its format.** A file brought in with `copiedFrom` keeps its bytes, so it may be PNG (`.png`) or JPEG (`.jpg`); every other v2 image is PNG. Its name is `<kind>[-<variant>]-<sha8>.<ext>`. |
+
+### Location bundles
+
+| ID | Requirement |
+|----|-------------|
+| DF-79 | **Two bundle types.** The top-level `dossierType` says which a bundle is: `character`, the default when it is absent, or `location`. Any other value is reserved and read as `character`. Nothing else, such as the directory a bundle is in, decides it. A 2.0.0 character bundle needs no change. |
+| DF-80 | **A location is found from `LOCATIONS.md`,** a second index beside `CAST.md`: YAML front matter with `type: locations`, `schemaVersion: 1` and a `locations` list, each entry with `location` (the canonical name) and an optional `manifest:` pointer. Discovery, pointers, `W-POINTER`, `E-MANIFEST` and `E-CAST` work as for `CAST.md`; orphans are looked for in `locations/` beside it. The location's name is canonical by DF-2 and held in the manifest's `character`, so the manifest keeps its 2.0.0 shape. A `CAST.md` member that points at a location bundle, or a `LOCATIONS.md` entry that points at a character bundle, is `E-TYPE-MISMATCH`. |
+| DF-81 | **`LOCATION.md`** is a location's description, the `description` asset at that path: front matter `type: location`, `location` (the name, compared as `E-NAME-MISMATCH`) and an optional `theme`, and a free Markdown body for people. `## Blocking` and `## Views` are recommended. Footnotes follow the `CHARACTER.md` rule. |
+| DF-82 | **A location bundle holds `description`, `plate`, `view` and `sourcePhoto`.** Any other kind is `E-SCHEMA`, and `plate` is `E-SCHEMA` in a character bundle. A **plate** is an empty set for one camera setup: kind `plate`, a required lowercase slug `variant` naming the view, 16:9, at `images/plate-<variant>-<sha8>.png`, one `selected` per variant. It isn't derived and is never stale. A `view` in a location bundle MUST be imported (`copiedFrom`). A location has no tier, no completeness and no `W-INCOMPLETE`. |
+| DF-83 | **The `location` record** is an optional manifest object: `name`, `description`, `theme` and `views`, the producing tool's recipe per view (`prompt`, `rule`, `refs`, `exterior`, `theme`), keyed by plate variant. Every key is optional and unknown keys are preserved. The record and the plates aren't compared. |
+| DF-84 | **A location has no page in 2.1.0.** It has no `dossier` asset and no preview. A viewer or host shows it read-only, writing nothing: the name, `LOCATION.md`'s body, each selected plate labelled with its variant, then the selected views. |
 
 ## 8. CHARACTER.md and the face crop
 
@@ -250,7 +274,7 @@ like. The migration tool is an implementation's.
 | Path | Contents |
 |------|----------|
 | `docs/DOSSIER-FORMAT.md` | The specification: §3 to §12 of this document as normative text, with examples. |
-| `schemas/` | JSON Schema for the manifest (versions 1 and 2), `samples.yaml`, and the embedded record. |
+| `schemas/` | JSON Schema for the manifest (versions 1 and 2), `samples.yaml`, the embedded record, and `LOCATIONS.md`'s front matter. |
 | `data/tiers.json` | The requirements table (DF-36). |
 | `data/fields.json` | The field list (DF-47). |
 | `data/tokens.json` | The design tokens (DF-48). |
@@ -294,3 +318,5 @@ Nothing. The source text is already written (§1).
 | Q6 | **The type identifier.** The draft uses `io.intrusive-memory.dossier`. A vendor-neutral standard may want a neutral one. | Keep the draft identifier until someone outside the organization implements the format. |
 | Q7 | **Version 1 in the specification.** Only two version 1 records exist. | Describe version 1 in an appendix for readers; give it a schema; don't write fixtures beyond those two. |
 | Q8 | *Decided 2026-11-12 by the user (DF-77; DOSSIER-FORMAT §7): the `copiedFrom` waiver.* **Imported reference images.** A reference image brought into the bundle unchanged, such as a drawing of the character from elsewhere in the project, is filed as a `view` (or `face`, `expression`) with `provenance.copiedFrom` and no `derivedFrom`, which waives the kind's `derivedFrom` requirement and staleness. The alternative is a separate kind for imported reference images, leaving `view` always derived. | Keep the `copiedFrom` waiver: it adds no kind, so the kind list, `data/tiers.json`, `data/fields.json` and the page don't change, and a reader changes only by the one conditional. The cost is that "is this view derived?" is answered by `copiedFrom`, not by `kind`, and an imported view counts toward completeness and is shown on the Views tab like a generated one. |
+| Q9 | **Who owns `LOCATIONS.md`?** `CAST.md` belongs to SwiftReparto, and nothing owned a location index, so 2.1.0 defines `LOCATIONS.md` here (DF-80). | Keep it here until a second tool reads or writes it; then decide whether it moves beside `CAST.md` in SwiftReparto, as a minor release that changes no field. |
+| Q10 | **A page for locations.** 2.1.0 has none (DF-84): the template and `data/fields.json` are about characters. | Add a location template, with its own field list, when a tool needs to hand a location to someone as one file. |

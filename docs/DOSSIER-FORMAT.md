@@ -9,10 +9,12 @@ updated: 2026-11-12
 
 A **dossier** is one dramatic character, as a folder: a `.dossier` bundle
 holding the character's description, images, voice and a self-contained HTML
-page, inventoried by `manifest.json`.
+page, inventoried by `manifest.json`. Since 2.1.0 a bundle can hold a **location**
+instead: its description and its plates, the empty sets a scene is painted onto (§16).
+Every section but §16 is about a character bundle unless it says otherwise.
 
 This document is normative. It implements [REQUIREMENTS.md](../REQUIREMENTS.md)
-(DF-1 to DF-78); the requirement each section satisfies is cited in brackets.
+(DF-1 to DF-95); the requirement each section satisfies is cited in brackets.
 Decisions D1–D10 and the evidence behind every property are in
 [PROPERTY-INVENTORY.md](PROPERTY-INVENTORY.md).
 
@@ -81,7 +83,7 @@ bundle's only by case.
 | `AC/DC` | error `E-NAME` |
 | `.HIDDEN` | error `E-NAME` |
 
-## 3. Discovery [DF-7 to DF-12, DF-63]
+## 3. Discovery [DF-7 to DF-12, DF-63, DF-80]
 
 - **`CAST.md`** is a Markdown file. Its YAML front matter, between `---` lines at
   the top, has `type: cast`, `schemaVersion: 1` and a `cast` list, and each entry
@@ -111,8 +113,10 @@ bundle's only by case.
 - A `.dossier` directory no member points at is an **orphan** (`W-ORPHAN`):
   reported, never loaded, never deleted. A validator looks for orphans only in
   `characters/` beside `CAST.md` and in each directory holding a bundle a member
-  points at, not recursively. This is the only directory listing the format
-  uses. A writer's *refresh* MAY adopt an orphan whose name equals a member that
+  points at, not recursively, and for locations as §16.2 says. This is the only
+  directory listing the format uses. A `.dossier` directory is an orphan only when no
+  entry of either index points at it, so a bundle that `LOCATIONS.md` points at isn't
+  one for want of a `CAST.md` member. A writer's *refresh* MAY adopt an orphan whose name equals a member that
   has no `manifest:`, by setting the pointer. It never adopts on a near match.
 - Everything for a character lives in its bundle: description, art style
   (§9.1), images, voice and LoRA (§8.4). No copy elsewhere is the authority.
@@ -120,11 +124,16 @@ bundle's only by case.
   `characters/`); the format only requires that `manifest:` points there.
 
 **`CAST.md` fields read** (the format belongs to SwiftReparto): `character`,
-`role`, `manifest`, `voicePrompt`, `voices.voxalta`, `language`, `actor`, and
-`voices.<provider>` for a hosted voice (§7, §8.2).
+`role`, `manifest`, `voicePrompt`, `voices.voxalta`, `language`, `actor`,
+`voices.<provider>` for a hosted voice (§7, §8.2), and `displayName` (§5.1).
 The format writes none of them except through a `CAST.md` writer.
 
-## 4. The bundle [DF-13 to DF-20]
+**Locations** have an index of their own, `LOCATIONS.md`, beside `CAST.md` (§16.2). A
+project's **indexes** are `CAST.md` and, when it exists, `LOCATIONS.md` in the same
+directory. A `CAST.md` member points at character bundles only, and a `LOCATIONS.md`
+entry at location bundles only (§16.1).
+
+## 4. The bundle [DF-13 to DF-20, DF-87]
 
 ```
 <CHARACTER>.dossier/
@@ -150,7 +159,9 @@ The format writes none of them except through a `CAST.md` writer.
   place. It is not an export.
 - **Image names.** A writer names every file it adds under `images/` as
   `<kind>[-<variant>]-<sha8>.png`, from the file's bytes as it adds them. v2 images
-  are PNG. A name's `<sha8>` records the bytes when the file was added, and the
+  are PNG, except an imported image (one whose `provenance` has `copiedFrom`, §6), which
+  keeps the format it was copied in: PNG, named `.png`, or JPEG, named `.jpg`. Re-encoding
+  it would change the bytes that `copiedFrom` says were brought in unchanged. [DF-87] A name's `<sha8>` records the bytes when the file was added, and the
   manifest's `sha256` is the authority. So when *refresh* accepts a changed image, the
   file keeps its name and is never renamed, and a name that no longer matches its hash
   isn't a finding (§5.6). [DF-14]
@@ -207,7 +218,7 @@ The format writes none of them except through a `CAST.md` writer.
   reported as unclassified (`W-UNCLASSIFIED`), except `samples.yaml`, which
   is a known file without an asset.
 
-## 5. The manifest [DF-21 to DF-31]
+## 5. The manifest [DF-21 to DF-31, DF-79, DF-88, DF-89]
 
 `manifest.json` is UTF-8 JSON, pretty-printed with 2-space indentation and
 keys sorted, ending in a newline. Schema: [`schemas/manifest-v2.schema.json`](../schemas/manifest-v2.schema.json).
@@ -217,7 +228,10 @@ keys sorted, ending in a newline. Schema: [`schemas/manifest-v2.schema.json`](..
 | Key | Required | Type | Meaning |
 |-----|----------|------|---------|
 | `manifestVersion` | yes | `2` | The format version. A reader MUST reject an unknown version (`E-VERSION`). |
-| `character` | yes | string | The canonical name (§2). |
+| `character` | yes | string | The canonical name (§2). In a location bundle, the location's name (§16.1). |
+| `dossierType` | no | string | `character` (the default) or `location` (§16). [DF-79] |
+| `displayName` | no | non-empty string | How people name the character in prose, captions and prompts (below). [DF-88] |
+| `location` | no | object (§16.3) | A location bundle's record. Not defined in a character bundle. [DF-83] |
 | `role` | no | tier (§8.3) | A copy of the `CAST.md` role. `CAST.md` wins. |
 | `updatedAt` | yes | timestamp | The last write. |
 | `generator` | no | `{name, version?}` | The writing tool. |
@@ -228,6 +242,22 @@ keys sorted, ending in a newline. Schema: [`schemas/manifest-v2.schema.json`](..
 
 Unknown top-level keys MUST be preserved by writers and MAY be ignored by
 readers. [D10]
+
+**`dossierType`** [DF-79] says which kind of bundle this is. Absent or `character`, it is
+a character bundle, and everything in this document applies as written. `location` makes
+it a location bundle (§16). Any other value is reserved for a later version, and a reader
+reads that bundle as a character bundle, as a 2.0.0 reader would.
+
+**`displayName`** [DF-88] is the name a tool uses for the character in prose, such as
+`Agnes` for `AGNES MORROW` or `the captain` for `CAPTAIN`: a caption, a storyboard prompt,
+a cast list for people. It is display text. It is never a key, never canonicalized, and
+never compared with a file name; the character's one name is still `character` (§2). The
+`CAST.md` member's `displayName` wins, as its `role` does, and the manifest's is a copy
+for a reader that has no member. When both are present and differ as NFC strings, a
+validator reports `W-DISPLAY-NAME`. A member with a `displayName` and no dossier is
+nothing to the format. The page doesn't show `displayName` yet (template 0.1.1); as a
+member field it is already in the member's hash (§7), so changing it makes the page
+stale.
 
 ### 5.2 `files`
 
@@ -292,6 +322,7 @@ list. An asset whose `path` has no `files` entry is `E-ASSET-NO-FILE`.
 | `status` | yes | `selected` \| `candidate` \| `rejected` | At most one `selected` per `kind` + `variant`, and for `voiceSample` per `kind` + `variant` + `model` (`E-MULTI-SELECTED`). Selecting one demotes the previous selection of that same combination to `candidate`. Nothing is ever deleted implicitly. [DF-26] |
 | `variant` | when the kind has variants | string | §8.1. |
 | `label` | no | string | Display text. Never a key; never parsed. |
+| `storyboardLabel` | no | string | The phrase a storyboard or image tool uses for this image when it sends it as a reference ("the empty set; paint the people into it"). Display text, like `label`: never a key, never parsed, and nothing in the format reads it. Any kind. [DF-89] |
 | `createdAt` | yes | timestamp | When the file was made (a generator's own time where known), not when it was added. |
 | `provenance` | yes | object (§6) | How it was made. |
 | `derivedFrom` | on derived kinds | array (§7) | Its inputs. |
@@ -426,7 +457,7 @@ key is still active.
 | `2026-10-19T17:00:00Z` | no | `now` is not before it |
 | `2026-10-19T12:00:00+05:00` | no | Not a timestamp under §1 |
 
-## 6. Provenance [DF-28, DF-75, DF-77]
+## 6. Provenance [DF-28, DF-75, DF-77, DF-90 to DF-92, DF-95]
 
 `provenance` records how a file was made, well enough to make it again.
 Every key except `provider` is optional; producers record what they know.
@@ -454,11 +485,15 @@ Unknown keys are preserved.
 | `round` | `portrait` | string | The prompt round (`v3`, `v3-ref`), which a content-hash file name no longer carries. |
 | `box` | `face` | `{x, y, width, height}` | A hand-set **face** box (§8.5), not the crop, in source pixels, origin top-left. Absent when detected. |
 | `voicePrompt` | `vox` | string | The voice-design prompt. |
-| `copiedFrom` | all | project-relative path | Set when the file was brought in unchanged from elsewhere in the project. A `face`, `view` or `expression` with `copiedFrom` isn't derived (§7). |
+| `copiedFrom` | all | project-relative path | Set when the file was brought in unchanged from elsewhere in the project. A `face`, `view` or `expression` with `copiedFrom` isn't derived (§7), and isn't checked for shape (§8.1). |
+| `copiedFromSha256` | with `copiedFrom` | hash | The SHA-256 of the file at `copiedFrom` when it was copied (below). [DF-90] |
 | `instruct` | `voiceSample` | string | The delivery instruction sent. |
 | `instructMethod` | `voiceSample` | string | How `instruct` reached the engine (below). |
 | `instructApplied` | `voiceSample` | `yes` \| `no` \| `unverified` | Whether the delivery was honoured, however it was sent. |
-| `source` | `voiceSample` | string | Where the line comes from: project-relative `file:line[-line]`, or `sampleLine`. |
+| `voiceId` | `voiceSample` | non-empty string | A hosted voice's identifier as sent to the service, whether it came from the member or from inside a `.vox` (§7). Informational: staleness reads `derivedFrom`, never this. When the sample has a `voice` input, the two SHOULD be equal. [DF-91] |
+| `creditsUsed` | generated | number ≥ 0 | What the service charged for this generation, in its own units, as it reports them. `0` when it charged nothing, such as for a cached result or a free preview. Informational. [DF-91] |
+| `postProcess` | generated | object (below) | Processing applied to the file after it was generated. [DF-92] |
+| `source` | all | string | On a `voiceSample`, where the line comes from: project-relative `file:line[-line]`, or `sampleLine`. On another kind, the project-relative path the content came from, which for an imported file is its `copiedFrom`. Informational. [DF-95] |
 | `gateOverridden` | any | string | A producing tool's process gate that was skipped. |
 | `notes` | any | string | Free text. |
 
@@ -477,16 +512,45 @@ an instruction as audio tags and doesn't check the result writes
 `instructMethod: audio-tag` and `instructApplied: unverified`. A sample with no
 `instructMethod` says nothing about how its instruction was sent.
 
+**`copiedFromSha256`** [DF-90] is the hash of the source file's bytes when it was copied
+in, recorded next to the path it was copied from. It is valid only with `copiedFrom`
+(`E-SCHEMA` without it). The file in the bundle has the same bytes unless the writer
+stripped metadata as it copied (§4), so `copiedFromSha256` usually equals the file's
+`files` hash. Nothing in the bundle is checked against it, because the source is outside
+the bundle. A tool MAY compare it with the source to tell whether the source has changed
+since. *Migration:* a writer that recorded this hash as `provenance.sha256` before 2.1.0
+moves it to `copiedFromSha256`. Until it does, `provenance.sha256` is an unknown key:
+preserved, and read as nothing.
+
+**`postProcess`** [DF-92] records processing a tool applied to a generated file after the
+generator made it: an audio effect chain on a voice sample, an upscale or a colour grade
+on an image. The file in the bundle is the processed one: its `files` hash, its
+`derivedFrom` and the rest of its `provenance` describe it as it is now, and `model`,
+`prompt` and the like say how the original was made.
+
+| Key | Required | Type | Meaning |
+|-----|----------|------|---------|
+| `tool` | yes | `{name, version?, binary?}` | The program that did the processing, as `provenance.tool`. |
+| `chain` | yes | non-empty string | The processing applied, as the tool identifies it: a name, or a hash of its settings. A tool compares it with its current settings to tell whether a file was processed with them. |
+| `dry` | no | project-relative path | Where the unprocessed original is kept, outside the bundle, conventionally under `<charactersDir>/.generations/<CHARACTER>/` (§4). A reader MUST NOT expect it to exist. |
+| `notes` | no | string | Free text. |
+
+Processing changes nothing else: a processed sample is stale or current by its
+`derivedFrom` alone (§7), and a validator doesn't compare `chain` with anything.
+*Migration:* a writer that recorded this as `provenance.machineVoice: {chain, dry, tool}`
+moves it to `postProcess`, with `tool` as an object, `{"name": "<the tool string>"}`.
+
 **`references`** [D8]: one entry per image sent, in the order sent.
 
 | Key | Required | Meaning |
 |-----|----------|---------|
 | `sha256` | yes | The bytes sent. |
 | `path` | when known | The bundle path of the asset with that `sha256` at the time of writing; when none has it and the reference's `role` has a current selection, that selection's path (§7). A reader MUST NOT assume the file at `path` has that `sha256`. Never an absolute path. |
-| `role` | no | Why it was sent: `portrait`, `face`, `view:<variant>`, `expression:<variant>`, or a tool's own word. |
+| `source` | no | The project-relative path of the image sent, when it isn't in the bundle: a storyboard panel, a reference drawing. Nothing in the format reads it. [DF-95] |
+| `role` | no | Why it was sent: `portrait`, `face`, `view:<variant>`, `expression:<variant>`, `plate:<variant>` (§16.4), or a tool's own word. |
 | `originalWidth`, `originalHeight`, `effectiveWidth`, `effectiveHeight` | no | As the engine reports them. |
 
-## 7. `derivedFrom` and staleness [DF-27, DF-46, DF-76, DF-77, D4]
+## 7. `derivedFrom` and staleness [DF-27, DF-46, DF-76, DF-77, DF-93, DF-94, D4]
 
 `derivedFrom` is an array of input records. Each is one of:
 
@@ -505,6 +569,7 @@ an instruction as audio tags and doesn't check the result writes
 | `expression` | `face`, `portrait`, unless the asset is imported |
 | `voiceSample` | `vox` or `voice` |
 | `dossier` | `description`, `castMember`, `bundle`, `template` |
+| `plate` | nothing: a plate isn't derived and is never stale (§16.4) |
 
 **A hosted voice** [DF-76] is one a service keeps, which a tool names by an identifier
 instead of holding a file. A `voice` record names it: `provider` is the member's `voices`
@@ -514,6 +579,21 @@ member's `voices` entry for that provider is a bare voice ID. It records a `vox`
 when the voice ID lives inside a `.vox` file: vox-format has an entry per provider, so a
 `.vox` can carry a hosted voice's ID too, and then the `.vox` is the input. A sample made
 from a `.vox` never records a `voice` input for the ID inside it.
+
+**Lowercase** [DF-93], here and in the normal form below, means Unicode's default full
+lowercase mapping (toLowercase, applied to the whole string), the counterpart of §2's
+uppercasing. So `VocalSmith` becomes `vocalsmith` and `VÖX` becomes `vöx`. A `voice`
+record's `provider` MUST be lowercase, which is to say that lowercasing it changes
+nothing; otherwise it is `E-SCHEMA`. `vöx` is lowercase and `vÖx` isn't. The schema spells
+this rule out as a pattern that excludes every code point lowercasing changes, as of
+Unicode 17.0; for a code point assigned later, this text decides.
+
+**A malformed `voice` record** [DF-94] is one the schema rejects: it lacks `provider` or
+`voiceId`, one of them isn't a non-empty string, or `provider` isn't lowercase. It is
+`E-SCHEMA`, and it is also **stale**: it can't match a normal-form key and an element of
+its array, so step 2 below fails. A selected asset with one is `W-STALE` when there is a
+member to check it against, and a malformed record never makes a voice hosted (§8.3).
+With no member it isn't checked, like any `voice` input.
 
 **An imported asset** [DF-77] is a `face`, `view` or `expression` whose `provenance` has
 `copiedFrom` (§6): the file was brought in unchanged from elsewhere in the project, not
@@ -532,7 +612,7 @@ normalizes the file.
 - A legacy `voiceDescription` is dropped. If `voicePrompt` is absent or null, its
   value first becomes `voicePrompt`.
 - `voices` is always present, `{}` when the member has none. Provider keys are
-  lowercased. A single string becomes a one-element array. A value that is
+  lowercased (above). A single string becomes a one-element array. A value that is
   neither a string nor an array of strings is dropped.
 - `character`, `role`, `actor`, `gender`, `language`, `voicePrompt` and `manifest`
   are absent when their value is null.
@@ -645,14 +725,14 @@ member, the input isn't checked, and the sample isn't stale.
 
 ## 8. Kinds
 
-### 8.1 Kinds and variants [DF-32 to DF-34]
+### 8.1 Kinds and variants [DF-32 to DF-34, DF-85, DF-86]
 
 | `kind` | `variant` | Shape | Notes |
 |--------|-----------|-------|-------|
 | `description` | — | `CHARACTER.md` | Always at path `CHARACTER.md`. |
 | `portrait` | — | 9:16 | Head to mid-chest, three-quarter. The anchor; it *is* the three-quarter view. |
 | `face` | — | square | §8.5. Stands for the neutral expression. |
-| `view` | `front` \| `profile` \| `back` | 9:16 | Framed like the portrait. Profile faces screen-left. |
+| `view` | `front` \| `profile` \| `back`, or a family below | 9:16 | Framed like the portrait. Profile faces screen-left. |
 | `expression` | `happy` \| `sad` \| `frightened` \| `mad` | square | Framed like the face. Another variant is allowed with `W-VARIANT` (character-specific expressions come after v2). |
 | `vox` | — | `.vox` | Always at `voice/<CHARACTER>.vox`. |
 | `voiceSample` | `neutral`, or any register name | `.m4a` | §8.2. |
@@ -661,12 +741,37 @@ member, the input isn't checked, and the sample isn't stale.
 | `lora` | — | `.safetensors` | §8.4. |
 | `training` | — | image | §8.4. |
 | `crowdRef` | — | image | A reference for a background character. |
+| `plate` | a slug (§16.4) | 16:9 | Only in a location bundle (§16.4). |
+
+**View variant families** [DF-85]. Besides `front`, `profile` and `back`, a `view`
+variant may be one of two families. A **slug** is one or more runs of lowercase ASCII
+letters and digits joined by single hyphens (`^[a-z0-9]+(-[a-z0-9]+)*$`): `evening`,
+`brass-armor`, `s01-04`.
+
+| Variant | What it is |
+|---------|------------|
+| `storyboard`, `storyboard-<slug>` | A storyboard's reference image of the character: the design a storyboard keeps the character on-model with, or a second one for a particular state or prop, which the slug names. Usually imported (§7), and then any shape. |
+| `look-<slug>` | The character in another look, which the slug names: a costume, a disguise, an outfit for a scene, another body. Framed like the portrait and made from it as any view is. |
+
+Any other variant is `W-VARIANT`, and so are `look` and a family name followed by a
+hyphen and no slug, or by anything that isn't a slug (`look-Evening`, `storyboard--x`).
+The vocabulary stays closed: a one-off, such as a character's second body, is a look
+(`look-second-body`), not a variant of its own. A family variant is never required by a
+tier (§8.3) and never stands in for `front`, `profile` or `back`.
 
 **Shapes** are width to height, in pixels as stored in the file. For each
-`selected` `portrait`, `view`, `face` and `expression`, let *r* be width ÷ height
-and *t* be 9 ÷ 16 or 1. It is `W-SHAPE` when |*r* − *t*| ÷ *t* is over 0.01, computed
+`selected` `portrait`, `view`, `face`, `expression` and `plate`, let *r* be width ÷ height
+and *t* be 9 ÷ 16, 1 or 16 ÷ 9. It is `W-SHAPE` when |*r* − *t*| ÷ *t* is over 0.01, computed
 in exact or 64-bit arithmetic, or when a file that exists has no readable
-dimensions. A missing file is only `E-FILE-MISSING`. 179×320 passes and 178×320 doesn't.
+dimensions. A missing file is only `E-FILE-MISSING`. 179×320 passes and 178×320 doesn't; for a plate, 2752×1536 passes (0.8% from 16:9) and 240×180 doesn't.
+
+**An imported image isn't checked for shape** [DF-86]. A selected `face`, `view`,
+`expression` or `plate` whose `provenance` has `copiedFrom` (§6) was brought in unchanged,
+so its shape is what it was made at, and it is never `W-SHAPE`, as it is never stale
+(§7). **A portrait with `copiedFrom` keeps its shape check**, as it keeps its `artStyle`
+check: the face crop (§8.5) and every view are made from it. The page still makes its
+copies by template rule 5, which scales an image to cover and crops the centre, so a
+square imported view is cropped to 9:16 on the page.
 
 **Retired kinds** (`turnaround`, `faceSheet`, `expressions`, `wardrobe`,
 `palette`): a version 1 reader recognizes them; a writer MUST NOT produce
@@ -886,7 +991,7 @@ It is a known file without an asset entry.
 ## 11. The dossier page [DF-42 to DF-53]
 
 `<CHARACTER>-dossier.html` is the only HTML file in the bundle's inventory (§5.2)
-and is registered as `kind: dossier`. A viewer's previews (§11.1) are hidden, so
+and is registered as `kind: dossier`. A location bundle has no page (§16.6). A viewer's previews (§11.1) are hidden, so
 they are outside the inventory and aren't the page.
 
 - **Self-contained.** Styles, scripts, fonts, images and samples are
@@ -953,6 +1058,9 @@ A **preview** is the page as a **viewer** builds it to show a bundle, from the b
 it is on disk. It is how a host (§12) shows a dossier, whether or not the bundle has a
 page, and whether or not that page is current. A viewer is any tool that builds
 previews; a host, a writer or both can be one.
+
+Previews are for character bundles. A viewer builds none for a location bundle and
+writes nothing in one; it shows it as §16.6 says.
 
 A preview isn't the page. It isn't registered as an asset, it is outside `files` and
 `manifestChecksum`, and a validator doesn't report it, because it lives in a hidden
@@ -1096,7 +1204,8 @@ and it changes `manifest.json` only through a rebuild, which a conforming writer
 does. A host that can't build a preview shows the stored one when its name matches
 the key, and otherwise says that no current preview is stored. A host that links a
 conforming writer MAY offer a rebuild. A bundle found on disk is not a cast member
-unless `CAST.md` says so.
+unless `CAST.md` says so. A location bundle is an item too, shown as §16.6 says, and it is
+a location only when `LOCATIONS.md` says so (§16.2).
 
 A host that shows update status does this while a bundle is being updated
 (§5.7):
@@ -1120,7 +1229,7 @@ storyboard panel recording its references) records their `sha256`, and finds the
 by `sha256` through the manifest. A recorded hash names those bytes, so after refresh
 accepts a change to the file, that hash no longer finds it.
 
-## 14. Validation [DF-54 to DF-57]
+## 14. Validation [DF-54 to DF-57, DF-80, DF-88]
 
 A validator never changes anything. Each finding has a stable code. A fault
 that a specific code below names may also break the schema; the specific code
@@ -1130,10 +1239,11 @@ MUST be reported and `E-SCHEMA` MAY be reported with it.
 |------|-------|---------|
 | `E-VERSION` | error | Unknown `manifestVersion` |
 | `E-NAME` | error | Name invalid (§2) |
-| `E-NAME-MISMATCH` | error | Bundle name, manifest `character`, `CAST.md` member and `CHARACTER.md` disagree (§3) |
-| `E-CAST` | error | `CAST.md` can't be read: its YAML doesn't parse, or a member has no `character`, a `role` that isn't a tier (§8.3), a `gender` other than `M`, `F`, `NB` or `NS`, or a `voices` that isn't a map. No other check is possible. |
+| `E-NAME-MISMATCH` | error | Bundle name, manifest `character`, `CAST.md` member and `CHARACTER.md` disagree (§3), or, for a location, bundle name, manifest `character`, `LOCATIONS.md` entry and `LOCATION.md` (§16.1) |
+| `E-CAST` | error | `CAST.md` can't be read: its YAML doesn't parse, or a member has no `character`, a `role` that isn't a tier (§8.3), a `gender` other than `M`, `F`, `NB` or `NS`, or a `voices` that isn't a map. Or `LOCATIONS.md` can't be read: its YAML doesn't parse, it has no `locations` list, or an entry has no `location` (§16.2). No other check of that index is possible. |
 | `E-MANIFEST` | error | A directory a member points at has no `manifest.json`, or it isn't a JSON object. No other check of that bundle is possible. |
 | `E-NOT-BUNDLE` | error | A version 2 manifest in a directory without `.dossier` |
+| `E-TYPE-MISMATCH` | error | A `CAST.md` member points at a location bundle, or a `LOCATIONS.md` entry at a character bundle (§16.1) |
 | `E-PATH` | error | A path in the manifest breaks §5.2's rules |
 | `E-FILE-MISSING` | error | A `files` entry has no file, or names a symlink or `manifest.json` (§5.2) |
 | `E-FILE-HASH` | error | A file's hash or size doesn't match its entry: the manifest is behind the disk (§5.6) |
@@ -1146,12 +1256,13 @@ MUST be reported and `E-SCHEMA` MAY be reported with it.
 | `E-SCHEMA` | error | The manifest fails its schema |
 | `W-UNCLASSIFIED` | warning | A file with no asset entry |
 | `W-STALE` | warning | A derived asset's inputs changed, or the member no longer names its hosted voice (§7) |
-| `W-SHAPE` | warning | Wrong aspect ratio for the kind (§8.1) |
-| `W-VARIANT` | warning | An `expression` or `view` variant outside the standard set |
+| `W-SHAPE` | warning | Wrong aspect ratio for the kind, on an asset that isn't imported (§8.1) |
+| `W-VARIANT` | warning | An `expression` variant outside the standard set, or a `view` variant outside the standard set and its families (§8.1) |
 | `W-SIDECAR` | warning | A `.json` sidecar in `images/` |
-| `W-ORPHAN` | warning | No `CAST.md` member points at the bundle |
-| `W-POINTER` | warning | The member's `manifest:` doesn't point at this bundle (§3) |
+| `W-ORPHAN` | warning | No index entry points at the bundle (§3, §16.2) |
+| `W-POINTER` | warning | The member's or entry's `manifest:` doesn't point at this bundle (§3) |
 | `W-ROLE` | warning | A member with a `manifest:` has no `role` |
+| `W-DISPLAY-NAME` | warning | The manifest's `displayName` differs from the member's (§5.1) |
 | `W-VOICE-ELSEWHERE` | warning | `voices.voxalta` doesn't name the selected `vox` |
 | `W-VOICE-PROMPT` | warning | `voicePrompt` differs from the vox's |
 | `W-FOOTNOTE` | warning | An undefined or unused footnote |
@@ -1177,7 +1288,188 @@ bundle with either can be valid.
 
 The format version is `manifestVersion`. A change that makes a valid bundle
 invalid is a new version. The template is versioned separately. Changes are
-listed in `CHANGELOG.md`.
+listed in `CHANGELOG.md`. A minor release (2.1.0) adds only what is optional, so a
+2.0.0 reader still opens every 2.1.0 character bundle that uses nothing new; it reports a
+location bundle's plates as `E-SCHEMA`, which is why §16 marks location bundles with
+`dossierType`.
+
+## 16. Location bundles [DF-79 to DF-84]
+
+A **location** is a place a story happens in, kept as a `.dossier` bundle the way a
+character is. Its main job is to hold **plates**: empty sets, one per camera setup (a
+**view** of the location), that an image tool paints a scene's people onto. A location
+bundle is a version 2 bundle, and §1 and §4 to §7 apply to it as written, except where
+this section says otherwise: names, paths, `files`, `manifestChecksum`, assets and
+statuses, provenance, the writes, update markers and the validation codes.
+
+### 16.1 Telling the bundle types apart [DF-79, DF-80]
+
+A manifest whose `dossierType` is `location` is a **location bundle**. Every other
+manifest is a character bundle (§5.1). Nothing else decides it: not the directory the
+bundle is in, its name or its files.
+
+- **The name** is the location's, canonical by §2: `HARBOR-LIGHT`, `THE SALT FLATS`. It is
+  the directory name without `.dossier`, the manifest's `character`, the `LOCATIONS.md`
+  entry's `location` and `LOCATION.md`'s `location:`. A location's name is held in
+  `character` so that the manifest keeps the shape every 2.0.0 reader expects; there it
+  names the bundle, not a character. Names compare exactly (§3), and any disagreement is
+  `E-NAME-MISMATCH`.
+- **The two indexes don't cross.** A `CAST.md` member that points at a location bundle,
+  or a `LOCATIONS.md` entry that points at a character bundle, is `E-TYPE-MISMATCH`, and
+  that bundle isn't checked further from that index. A character and a location may
+  have the same name, in different bundles.
+
+### 16.2 `LOCATIONS.md` [DF-80]
+
+Discovery starts at `LOCATIONS.md`, as it does at `CAST.md` for characters (§3). It is a
+Markdown file beside `CAST.md`; when a project has no `CAST.md`, the directory holding
+`LOCATIONS.md` is the project directory. Its YAML front matter
+([`schemas/locations.schema.json`](../schemas/locations.schema.json)) has:
+
+| Key | Required | Meaning |
+|-----|----------|---------|
+| `type` | yes | `locations` |
+| `schemaVersion` | yes | `1` |
+| `locations` | yes | A list. Each entry is one location. |
+
+| Entry key | Required | Meaning |
+|-----------|----------|---------|
+| `location` | yes | The location's name, canonical by §2. |
+| `manifest` | no | The bundle's `manifest.json`, relative to the directory holding `LOCATIONS.md`. An entry with none has no bundle, which is valid. |
+
+Other keys are allowed. They are copies for people (a name, a theme, a list of views),
+the manifest is the authority, and a reader doesn't compare them with it. The body is
+free Markdown. This standard defines `LOCATIONS.md`, and a writer that changes location
+bundles SHOULD rewrite it from them.
+
+An entry is read as a `CAST.md` member is for discovery: resolving its pointer,
+`W-POINTER`, `E-MANIFEST`, `E-NOT-BUNDLE` and `W-V1` are §3's, with "entry" for
+"member". `E-CAST` covers a `LOCATIONS.md` that can't be read. **Orphans:** a validator
+looks in `locations/` beside `LOCATIONS.md`, when there is a `LOCATIONS.md`, and in each
+directory holding a bundle an entry points at. A location bundle no entry points at is
+`W-ORPHAN`. A location bundle that only a directory listing finds is never one of the
+project's locations.
+
+A location has no member, so nothing is checked against one: a location bundle has no
+`castMember` or `voice` input, no `role` or `W-ROLE`, no voice and no `W-VOICE-*`.
+
+### 16.3 The manifest and `LOCATION.md` [DF-81, DF-83]
+
+The manifest is §5's, with `dossierType: "location"`. `role`, `prompts` and `displayName`
+aren't defined for a location: a writer doesn't write them, and a reader ignores them.
+The **`location`** object is the location's record. Every key is optional, and unknown
+keys are preserved.
+
+| Key | Type | Meaning |
+|-----|------|---------|
+| `name` | string | The location's name for people: `The harbor light at the end of the mole`. |
+| `description` | string | One line about the place. |
+| `theme` | string | The producing tool's name for the look the location shares with others, such as a colour script. |
+| `views` | object | The camera setups, keyed by the plate variant each one names (§16.4). Keys are slugs (§8.1). |
+
+Each entry of `views` is the producing tool's recipe for that view's plate, kept beside
+the plate so a tool can make another take. Every key is optional, and how a tool uses
+them is its own (§5.5):
+
+| Key | Type | Meaning |
+|-----|------|---------|
+| `prompt` | string | The prompt the plate is made from. |
+| `rule` | string | What the view asks of a scene painted onto its plate ("keep it unmirrored"). |
+| `refs` | array of string | The images the plate is painted from, in the tool's own notation. |
+| `exterior` | boolean | `true` for an outdoor view. |
+| `theme` | string | Overrides `location.theme` for this view. |
+
+The record and the plates aren't compared: a view with no selected plate isn't a finding,
+and neither is a plate whose variant has no `views` entry.
+
+**`LOCATION.md`** is the location's description, the `description` asset, always at path
+`LOCATION.md`. It is UTF-8 Markdown with YAML front matter:
+
+| Key | Required | Type | Meaning |
+|-----|----------|------|---------|
+| `type` | yes | `location` | |
+| `location` | yes | string | The canonical name. |
+| `theme` | no | string | A copy of `location.theme`. |
+
+Unknown keys are preserved, as in §9.1. The body is free Markdown for people: the layout,
+and how to block a scene in it. A `#` heading with the location's name, a `## Blocking`
+section and a `## Views` section with one row per view are recommended, not required.
+There is no full or short form. Footnotes follow §9.3 and are checked for `W-FOOTNOTE`
+as in `CHARACTER.md`. A missing `location` key isn't `E-NAME-MISMATCH`. The check
+findings of §14 apply with `LOCATION.md` for `CHARACTER.md` and `location` for
+`character`.
+
+### 16.4 Kinds and plates [DF-82]
+
+A location bundle holds these kinds, and any other is `E-SCHEMA`:
+
+| `kind` | `variant` | Shape | Notes |
+|--------|-----------|-------|-------|
+| `description` | — | `LOCATION.md` | Always at path `LOCATION.md`. |
+| `plate` | a slug (§8.1) | 16:9 | An empty set for one view. |
+| `view` | as §8.1 | any | A reference image of the place, always imported: its `provenance` MUST have `copiedFrom` (`E-SCHEMA` otherwise). |
+| `sourcePhoto` | — | image | A real photo the location is based on. |
+
+A `plate` is `E-SCHEMA` in a character bundle.
+
+**A plate** is the empty set for one view: the place as that camera sees it, with no
+people in it. Its `variant` names the view, as a slug (`dock`, `lamp-room`,
+`stair-from-below`), and is required (`E-SCHEMA` otherwise). There is no standard set
+and no `W-VARIANT` for plates. Its file is `images/plate-<variant>-<sha8>.png` (§4). At
+most one plate per variant is `selected` (`E-MULTI-SELECTED`), and the others are takes,
+`candidate` or `rejected`. A tool finds a view's plate by the lookup (§8.1), never by
+file name.
+
+A plate is 16:9 (`W-SHAPE`, §8.1, unless it is imported). It isn't derived: it needs no
+`derivedFrom`, and it is never stale. A plate painted from other images records them in
+`provenance.references` (§6): another plate of the same location with the role
+`plate:<variant>` and its `path`, and an image outside the bundle with its `source`.
+
+**Views** in a location bundle use §8.1's vocabulary and families, with `W-VARIANT`
+outside them: a storyboard's design drawing of the place is `storyboard` or
+`storyboard-<slug>`. Being imported, they are never stale and never `W-SHAPE`.
+
+**No tiers.** A location has no `role` and no tier, so completeness isn't defined for
+it, there is no completeness report, and `W-INCOMPLETE` is never reported for it.
+`data/tiers.json` is about characters only.
+
+### 16.5 Worked example
+
+`examples/valid/location`. `LOCATIONS.md` has
+
+```yaml
+locations:
+- location: HARBOR-LIGHT
+  name: The harbor light at the end of the mole
+  manifest: locations/HARBOR-LIGHT.dossier/manifest.json
+```
+
+The bundle's manifest has `"character": "HARBOR-LIGHT"`, `"dossierType": "location"` and a
+`location` record with two views, `dock` and `lamp-room`. `LOCATION.md` has
+`type: location` and `location: HARBOR-LIGHT`. The `dock` view has two plates, 320×180
+each, one `selected` and one `candidate`; `lamp-room` has one, painted from the selected
+`dock` plate, which its `references` names with the role `plate:dock`. A 200×100
+`storyboard-design` view is a JPEG copied from a storyboard. 320 ÷ 180 is within 1% of
+16 ÷ 9, and the 2:1 view is imported, so nothing is `W-SHAPE`, nothing is stale, and
+there is no completeness to report. The project's `CAST.md` has a member whose bundle is
+in `characters/`; it plays no part in the location's findings.
+
+### 16.6 No page [DF-84]
+
+A location bundle has no page in 2.1.0. `dossier` isn't one of its kinds, the template
+and `data/fields.json` are about characters, and a viewer builds no preview of one
+(§11.1). A **viewer** or **host** (§12) shows a location bundle read-only and writes
+nothing in it. It shows, in this order:
+
+1. the location's name: `location.name`, or the bundle name when there is none;
+2. `LOCATION.md`'s body, as text or as Markdown;
+3. each selected plate, labelled with its variant, in the order of `location.views` and
+   then the remaining variants in byte order;
+4. the selected views.
+
+How it lays these out is its own. The validator's findings go above, as for a character
+(§12). A host MAY use the first selected plate as the item's icon; its default icon is a
+place. A page for locations needs a template of its own and is left for a later version.
 
 ---
 

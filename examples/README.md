@@ -8,8 +8,9 @@ updated: 2026-11-12
 Every character here is invented. Images are flat shapes, `.vox` embeddings are
 placeholders that can't produce a voice, and samples are 0.2 seconds of silence.
 
-Each fixture is a small project: a `CAST.md` and a `characters/` directory.
-Validate it from its `CAST.md`.
+Each fixture is a small project: a `CAST.md` and a `characters/` directory, and for a
+location (§16) a `LOCATIONS.md` and a `locations/` directory beside them. Validate it from
+its indexes: its `CAST.md`, and its `LOCATIONS.md` when it has one.
 
 | Path | Contents |
 |------|----------|
@@ -72,6 +73,16 @@ Validate it from its `CAST.md`.
   `valid/hosted-voice-supporting` and `warnings/W-INCOMPLETE-hosted-no-neutral` the samples
   say nothing about the voice they were made with. The template change is deferred. The `copiedFrom` path in `valid/imported-view` names a file
   that isn't in the fixture, since nothing reads it.
+- **Files outside the bundle aren't in the fixtures.** The `copiedFrom` and `source` paths
+  of the imported images in `valid/view-families` and `valid/location`, and the `dry`
+  paths of `valid/hosted-voice-provenance`'s `postProcess`, name files that aren't there,
+  since nothing reads them.
+- **Locations have no page and no completeness** (§16.4, §16.6), so their fixtures assert
+  neither, and what a viewer shows for one (§16.6) isn't asserted.
+- **The provider pattern is generated.** `tools/build_provider_pattern.py` writes the
+  `voice` record's `provider` pattern in `schemas/manifest-v2.schema.json` from Unicode 17.0
+  and checks it with `--check`. `valid/hosted-voice-non-ascii-provider` and
+  `errors/E-SCHEMA-voice-input-provider-non-ascii-case` test a non-ASCII capital.
 - **Face detection has no fixture.** Images are shapes, not faces, so the face
   crops use `provenance.box`. §8.5's worked example is the portrait and box
   these fixtures use.

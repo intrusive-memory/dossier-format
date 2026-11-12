@@ -754,11 +754,16 @@ def code_for(name):
     return next(code for code in CODES if name == code or name.startswith(code + "-"))
 
 
-def fixture(group, name, bundles, members, codes=(), may_also=(), complete=None, missing=None, note="", cast_text=None, bundle_path=None, update_status=None, preview=None):
+def fixture(group, name, bundles, members, codes=(), may_also=(), complete=None, missing=None, note="", cast_text=None, bundle_path=None, update_status=None, preview=None,
+            locations=None, locations_text=None):
     project = OUT / group / name
     project.mkdir(parents=True)
     cast = cast_text or front_matter({"type": "cast", "schemaVersion": 1, "cast": members}) + "# Cast\n\nSynthetic data only.\n"
     (project / "CAST.md").write_text(cast, encoding="utf-8")
+    if locations is not None or locations_text is not None:
+        # §16.2: the second index, beside CAST.md.
+        text = locations_text or front_matter({"type": "locations", "schemaVersion": 1, "locations": locations}) + "# Locations\n\nSynthetic data only.\n"
+        (project / "LOCATIONS.md").write_text(text, encoding="utf-8")
     for bundle in bundles:
         bundle.write(project)
     entry = {"path": f"{group}/{name}", "bundle": bundle_path or bundles[0].dir, "verdict": {"valid": "valid", "warnings": "warnings", "errors": "invalid"}[group],
@@ -858,6 +863,80 @@ def add_visuals(b):
     b.image("portrait", portrait, provenance={"seed": 7, "steps": 4, "width": 180, "height": 320, "round": "v1", "prompt": "A tall woman in a grey coat."})
     b.image("face", face_crop(portrait), derivedFrom=[b.input("portrait")],
             provenance={"provider": "personaje", "box": {"x": 50, "y": 60, "width": 80, "height": 100}})
+
+
+# --- 2.1.0 shapes ------------------------------------------------------------
+
+def jpeg(width, height, seed):
+    """A flat JPEG, as an imported storyboard drawing might be (§4, DF-87)."""
+    digest = hashlib.sha256(seed.encode()).digest()
+    image = Image.new("RGB", (width, height), tuple(digest[:3]))
+    ImageDraw.Draw(image).rectangle((width // 4, height // 4, width * 3 // 4, height * 3 // 4), fill=tuple(digest[3:6]))
+    buffer = io.BytesIO()
+    image.save(buffer, "JPEG", quality=80, optimize=False)
+    return buffer.getvalue()
+
+
+def imported(b, kind, variant, data, ext, source, **extra):
+    """§6, §7, DF-77, DF-90: an image brought in unchanged. The hash of the source is the file's own."""
+    path = f"images/{kind}" + (f"-{variant}" if variant else "") + f"-{sha(data)[:8]}.{ext}"
+    return b.put(path, data, kind, variant=variant, provenance={"provider": "import", "copiedFrom": source, "copiedFromSha256": sha(data), "source": source}, **extra)
+
+
+PLATE_LABEL = "this location's empty set; paint the people into it"
+
+
+def location_bundle(name="HARBOR-LIGHT", description_name=None):
+    """§16: a location bundle with two views, a second take, and an imported design drawing."""
+    b = Bundle(name, parent="locations")
+    b.extra_top = {"dossierType": "location", "location": {
+        "name": "The harbor light at the end of the mole",
+        "description": "A squat stone lighthouse at the end of a long breakwater, with a lamp room up an iron stair.",
+        "theme": "COAST",
+        "views": {
+            "dock": {"prompt": "The end of the breakwater at dusk, the lighthouse door on the left.", "rule": "Keep the door on the left, unmirrored.",
+                     "refs": [], "exterior": True},
+            "lamp-room": {"prompt": "The lamp room seen from the top of the stair.", "rule": "Keep the lamp in the centre.",
+                          "refs": ["room:dock"], "exterior": False, "theme": "COAST-NIGHT"}}}}
+    b.put("LOCATION.md", (front_matter({"type": "location", "location": description_name or name, "theme": "COAST"}) + f"""
+# The harbor light at the end of the mole
+
+An invented place that exists only in these fixtures.[^a-fixture]
+
+## Blocking
+
+The door is on the left of the dock view; the stair rises on the right of the lamp room.
+
+## Views
+
+| View | Kind | Rule |
+|---|---|---|
+| `dock` | Exterior | Keep the door on the left, unmirrored. |
+| `lamp-room` | Interior | Keep the lamp in the centre. |
+
+[^a-fixture]: Author. Invented for the dossier-format fixtures, 2026-11-12.
+""").encode(), "description")
+    dock = add_plate(b, "dock", png(320, 180, name + "dock", (20, 20, 60, 60)))
+    add_plate(b, "dock", png(320, 180, name + "dock take 2", (40, 20, 60, 60)), status="candidate")
+    add_plate(b, "lamp-room", png(320, 180, name + "lamp room", (130, 50, 60, 80)),
+              references=[{"role": "plate:dock", "path": dock, "sha256": sha(b.files[dock])}])
+    imported(b, "view", "storyboard-design", jpeg(200, 100, name + "design"), "jpg", "storyboards/fixture/harbor-light-design.jpg",
+             storyboardLabel="the lighthouse's design: squat, stone, one window")
+    return b
+
+
+def add_plate(b, variant, data, status="selected", references=None, **extra):
+    """§16.4: a plate, 16:9, named plate-<variant>-<sha8>.png."""
+    prov = {"provider": "vinetas", "engine": "fixture", "mode": "imageToImage" if references else "textToImage",
+            "prompt": b.extra_top["location"]["views"][variant]["prompt"]}
+    if references:
+        prov["references"] = references
+    return b.put(f"images/plate-{variant}-{sha(data)[:8]}.png", data, "plate", status, variant, prov, storyboardLabel=PLATE_LABEL, **extra)
+
+
+def location_entry(b):
+    """A LOCATIONS.md entry (§16.2), with the copies for people that the index may carry."""
+    return {"location": b.name, "name": b.extra_top.get("location", {}).get("name", b.name), "manifest": f"{b.dir}/manifest.json"}
 
 
 # --- valid -------------------------------------------------------------------
@@ -1163,6 +1242,54 @@ Said the way it's spelled.[^one]
     b = base("THE PORTER"); m = member(b); b.page(m, padding=10_000_000)
     fixture("valid", "page-at-size-limit", [b], [m], complete=True, note="10,000,000 bytes, nearly all of it a comment.")
 
+    # --- 2.1.0 ---
+
+    # §16, DF-79 to DF-84: a location bundle, found from LOCATIONS.md beside CAST.md.
+    loc = location_bundle()
+    keeper = base("THE KEEPER")
+    fixture("valid", "location", [loc, keeper], [member(keeper)], locations=[location_entry(loc), {"location": "THE OLD QUAY", "name": "Not built yet"}],
+            bundle_path=loc.dir,
+            note="§16.5's worked example. dossierType location; the name in character; a location record whose views are dock and lamp-room; LOCATION.md; two dock plates (one candidate) and a lamp-room plate painted from the dock plate (role plate:dock), all 320×180, within 1% of 16:9; an imported 200×100 JPEG storyboard-design view, which isn't W-SHAPE. No completeness: a location has no tier. A LOCATIONS.md entry with no manifest has no bundle. The CAST.md member's bundle is in characters/ and isn't under test.")
+
+    # §8.1, DF-85 to DF-87, DF-89, DF-90: the view families, imported JPEG views of any shape, storyboardLabel, copiedFromSha256.
+    b = base("THE ARCHIVIST")
+    imported(b, "view", "storyboard", jpeg(128, 128, b.name + "storyboard"), "jpg", "storyboards/fixture/archivist.jpg",
+             storyboardLabel="the archivist's design")
+    imported(b, "view", "storyboard-ink-stained", jpeg(160, 90, b.name + "ink"), "jpg", "storyboards/fixture/archivist-ink.jpg",
+             storyboardLabel="the archivist with ink on both hands, for the flood scene")
+    b.image("view", png(180, 320, b.name + "look evening"), "look-evening", derivedFrom=[b.input("portrait"), b.input("face")],
+            storyboardLabel="the archivist in evening dress")
+    b.image("view", png(180, 320, b.name + "look clockwork"), "look-clockwork-body", derivedFrom=[b.input("portrait"), b.input("face")])
+    fixture("valid", "view-families", [b], [member(b)], complete=True,
+            note="Views storyboard and storyboard-ink-stained (imported JPEGs, square and 16:9, so not W-SHAPE), and look-evening and look-clockwork-body (generated, 9:16). None is W-VARIANT. The imported views record copiedFromSha256, equal to their files hash, and storyboardLabel, which nothing reads.")
+
+    # §5.1, DF-88: displayName in the manifest, agreeing with the member's; and a member with one and no dossier.
+    b = base("CAPTAIN ODDLEY"); b.extra_top = {"displayName": "the captain"}
+    fixture("valid", "display-name", [b], [{**member(b), "displayName": "the captain"}, {"character": "SECOND MATE", "role": "background", "voices": {}, "displayName": "the mate"}],
+            complete=True, note="The manifest's displayName equals the member's, so no W-DISPLAY-NAME. SECOND MATE's displayName has no dossier to compare with.")
+    b = base("THE PURSER"); b.extra_top = {"displayName": "the purser"}
+    fixture("valid", "display-name-no-member-copy", [b], [member(b)], complete=True,
+            note="The manifest has a displayName and the member has none: nothing to compare, so no W-DISPLAY-NAME. A reader uses the manifest's.")
+
+    # §6, DF-91, DF-92: a hosted-voice sample's voiceId and creditsUsed, and an effect chain applied after generation.
+    b = hosted_voice_bundle("THE SIGNALMAN")
+    for asset in b.assets:
+        if asset["kind"] == "voiceSample":
+            asset["provenance"].update(voiceId=HOSTED_VOICE, creditsUsed=0 if asset["variant"] == "neutral" else 38)
+            asset["provenance"]["postProcess"] = {"tool": {"name": "fixture-voicefx", "version": "1"}, "chain": "radio-0a1b2c3d",
+                                                  "dry": f"characters/.generations/{b.name}/dry/{asset['path'].split('/')[-1]}"}
+    fixture("valid", "hosted-voice-provenance", [b], [hosted_member(b)], complete=True,
+            note="Both samples record voiceId, equal to their voice input's, and creditsUsed (0 for a free result). Both went through an effect chain after generation (postProcess); the dry originals are outside the bundle and aren't in the fixture. Neither is stale: processing doesn't change staleness.")
+
+    # §7, DF-93: a provider key with a non-ASCII capital, lowercased in full by the normal form.
+    b = hosted_voice_bundle("THE FERRYMAN")
+    for asset in b.assets:
+        for record in asset.get("derivedFrom", []):
+            if record["role"] == "voice":
+                record["provider"] = "vöx"
+    fixture("valid", "hosted-voice-non-ascii-provider", [b], [{**member(b), "voices": {"VÖX": HOSTED_VOICE}}], complete=True,
+            note="The member's key is VÖX; Unicode's full lowercase mapping gives vöx, which is the records' provider, so they are current and lowercase.")
+
 
 # --- errors ------------------------------------------------------------------
 
@@ -1306,6 +1433,66 @@ def errors():
             if record["role"] == "voice":
                 record["provider"] = "VocalSmith"
     err("E-SCHEMA-voice-input-provider-case", b, members=[hosted_member(b)], may_also=["W-STALE"], note="The voice records' provider is VocalSmith, not vocalsmith.")
+
+    # --- 2.1.0 ---
+
+    # §7, DF-93: lowercase is Unicode's full mapping, so a non-ASCII capital isn't lowercase either. DF-94: and the record is stale.
+    b = hosted_voice_bundle(PELL)
+    for asset in b.assets:
+        for record in asset.get("derivedFrom", []):
+            if record["role"] == "voice":
+                record["provider"] = "vÖx"
+    err("E-SCHEMA-voice-input-provider-non-ascii-case", b, members=[{**member(b), "voices": {"VÖX": HOSTED_VOICE}}], codes=["E-SCHEMA", "W-STALE"],
+        note="The records' provider is vÖx. Lowercasing changes it (Ö to ö), so it isn't lowercase, and it matches no normal-form key (vöx), so both samples are stale (§7, DF-94).")
+
+    # §7, DF-94: a malformed voice record is E-SCHEMA, and stale.
+    b = hosted_voice_bundle(PELL)
+    for asset in b.assets:
+        for record in asset.get("derivedFrom", []):
+            if record["role"] == "voice":
+                del record["voiceId"]
+    err("E-SCHEMA-voice-input-malformed", b, members=[hosted_member(b)], codes=["E-SCHEMA", "W-STALE"],
+        note="The voice records have no voiceId. Each matches no element of the member's voices.vocalsmith, so both samples are stale, and the voice isn't hosted.")
+
+    # §16.4, DF-82: what a location bundle may hold, and where a plate may be.
+    b = location_bundle(); b.image("portrait", png(180, 320, "a portrait in a location"))
+    fixture("errors", "E-SCHEMA-location-kind", [b], [], ["E-SCHEMA"], ["W-STALE"], locations=[location_entry(b)],
+            note="A portrait in a location bundle. Its provenance.artStyle has no front-matter artStyle to match, which a validator may also report as W-STALE.")
+    b = location_bundle(); view = png(320, 180, "a generated location view")
+    b.put(f"images/view-storyboard-{sha(view)[:8]}.png", view, "view", variant="storyboard", provenance={"provider": "vinetas", "engine": "fixture"})
+    fixture("errors", "E-SCHEMA-location-view-not-imported", [b], [], ["E-SCHEMA"], locations=[location_entry(b)],
+            note="A view in a location bundle with no copiedFrom.")
+    b = location_bundle(); b.extra_top["location"]["views"]["Upper-Deck"] = {"prompt": "x"}
+    add_plate(b, "Upper-Deck", png(320, 180, "upper deck"))
+    fixture("errors", "E-SCHEMA-plate-variant", [b], [], ["E-SCHEMA"], locations=[location_entry(b)],
+            note="A plate's variant, and its views key, must be a lowercase slug: Upper-Deck isn't.")
+    b = base(); b.put(f"images/plate-dock-{sha(png(320, 180, 'stray plate'))[:8]}.png", png(320, 180, "stray plate"), "plate", variant="dock", provenance={"provider": "vinetas"})
+    err("E-SCHEMA-plate-in-character", b, codes=["E-SCHEMA"], note="A plate in a character bundle.")
+
+    # §6, DF-90, DF-92.
+    b = base(); b.assets[1]["provenance"]["copiedFromSha256"] = sha(b.files[b.assets[1]["path"]])
+    err("E-SCHEMA-copied-from-sha256-alone", b, codes=["E-SCHEMA"], note="The portrait has copiedFromSha256 and no copiedFrom.")
+    b = hosted_voice_bundle(PELL)
+    b.selected("voiceSample", "neutral")["provenance"]["postProcess"] = {"tool": {"name": "fixture-voicefx"}, "dry": "characters/.generations/PELL ARDEN/dry/sample-neutral.m4a"}
+    err("E-SCHEMA-post-process-no-chain", b, members=[hosted_member(b)], codes=["E-SCHEMA"], note="postProcess has no chain.")
+
+    # §16.1, DF-80: the two indexes don't cross.
+    loc = location_bundle()
+    fixture("errors", "E-TYPE-MISMATCH", [loc], [{"character": loc.name, "role": "background", "voices": {}, "manifest": f"{loc.dir}/manifest.json"}], ["E-TYPE-MISMATCH"],
+            note="A CAST.md member points at a location bundle. There is no LOCATIONS.md.")
+    b = base()
+    fixture("errors", "E-TYPE-MISMATCH-location-entry", [b], [], ["E-TYPE-MISMATCH"], locations=[{"location": b.name, "manifest": f"{b.dir}/manifest.json"}],
+            may_also=["W-ORPHAN"], note="A LOCATIONS.md entry points at a character bundle, which no CAST.md member points at.")
+
+    # §16.2: LOCATIONS.md can't be read.
+    loc = location_bundle()
+    fixture("errors", "E-CAST-locations-no-location", [loc], [], ["E-CAST"], locations=[{"name": "An entry with no location", "manifest": f"{loc.dir}/manifest.json"}],
+            may_also=["W-ORPHAN"], note="An entry of LOCATIONS.md has no location key.")
+
+    # §16.1: the location's names disagree.
+    loc = location_bundle(description_name="HARBOR LIGHT")
+    fixture("errors", "E-NAME-MISMATCH-location", [loc], [], ["E-NAME-MISMATCH"], locations=[location_entry(loc)],
+            note="LOCATION.md's location is HARBOR LIGHT; the bundle is HARBOR-LIGHT.")
 
 
 # --- warnings ----------------------------------------------------------------
@@ -1495,6 +1682,39 @@ def warnings():
          note="Version 1 as first specified: no .dossier extension, and not E-NOT-BUNDLE.")
     warn("W-V1-two-selected", v1(None, second_selected=True), may_also=["W-SIDECAR", "W-UNCLASSIFIED", "W-SHAPE"], complete=None,
          note="Two selected portraits. E-MULTI-SELECTED applies only to version 2 (Appendix A).")
+
+    # --- 2.1.0 ---
+
+    # §8.1, §16.4: a plate is 16:9.
+    loc = location_bundle(); add_plate(loc, "lamp-room", png(240, 180, loc.name + "four by three"), status="selected")
+    for asset in loc.assets:
+        if asset["kind"] == "plate" and asset["variant"] == "lamp-room" and asset["path"] != loc.assets[-1]["path"]:
+            asset["status"] = "candidate"
+    fixture("warnings", "W-SHAPE-plate", [loc], [], ["W-SHAPE"], locations=[location_entry(loc)], note="The selected lamp-room plate is 240×180, 4:3.")
+
+    # §8.1, DF-86: an imported portrait keeps its shape check.
+    b = Bundle(PELL, "background")
+    b.put("CHARACTER.md", short_description(PELL, "background"), "description")
+    imported(b, "portrait", None, png(180, 180, "an imported square portrait"), "png", "references/pell-arden.png")
+    warn("W-SHAPE-imported-portrait", b, codes=["W-SHAPE"], note="The portrait has copiedFrom and is square. Unlike a face, view or expression, an imported portrait is still checked for shape.")
+
+    # §8.1, DF-85: the vocabulary stays closed.
+    b = base(); b.image("view", png(180, 320, "brass armor"), "brass-armor", derivedFrom=[b.input("portrait"), b.input("face")])
+    warn("W-VARIANT-view-one-off", b, codes=["W-VARIANT"], note="brass-armor is in no family: a one-off look is look-brass-armor.")
+    b = base(); b.image("view", png(180, 320, "bare look"), "look", derivedFrom=[b.input("portrait"), b.input("face")])
+    warn("W-VARIANT-view-bare-look", b, codes=["W-VARIANT"], note="look- needs a slug after it; storyboard alone is allowed, look alone isn't.")
+    b = base(); b.image("view", png(180, 320, "capital look"), "look-Evening", derivedFrom=[b.input("portrait"), b.input("face")])
+    warn("W-VARIANT-view-family-not-slug", b, codes=["W-VARIANT"], note="Evening isn't a slug: slugs are lowercase.")
+
+    # §5.1, DF-88: the manifest's displayName is a copy, and the member's wins.
+    b = base(); b.extra_top = {"displayName": "Pell"}
+    warn("W-DISPLAY-NAME", b, members=[{**member(b), "displayName": "Miss Arden"}],
+         note="The manifest says Pell and the member says Miss Arden. The member's wins.")
+
+    # §16.2: a location bundle no LOCATIONS.md entry points at.
+    loc = location_bundle(); stray = location_bundle("DRY-DOCK")
+    fixture("warnings", "W-ORPHAN-location", [loc, stray], [], ["W-ORPHAN"], locations=[location_entry(loc)],
+            note="DRY-DOCK is in locations/ beside LOCATIONS.md, and no entry points at it.")
 
 
 # --- data --------------------------------------------------------------------

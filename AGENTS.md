@@ -63,7 +63,9 @@ Version 2.0.0, released 2026-11-12. Written: the specification (`docs/DOSSIER-FO
 data files (`data/`), the conformance fixtures (`examples/`) and the page template
 (`template/`, version 0.1.1), whose rules §11 makes normative. The fixture pages are
 filled from that template. [REQUIREMENTS.md](REQUIREMENTS.md) is what the standard must
-say (DF-1 to DF-78), with the deliverables and the open questions.
+say (DF-1 to DF-95), with the deliverables and the open questions. 2.1.0, on
+`development` and not yet released, adds location bundles (§16) and the fields
+synchronized-worlds' bundles use (DF-79 to DF-95).
 
 ## Rules for working here
 
