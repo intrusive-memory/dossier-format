@@ -1,0 +1,75 @@
+{
+  "assets": [
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "kind": "description",
+      "path": "CHARACTER.md",
+      "provenance": {
+        "provider": "manual"
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "derivedFrom": [
+        {
+          "path": "images/portrait-d99c8344.png",
+          "role": "portrait",
+          "sha256": "d99c8344750b19eb1608c80501603a2ce7a09b6aab1ae24521145bdfc053bee4"
+        }
+      ],
+      "kind": "face",
+      "path": "images/face-c6f88728.png",
+      "provenance": {
+        "artStyle": "flat placeholder shapes",
+        "box": {
+          "height": 100,
+          "width": 80,
+          "x": 50,
+          "y": 60
+        },
+        "engine": "fixture",
+        "provider": "personaje"
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "kind": "portrait",
+      "path": "images/portrait-d99c8344.png",
+      "provenance": {
+        "artStyle": "flat placeholder shapes",
+        "engine": "fixture",
+        "provider": "vinetas"
+      },
+      "status": "selected"
+    }
+  ],
+  "character": "THE PURSER",
+  "displayName": "the purser",
+  "files": [
+    {
+      "path": "CHARACTER.md",
+      "sha256": "17c5126fbfcc0130ca19c4b1eebbd75f3213da5e6a70bc581677755b5ec34d08",
+      "sizeBytes": 431
+    },
+    {
+      "path": "images/face-c6f88728.png",
+      "sha256": "c6f8872883ecd882a62718a04021dd890b601f9842c8ffdb10519f889d9c99e7",
+      "sizeBytes": 704
+    },
+    {
+      "path": "images/portrait-d99c8344.png",
+      "sha256": "d99c8344750b19eb1608c80501603a2ce7a09b6aab1ae24521145bdfc053bee4",
+      "sizeBytes": 939
+    }
+  ],
+  "generator": {
+    "name": "dossier-format fixtures",
+    "version": "1"
+  },
+  "manifestChecksum": "a6b8ad8b4ac2b0f644b11e10a4bbcb0dcfc1bc95ff96e57c4e0c9fa15c8058ce",
+  "manifestVersion": 2,
+  "role": "background",
+  "updatedAt": "2026-10-31T12:00:00Z"
+}

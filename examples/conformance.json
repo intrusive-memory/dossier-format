@@ -2,6 +2,8 @@
   "formatVersion": 2,
   "templateVersion": "0.1.1",
   "templateSha256": "8819dcefe82728a9a407707195af5277527a65e842db63a831587d062ffad76c",
+  "locationsTemplateVersion": "0.1.0",
+  "locationsTemplateSha256": "effb622f4b8cb19f9b64363b74f341c7df1300bccddb043f8b86ac1d2c45c90f",
   "fixtures": [
     {
       "path": "valid/complete-lead",
@@ -243,6 +245,112 @@
       "complete": true,
       "missingRequired": [],
       "note": "10,000,000 bytes, nearly all of it a comment."
+    },
+    {
+      "path": "valid/location",
+      "bundle": "locations/HARBOR-LIGHT.dossier",
+      "verdict": "valid",
+      "codes": [],
+      "mayAlso": [],
+      "note": "§16.5's worked example. dossierType location; the name in character; a location record whose views are dock and lamp-room; LOCATION.md; two dock plates (one candidate) and a lamp-room plate painted from the dock plate (role plate:dock), all 320×180, within 1% of 16:9; an imported 200×100 JPEG storyboard-design view, which isn't W-SHAPE. No completeness: a location has no tier. A LOCATIONS.md entry with no manifest has no bundle. The CAST.md member's bundle is in characters/ and isn't under test."
+    },
+    {
+      "path": "valid/locations-no-key",
+      "bundle": "characters/THE KEEPER.dossier",
+      "verdict": "valid",
+      "codes": [],
+      "mayAlso": [],
+      "note": "PROJECT.md has no locations key, so the project has no locations: LOCATIONS.md isn't read and locations/ isn't listed. HARBOR-LIGHT and DRY-DOCK are neither locations nor orphans, and a validator reports nothing about them."
+    },
+    {
+      "path": "valid/locations-no-project",
+      "bundle": "characters/THE KEEPER.dossier",
+      "verdict": "valid",
+      "codes": [],
+      "mayAlso": [],
+      "note": "There is no PROJECT.md, so the project has no locations, as with no key. LOCATIONS.md and locations/ are ordinary files."
+    },
+    {
+      "path": "valid/locations-index-elsewhere",
+      "bundle": "world/locations/HARBOR-LIGHT.dossier",
+      "verdict": "valid",
+      "codes": [],
+      "mayAlso": [],
+      "note": "PROJECT.md says locations: world/PLACES.md. The index may have any name. Its entry's manifest is relative to world/, and orphans are looked for in world/locations/, so DRY-DOCK in the project's own locations/ isn't listed and isn't W-ORPHAN."
+    },
+    {
+      "path": "valid/locations-page-current",
+      "bundle": "locations/HARBOR-LIGHT.dossier",
+      "verdict": "valid",
+      "codes": [],
+      "mayAlso": [],
+      "locationsPage": {
+        "key": "95898bc7b519d3d5437542fe6d66f8666c7738cb22d1c49ad3d0bd49914c85a6",
+        "hit": true
+      },
+      "note": "§16.6's worked example. The store beside LOCATIONS.md holds the page for this key, an older page and a temporary file left by a write. A viewer shows the first and writes nothing; a validator reports none of them. The page has three sections in index order: HARBOR-LIGHT (LOCATION.md, the dock and lamp-room plates in the order of location.views, the storyboard-design view), THE OLD QUAY (no bundle yet) and SALT-STORE."
+    },
+    {
+      "path": "valid/locations-page-out-of-date",
+      "bundle": "locations/HARBOR-LIGHT.dossier",
+      "verdict": "valid",
+      "codes": [],
+      "mayAlso": [],
+      "locationsPage": {
+        "key": "95898bc7b519d3d5437542fe6d66f8666c7738cb22d1c49ad3d0bd49914c85a6",
+        "hit": false
+      },
+      "note": "The store holds only a page for another key. A viewer builds this key's page; after it is stored, .gitignore and that page are all the store holds."
+    },
+    {
+      "path": "valid/view-families",
+      "bundle": "characters/THE ARCHIVIST.dossier",
+      "verdict": "valid",
+      "codes": [],
+      "mayAlso": [],
+      "complete": true,
+      "missingRequired": [],
+      "note": "Views storyboard and storyboard-ink-stained (imported JPEGs, square and 16:9, so not W-SHAPE), and look-evening and look-clockwork-body (generated, 9:16). None is W-VARIANT. The imported views record copiedFromSha256, equal to their files hash, and storyboardLabel, which nothing reads."
+    },
+    {
+      "path": "valid/display-name",
+      "bundle": "characters/CAPTAIN ODDLEY.dossier",
+      "verdict": "valid",
+      "codes": [],
+      "mayAlso": [],
+      "complete": true,
+      "missingRequired": [],
+      "note": "The manifest's displayName equals the member's, so no W-DISPLAY-NAME. SECOND MATE's displayName has no dossier to compare with."
+    },
+    {
+      "path": "valid/display-name-no-member-copy",
+      "bundle": "characters/THE PURSER.dossier",
+      "verdict": "valid",
+      "codes": [],
+      "mayAlso": [],
+      "complete": true,
+      "missingRequired": [],
+      "note": "The manifest has a displayName and the member has none: nothing to compare, so no W-DISPLAY-NAME. A reader uses the manifest's."
+    },
+    {
+      "path": "valid/hosted-voice-provenance",
+      "bundle": "characters/THE SIGNALMAN.dossier",
+      "verdict": "valid",
+      "codes": [],
+      "mayAlso": [],
+      "complete": true,
+      "missingRequired": [],
+      "note": "Both samples record voiceId, equal to their voice input's, and creditsUsed (0 for a free result). Both went through an effect chain after generation (postProcess); the dry originals are outside the bundle and aren't in the fixture. Neither is stale: processing doesn't change staleness."
+    },
+    {
+      "path": "valid/hosted-voice-non-ascii-provider",
+      "bundle": "characters/THE FERRYMAN.dossier",
+      "verdict": "valid",
+      "codes": [],
+      "mayAlso": [],
+      "complete": true,
+      "missingRequired": [],
+      "note": "The member's key is VÖX; Unicode's full lowercase mapping gives vöx, which is the records' provider, so they are current and lowercase."
     },
     {
       "path": "errors/E-VERSION",
@@ -701,6 +809,194 @@
         "W-STALE"
       ],
       "note": "The voice records' provider is VocalSmith, not vocalsmith."
+    },
+    {
+      "path": "errors/E-SCHEMA-voice-input-provider-non-ascii-case",
+      "bundle": "characters/PELL ARDEN.dossier",
+      "verdict": "invalid",
+      "codes": [
+        "E-SCHEMA",
+        "W-STALE"
+      ],
+      "mayAlso": [],
+      "note": "The records' provider is vÖx. Lowercasing changes it (Ö to ö), so it isn't lowercase, and it matches no normal-form key (vöx), so both samples are stale (§7, DF-94)."
+    },
+    {
+      "path": "errors/E-SCHEMA-voice-input-malformed",
+      "bundle": "characters/PELL ARDEN.dossier",
+      "verdict": "invalid",
+      "codes": [
+        "E-SCHEMA",
+        "W-STALE"
+      ],
+      "mayAlso": [],
+      "note": "The voice records have no voiceId. Each matches no element of the member's voices.vocalsmith, so both samples are stale, and the voice isn't hosted."
+    },
+    {
+      "path": "errors/E-SCHEMA-location-kind",
+      "bundle": "locations/HARBOR-LIGHT.dossier",
+      "verdict": "invalid",
+      "codes": [
+        "E-SCHEMA"
+      ],
+      "mayAlso": [
+        "W-STALE"
+      ],
+      "note": "A portrait in a location bundle. Its provenance.artStyle has no front-matter artStyle to match, which a validator may also report as W-STALE."
+    },
+    {
+      "path": "errors/E-SCHEMA-location-view-not-imported",
+      "bundle": "locations/HARBOR-LIGHT.dossier",
+      "verdict": "invalid",
+      "codes": [
+        "E-SCHEMA"
+      ],
+      "mayAlso": [],
+      "note": "A view in a location bundle with no copiedFrom."
+    },
+    {
+      "path": "errors/E-SCHEMA-plate-variant",
+      "bundle": "locations/HARBOR-LIGHT.dossier",
+      "verdict": "invalid",
+      "codes": [
+        "E-SCHEMA"
+      ],
+      "mayAlso": [],
+      "note": "A plate's variant, and its views key, must be a lowercase slug: Upper-Deck isn't."
+    },
+    {
+      "path": "errors/E-SCHEMA-plate-in-character",
+      "bundle": "characters/PELL ARDEN.dossier",
+      "verdict": "invalid",
+      "codes": [
+        "E-SCHEMA"
+      ],
+      "mayAlso": [],
+      "note": "A plate in a character bundle."
+    },
+    {
+      "path": "errors/E-SCHEMA-copied-from-sha256-alone",
+      "bundle": "characters/PELL ARDEN.dossier",
+      "verdict": "invalid",
+      "codes": [
+        "E-SCHEMA"
+      ],
+      "mayAlso": [],
+      "note": "The portrait has copiedFromSha256 and no copiedFrom."
+    },
+    {
+      "path": "errors/E-SCHEMA-post-process-no-chain",
+      "bundle": "characters/PELL ARDEN.dossier",
+      "verdict": "invalid",
+      "codes": [
+        "E-SCHEMA"
+      ],
+      "mayAlso": [],
+      "note": "postProcess has no chain."
+    },
+    {
+      "path": "errors/E-TYPE-MISMATCH",
+      "bundle": "locations/HARBOR-LIGHT.dossier",
+      "verdict": "invalid",
+      "codes": [
+        "E-TYPE-MISMATCH"
+      ],
+      "mayAlso": [],
+      "note": "A CAST.md member points at a location bundle. There is no LOCATIONS.md."
+    },
+    {
+      "path": "errors/E-TYPE-MISMATCH-location-entry",
+      "bundle": "characters/PELL ARDEN.dossier",
+      "verdict": "invalid",
+      "codes": [
+        "E-TYPE-MISMATCH"
+      ],
+      "mayAlso": [
+        "W-ORPHAN"
+      ],
+      "note": "A LOCATIONS.md entry points at a character bundle, which no CAST.md member points at."
+    },
+    {
+      "path": "errors/E-CAST-locations-no-location",
+      "bundle": "locations/HARBOR-LIGHT.dossier",
+      "verdict": "invalid",
+      "codes": [
+        "E-CAST"
+      ],
+      "mayAlso": [
+        "W-ORPHAN"
+      ],
+      "note": "An entry of LOCATIONS.md has no location key."
+    },
+    {
+      "path": "errors/E-CAST-project-yaml",
+      "bundle": "locations/HARBOR-LIGHT.dossier",
+      "verdict": "invalid",
+      "codes": [
+        "E-CAST"
+      ],
+      "mayAlso": [],
+      "note": "PROJECT.md's front matter doesn't parse as YAML, so its locations are unknown. Nothing is listed, so HARBOR-LIGHT isn't W-ORPHAN."
+    },
+    {
+      "path": "errors/E-CAST-project-locations-type",
+      "bundle": "locations/HARBOR-LIGHT.dossier",
+      "verdict": "invalid",
+      "codes": [
+        "E-CAST"
+      ],
+      "mayAlso": [],
+      "note": "PROJECT.md's locations is a list, not a path."
+    },
+    {
+      "path": "errors/E-CAST-project-locations-absolute",
+      "bundle": "locations/HARBOR-LIGHT.dossier",
+      "verdict": "invalid",
+      "codes": [
+        "E-CAST"
+      ],
+      "mayAlso": [],
+      "note": "PROJECT.md's locations starts with /."
+    },
+    {
+      "path": "errors/E-CAST-project-locations-outside",
+      "bundle": "locations/HARBOR-LIGHT.dossier",
+      "verdict": "invalid",
+      "codes": [
+        "E-CAST"
+      ],
+      "mayAlso": [],
+      "note": "PROJECT.md's locations, ../LOCATIONS.md, leaves the project directory."
+    },
+    {
+      "path": "errors/E-CAST-locations-yaml",
+      "bundle": "locations/HARBOR-LIGHT.dossier",
+      "verdict": "invalid",
+      "codes": [
+        "E-CAST"
+      ],
+      "mayAlso": [],
+      "note": "The file PROJECT.md's locations reaches has front matter that doesn't parse as YAML."
+    },
+    {
+      "path": "errors/E-CAST-locations-type",
+      "bundle": "locations/HARBOR-LIGHT.dossier",
+      "verdict": "invalid",
+      "codes": [
+        "E-CAST"
+      ],
+      "mayAlso": [],
+      "note": "PROJECT.md's locations reaches CAST.md, whose type is cast, not locations."
+    },
+    {
+      "path": "errors/E-NAME-MISMATCH-location",
+      "bundle": "locations/HARBOR-LIGHT.dossier",
+      "verdict": "invalid",
+      "codes": [
+        "E-NAME-MISMATCH"
+      ],
+      "mayAlso": [],
+      "note": "LOCATION.md's location is HARBOR LIGHT; the bundle is HARBOR-LIGHT."
     },
     {
       "path": "warnings/W-UNCLASSIFIED",
@@ -1323,6 +1619,106 @@
         "W-UNCLASSIFIED"
       ],
       "note": "Two selected portraits. E-MULTI-SELECTED applies only to version 2 (Appendix A)."
+    },
+    {
+      "path": "warnings/W-SHAPE-plate",
+      "bundle": "locations/HARBOR-LIGHT.dossier",
+      "verdict": "warnings",
+      "codes": [
+        "W-SHAPE"
+      ],
+      "mayAlso": [],
+      "note": "The selected lamp-room plate is 240×180, 4:3."
+    },
+    {
+      "path": "warnings/W-SHAPE-imported-portrait",
+      "bundle": "characters/PELL ARDEN.dossier",
+      "verdict": "warnings",
+      "codes": [
+        "W-SHAPE"
+      ],
+      "mayAlso": [],
+      "complete": true,
+      "missingRequired": [],
+      "note": "The portrait has copiedFrom and is square. Unlike a face, view or expression, an imported portrait is still checked for shape."
+    },
+    {
+      "path": "warnings/W-VARIANT-view-one-off",
+      "bundle": "characters/PELL ARDEN.dossier",
+      "verdict": "warnings",
+      "codes": [
+        "W-VARIANT"
+      ],
+      "mayAlso": [],
+      "complete": true,
+      "missingRequired": [],
+      "note": "brass-armor is in no family: a one-off look is look-brass-armor."
+    },
+    {
+      "path": "warnings/W-VARIANT-view-bare-look",
+      "bundle": "characters/PELL ARDEN.dossier",
+      "verdict": "warnings",
+      "codes": [
+        "W-VARIANT"
+      ],
+      "mayAlso": [],
+      "complete": true,
+      "missingRequired": [],
+      "note": "look- needs a slug after it; storyboard alone is allowed, look alone isn't."
+    },
+    {
+      "path": "warnings/W-VARIANT-view-family-not-slug",
+      "bundle": "characters/PELL ARDEN.dossier",
+      "verdict": "warnings",
+      "codes": [
+        "W-VARIANT"
+      ],
+      "mayAlso": [],
+      "complete": true,
+      "missingRequired": [],
+      "note": "Evening isn't a slug: slugs are lowercase."
+    },
+    {
+      "path": "warnings/W-DISPLAY-NAME",
+      "bundle": "characters/PELL ARDEN.dossier",
+      "verdict": "warnings",
+      "codes": [
+        "W-DISPLAY-NAME"
+      ],
+      "mayAlso": [],
+      "complete": true,
+      "missingRequired": [],
+      "note": "The manifest says Pell and the member says Miss Arden. The member's wins."
+    },
+    {
+      "path": "warnings/W-ORPHAN-location",
+      "bundle": "locations/HARBOR-LIGHT.dossier",
+      "verdict": "warnings",
+      "codes": [
+        "W-ORPHAN"
+      ],
+      "mayAlso": [],
+      "note": "DRY-DOCK is in locations/ beside LOCATIONS.md, and no entry points at it."
+    },
+    {
+      "path": "warnings/W-POINTER-locations-missing",
+      "bundle": "locations/HARBOR-LIGHT.dossier",
+      "verdict": "warnings",
+      "codes": [
+        "W-POINTER"
+      ],
+      "mayAlso": [],
+      "note": "PROJECT.md says locations: LOCATIONS.md, and there is no such file. The project has no locations, so locations/ isn't listed and HARBOR-LIGHT isn't W-ORPHAN."
+    },
+    {
+      "path": "warnings/W-POINTER-locations-directory",
+      "bundle": "locations/HARBOR-LIGHT.dossier",
+      "verdict": "warnings",
+      "codes": [
+        "W-POINTER"
+      ],
+      "mayAlso": [],
+      "note": "PROJECT.md's locations reaches a directory, not a file."
     }
   ]
 }

@@ -8,8 +8,11 @@ updated: 2026-11-12
 Every character here is invented. Images are flat shapes, `.vox` embeddings are
 placeholders that can't produce a voice, and samples are 0.2 seconds of silence.
 
-Each fixture is a small project: a `CAST.md` and a `characters/` directory.
-Validate it from its `CAST.md`.
+Each fixture is a small project: a `CAST.md` and a `characters/` directory, and for a
+location (§16) a `PROJECT.md` whose `locations` key names the index, usually `LOCATIONS.md`
+with a `locations/` directory beside it. Validate it from its `CAST.md` and from its
+`PROJECT.md` when it has one (§16.2). A fixture's `PROJECT.md` has the four keys SwiftProyecto
+requires and the two the format reads; the rest of that file is SwiftProyecto's.
 
 | Path | Contents |
 |------|----------|
@@ -31,13 +34,15 @@ Validate it from its `CAST.md`.
 | `complete`, `missingRequired` | The completeness result against the tier (§8.3). Absent where it isn't asserted. |
 | `updateStatus` | The update status of `bundle` (§5.7): `at` is the time to use as `now`, and `updating` is the answer. Absent where it isn't asserted. |
 | `preview` | The preview of `bundle` (§11.1): `key` is its key, against the template in `templateSha256`, and `hit` says whether `.preview/<key>.html` is already stored. Absent where it isn't asserted. |
+| `locationsPage` | The project's LOCATIONS page (§16.6): `key` is its key, against the template in `locationsTemplateSha256`, and `hit` says whether `.locations-page/<key>.html` is already stored beside the index. Absent where it isn't asserted. |
 | `note` | What the fixture is testing, where the name doesn't say. |
 
 ## Limits
 
 - **The pages are the shipped template, filled.** `templateVersion` and
   `templateSha256` in `conformance.json` are `template/VERSION.json`'s: treat that as
-  the current template. The tool fills only what these pages need, so its banner is
+  the current template. `locationsTemplateVersion` and `locationsTemplateSha256` are
+  `template-locations/VERSION.json`'s, the current LOCATIONS page template. The tool fills only what these pages need, so its banner is
   always empty and it refuses a footnote that isn't both cited and defined. A page that
   tests a fault has it added afterwards: `W-PAGE-EXTERNAL` markup goes before the
   record, `W-PAGE-SIZE` and `valid/page-at-size-limit` get a comment after `</html>`,
@@ -72,6 +77,25 @@ Validate it from its `CAST.md`.
   `valid/hosted-voice-supporting` and `warnings/W-INCOMPLETE-hosted-no-neutral` the samples
   say nothing about the voice they were made with. The template change is deferred. The `copiedFrom` path in `valid/imported-view` names a file
   that isn't in the fixture, since nothing reads it.
+- **Files outside the bundle aren't in the fixtures.** The `copiedFrom` and `source` paths
+  of the imported images in `valid/view-families` and `valid/location`, and the `dry`
+  paths of `valid/hosted-voice-provenance`'s `postProcess`, name files that aren't there,
+  since nothing reads them.
+- **Locations have no page of their own and no completeness** (§16.4, §16.6). The project's
+  LOCATIONS page is asserted by key only, like a preview: `valid/locations-page-current`
+  stores it, with an older page and a temporary file that clean-up would remove, and
+  `valid/locations-page-out-of-date` stores only an older one. The stored page is
+  `template-locations/example/LOCATIONS.html`, byte for byte. Each store's `.gitignore` holds
+  `*`, so a new file in one needs `git add -f`. What a host shows (§16.7) isn't asserted.
+- **Project-level findings name a bundle anyway.** `conformance.json` has one bundle per
+  fixture, so a fixture whose finding is about `PROJECT.md` or the locations index
+  (`E-CAST-project-*`, `E-CAST-locations-*`, `W-POINTER-locations-*`) names the location
+  bundle that the broken discovery leaves unread, and `valid/locations-no-key` and
+  `valid/locations-no-project` name a character bundle, since the project has no locations.
+- **The provider pattern is generated.** `tools/build_provider_pattern.py` writes the
+  `voice` record's `provider` pattern in `schemas/manifest-v2.schema.json` from Unicode 17.0
+  and checks it with `--check`. `valid/hosted-voice-non-ascii-provider` and
+  `errors/E-SCHEMA-voice-input-provider-non-ascii-case` test a non-ASCII capital.
 - **Face detection has no fixture.** Images are shapes, not faces, so the face
   crops use `provenance.box`. §8.5's worked example is the portrait and box
   these fixtures use.

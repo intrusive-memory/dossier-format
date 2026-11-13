@@ -22,6 +22,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 TEMPLATE = ROOT / "template"
+LOCATIONS_TEMPLATE = ROOT / "template-locations"
 
 ATTRIBUTES = {"src", "srcset", "href", "xlink:href", "poster", "data", "action", "formaction", "background"}
 VOID = {"area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "source", "track", "wbr"}
@@ -30,6 +31,8 @@ ELEMENT_FOR_KIND = {"text": "dossier-field", "longText": "dossier-field", "list"
 SKELETON_PLACEHOLDERS = {"lang", "character", "template.version", "template.sha256", "include:fonts.css",
                          "include:dossier.css", "include:dossier.js", "page.before", "tab.links", "tab.panels",
                          "page.after", "record"}
+LOCATIONS_PLACEHOLDERS = {"template.version", "template.sha256", "key", "title", "include:fonts.css",
+                          "include:dossier.css", "include:locations.css", "project", "count", "locations"}
 REQUEST_APIS = ("fetch(", "XMLHttpRequest", "WebSocket", "EventSource", "sendBeacon", "import(", "importScripts", "new Worker")
 
 failures = []
@@ -405,6 +408,61 @@ def check_template_files():
         print(f"  {command[0]} --check: {result.stdout.strip()}")
 
 
+def check_locations_template():
+    """template-locations/: its skeleton, its stylesheet, and its example, which is a fixture's stored page."""
+    skeleton = (LOCATIONS_TEMPLATE / "skeleton.html").read_text(encoding="utf-8")
+    placeholders = set(re.findall(r"\{\{([^{}]+)\}\}", skeleton))
+    check(placeholders == LOCATIONS_PLACEHOLDERS, f"locations skeleton placeholders differ: {sorted(placeholders ^ LOCATIONS_PLACEHOLDERS)}")
+    css = (LOCATIONS_TEMPLATE / "locations.css").read_text(encoding="utf-8")
+    check("</style" not in css.lower(), "locations.css can't sit inside a style element")
+    check(not css_references(css), "locations.css references a file")
+    check("<script" not in skeleton + (LOCATIONS_TEMPLATE / "fragments.html").read_text(encoding="utf-8"), "the LOCATIONS page has no script")
+    version = json.loads((LOCATIONS_TEMPLATE / "VERSION.json").read_text(encoding="utf-8"))
+    copies = json.loads((LOCATIONS_TEMPLATE / "page-copies.json").read_text(encoding="utf-8"))["sizes"]
+    conformance = json.loads((ROOT / "examples/conformance.json").read_text(encoding="utf-8"))
+    check(conformance.get("locationsTemplateSha256") == version["sha256"], "conformance.json's locationsTemplateSha256 isn't template-locations/VERSION.json's")
+    examples = sorted((LOCATIONS_TEMPLATE / "example").glob("*.html"))
+    check(len(examples) == 1, f"template-locations/example/ holds {len(examples)} pages")
+    for path in examples:
+        stored = [f for f in conformance["fixtures"] if f.get("locationsPage", {}).get("hit")]
+        sources = [ROOT / "examples" / f["path"] / ".locations-page" / f"{f['locationsPage']['key']}.html" for f in stored]
+        check(any(source.is_file() and source.read_bytes() == path.read_bytes() for source in sources),
+              f"{path.name} isn't the stored page of a fixture: copy it again")
+        text = path.read_text(encoding="utf-8")
+        page = parse(text)
+        external = external_references(page)
+        check(not external, f"{path.name}: references outside the page: {external[:5]}")
+        metas = [attrs.get("content") for tag, attrs, _ in page.elements if tag == "meta" and attrs.get("name") == "dossier-locations-template"]
+        check(metas == [f"{version['version']} {version['sha256']}"], f"dossier-locations-template meta is {metas}")
+        for name, folder in (("fonts.css", TEMPLATE), ("dossier.css", TEMPLATE), ("locations.css", LOCATIONS_TEMPLATE)):
+            check((folder / name).read_text(encoding="utf-8") in page.styles, f"{path.name} doesn't carry {folder.name}/{name} as it is")
+        check(not page.scripts, f"{path.name} has a script")
+        check("{{" not in "".join(page.markup_text), f"{path.name}: a placeholder was left in the page's text")
+        images = 0
+        parents = []
+        for tag, attrs, _ in page.elements:
+            if tag == "div" and "location-plates" in (attrs.get("class") or ""):
+                parents.append("plate")
+            if tag == "div" and "location-views" in (attrs.get("class") or ""):
+                parents.append("view")
+            if tag != "img":
+                continue
+            images += 1
+            src = attrs.get("src", "")
+            if not check(src.startswith("data:image/jpeg;base64,"), f"{path.name}: an image isn't a JPEG data: URI"):
+                continue
+            size = jpeg_size(base64.b64decode(src.split(",", 1)[1]))
+            box = copies[parents[-1]] if parents else None
+            check(box is not None, f"{path.name}: an image outside plates and views")
+            if box and box["fit"] == "cover":
+                check(size == (box["width"], box["height"]), f"{path.name}: a plate is {size}")
+            elif box:
+                check(size[0] <= box["width"] and size[1] <= box["height"] and (size[0] == box["width"] or size[1] == box["height"]),
+                      f"{path.name}: a view is {size}")
+            check(attrs.get("width") == str(size[0]) and attrs.get("height") == str(size[1]), f"{path.name}: width and height attributes")
+        print(f"  template-locations {version['version']} {version['sha256']}: {path.name}, {path.stat().st_size} bytes, {images} images")
+
+
 def main():
     pages = [Path(arg) for arg in sys.argv[1:]] or sorted((TEMPLATE / "example").glob("*-dossier.html"))
     check(bool(pages), "no page to check")
@@ -412,6 +470,7 @@ def main():
     print(f"template {version['version']} {version['sha256']}")
     check_template_files()
     tested = check_rule_against_fixtures()
+    check_locations_template()
     print(f"  W-PAGE-EXTERNAL rule against fixtures: {tested} pages")
     for path in pages:
         result = check_page(path, version)
