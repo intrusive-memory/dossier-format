@@ -5,7 +5,7 @@ updated: 2026-11-12
 
 # Changelog
 
-## Format 2.1.0 (unreleased)
+## Format 2.1.0 (2026-11-12)
 
 Template 0.1.1, unchanged. New: the LOCATIONS page template, `template-locations/`, version
 0.1.0. A minor release: everything below is new and optional, so
