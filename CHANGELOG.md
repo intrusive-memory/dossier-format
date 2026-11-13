@@ -5,6 +5,141 @@ updated: 2026-11-12
 
 # Changelog
 
+## Format 2.1.0 (2026-11-12)
+
+Template 0.1.1, unchanged. New: the LOCATIONS page template, `template-locations/`, version
+0.1.0. A minor release: everything below is new and optional, so
+`manifestVersion` stays 2 and no 2.0.0 fixture's result changes. It standardizes the shapes
+a production's bundles already use that 2.0.0 didn't define: location bundles, two view
+variant families, imported images of any shape and in JPEG, and six fields the schema let
+through untyped. Keys that 2.0.0 left undefined are now typed, so a 2.0.0 bundle that used
+one of these names with another type would now fail; no such bundle is known. Two 2.0.0
+gaps are closed too.
+
+- **§16, §3, §5.1, DF-79 to DF-84: location bundles.** `dossierType: "location"` makes a
+  bundle a location: a place, holding its description and its **plates**, the empty sets a
+  scene's people are painted onto, one per camera setup. Absent or `character`, a bundle is a
+  character bundle as before; another value is reserved and read as `character`. A location
+  is found from **`LOCATIONS.md`**, a second index beside `CAST.md` (`type: locations`,
+  `schemaVersion: 1`, `locations: [{location, manifest?}]`, schema
+  `schemas/locations.schema.json`), with orphans looked for in `locations/`. Its name is
+  canonical and is held in the manifest's `character`, so the manifest keeps its 2.0.0 shape.
+  *(The index was first found beside `CAST.md`; see the next item.)*
+  Its description is **`LOCATION.md`** (`type: location`, `location`, optional `theme`; a free
+  body, `## Blocking` and `## Views` recommended). It holds `description`, `plate`, `view`
+  (always imported) and `sourcePhoto`, and any other kind is `E-SCHEMA`. A **plate** has a
+  required lowercase slug `variant` naming its view, is 16:9, lives at
+  `images/plate-<variant>-<sha8>.png`, isn't derived and is never stale. The optional
+  **`location`** object records the location's `name`, `description`, `theme` and the
+  producing tool's recipe per view. A location has no tier, no completeness, no member, and
+  no page or preview of its own. `plate` in a character bundle is still `E-SCHEMA`.
+- **§16.2, DF-80, DF-96: `PROJECT.md` declares the locations** (Q9, decided by the user on
+  2026-11-12). Location discovery starts at `PROJECT.md`'s front-matter key `locations`, a
+  path relative to `PROJECT.md` naming the index, `LOCATIONS.md` by convention, and only there.
+  `PROJECT.md` belongs to SwiftProyecto; the format reads `locations` and `title` and writes
+  neither. No `PROJECT.md`, no front matter or no key: the project has no locations, and
+  nothing is read, listed or reported. A `PROJECT.md` that can't be read, or a `locations`
+  that isn't a valid index path (empty, starting with `/`, or leaving the project directory):
+  `E-CAST`. A path that reaches no file, or a directory: `W-POINTER`, and no locations. An
+  index that can't be read, now including one whose `type` isn't `locations`: `E-CAST`.
+  Orphans are looked for in `locations/` beside the index, and only once it has been read.
+  Character discovery never reads `PROJECT.md`, so no character bundle's result changes.
+  Project-relative paths are now relative to the *project directory*: the directory holding
+  `CAST.md` as before, or the one holding `PROJECT.md` when there is no `CAST.md`.
+- **§16.6, §16.7, DF-84, DF-97 to DF-99: one synthesized LOCATIONS page** (Q10, decided by
+  the user on 2026-11-12). A viewer builds one self-contained page showing every entry of the
+  index, in its order: the name, `LOCATION.md`'s body (with tables, code spans and its
+  footnotes as sources), the selected plates as JPEG 1280×720 copies in `location.views`
+  order, and the selected views fitted inside 1280×720. It is derived, in no bundle, and not
+  validated. It is built on demand and cached as a preview is, in `.locations-page/<key>.html`
+  beside the index, under a key over the index's bytes, `PROJECT.md`'s title, each entry's
+  `manifest.json` and the template's hash. A host shows it when the index or `locations/` is
+  selected, and at the location's section (`#location-<sha8 of the name>`) when a location
+  bundle is. **`template-locations/`** is its template, versioned and hashed apart from
+  `template/` so that neither makes the other's pages stale; it carries `template/dossier.css`
+  and `template/fonts.css` unchanged, and its hash covers them.
+- **New codes.** `E-TYPE-MISMATCH`: a `CAST.md` member points at a location bundle, or a
+  `LOCATIONS.md` entry at a character bundle. `W-DISPLAY-NAME`: below. `E-CAST` also covers a
+  `PROJECT.md` or a locations index that can't be read, `W-POINTER` a `locations` key that
+  reaches no file, and `E-NAME-MISMATCH` and `W-ORPHAN` cover locations.
+- **§8.1, DF-85: view variant families.** `storyboard` and `storyboard-<slug>` (a storyboard's
+  reference image of the character) and `look-<slug>` (the character in another look, framed
+  like the portrait) aren't `W-VARIANT`. A slug is lowercase ASCII letters and digits joined by
+  single hyphens. `look` alone, a family name with no slug, and anything else still is: the
+  vocabulary is closed, and a one-off is a look (`look-second-body`).
+- **§8.1, DF-86: an imported image isn't checked for shape.** A `face`, `view`, `expression` or
+  `plate` with `copiedFrom` is never `W-SHAPE`, as DF-77 already makes it never stale. A
+  portrait with `copiedFrom` keeps its shape check, as it keeps its `artStyle` check.
+- **§4, DF-87: an imported image keeps its format,** PNG (`.png`) or JPEG (`.jpg`), since
+  re-encoding it would change the bytes `copiedFrom` says were brought in unchanged. Every
+  other v2 image is still PNG.
+- **§5.1, DF-88: `displayName`,** an optional top-level string: how people name the character
+  in prose, captions and prompts. The `CAST.md` member's `displayName` (now in the list of
+  `CAST.md` fields read) wins, and the manifest's is a copy; when both are present and differ,
+  `W-DISPLAY-NAME`. Not on the page yet.
+- **§5.4, DF-89: `storyboardLabel`,** an optional asset string: the phrase a storyboard tool
+  uses for the image when it sends it as a reference. Display text that nothing reads.
+- **§6, DF-90: `provenance.copiedFromSha256`,** the hash of the source file when it was copied,
+  valid only with `copiedFrom` (`E-SCHEMA` otherwise). *Migration:* a writer that recorded it as
+  `provenance.sha256` moves it. Until then `provenance.sha256` is an unknown key, kept and
+  read as nothing.
+- **§6, DF-91: `provenance.voiceId`** (the hosted voice's identifier as sent, whether it came
+  from the member or from a `.vox`) **and `provenance.creditsUsed`** (what the service charged,
+  in its own units, 0 or more). Both are informational: staleness reads `derivedFrom`.
+- **§6, DF-92: `provenance.postProcess`** records processing applied after generation:
+  `{tool: {name, version?}, chain, dry?, notes?}`. `chain` is the tool's identifier for the
+  processing, and `dry` the project-relative path of the unprocessed original, kept outside
+  the bundle. The file in the bundle is the processed one, and staleness is unchanged.
+  *Migration:* a writer that recorded `provenance.machineVoice: {chain, dry, tool}` moves it
+  to `postProcess` with `tool` as `{"name": ...}`.
+- **§6, DF-95: project-relative sources.** `provenance.source` is allowed on any kind (on
+  another kind than `voiceSample`, the project-relative path the content came from), and a
+  `references` entry may carry `source`, the project-relative path of an image sent that isn't
+  in the bundle. `plate:<variant>` joins the reference roles.
+- **§7, DF-93: lowercase means Unicode's full default lowercase mapping,** in the member's
+  normal form and in a `voice` record's `provider`. The 2.0.0 schema's `^[^A-Z]+$` rejected only
+  ASCII capitals, so it let `vÖx` through, which the text already ruled out; the schema now
+  agrees with the text. The pattern excludes every code point that lowercasing changes in
+  Unicode 17.0, generated and checked by `tools/build_provider_pattern.py`; for a code point
+  assigned later, the text decides.
+- **§7, DF-94: a malformed `voice` record is stale.** One with no `provider` or `voiceId`,
+  either not a non-empty string, or a `provider` that isn't lowercase is `E-SCHEMA` and, when
+  there is a member, `W-STALE`, because it can't match the member's `voices`. It never makes a
+  voice hosted. 2.0.0 didn't say. `errors/E-SCHEMA-voice-input-provider-case` keeps `W-STALE` in
+  `mayAlso`, unchanged; the new fixtures assert it.
+- **`schemas/manifest-v2.schema.json`:** `dossierType`, `displayName`, `location`; kind `plate`,
+  with its slug `variant`; `storyboardLabel`; `copiedFromSha256` (with `copiedFrom`),
+  `creditsUsed`, `voiceId`, `postProcess`; `references[].source`; the generated `provider`
+  pattern; a location bundle's kinds, and its views required to have `copiedFrom`; `plate`
+  only in a location bundle. **New:** `schemas/locations.schema.json`.
+- **Q9 and Q10** are closed by the user's decision of 2026-11-12: "locations needs to be
+  defined in PROJECT.md. a LOCATIONS page showing all of them should be synthesized from the
+  LOCATIONS.md".
+- **What SwiftProyecto must add:** `locations`, an optional string, to `PROJECT.md`'s model and
+  serializer. Until it does, SwiftProyecto keeps the key as an unknown key and writes it back
+  at the end of the front matter.
+- **Fixtures (154):** `valid/location`, `valid/view-families`, `valid/display-name`,
+  `valid/display-name-no-member-copy`, `valid/hosted-voice-provenance`,
+  `valid/hosted-voice-non-ascii-provider`; `errors/E-SCHEMA-voice-input-provider-non-ascii-case`,
+  `errors/E-SCHEMA-voice-input-malformed`, `errors/E-SCHEMA-location-kind`,
+  `errors/E-SCHEMA-location-view-not-imported`, `errors/E-SCHEMA-plate-variant`,
+  `errors/E-SCHEMA-plate-in-character`, `errors/E-SCHEMA-copied-from-sha256-alone`,
+  `errors/E-SCHEMA-post-process-no-chain`, `errors/E-TYPE-MISMATCH`,
+  `errors/E-TYPE-MISMATCH-location-entry`, `errors/E-CAST-locations-no-location`,
+  `errors/E-NAME-MISMATCH-location`; `warnings/W-SHAPE-plate`,
+  `warnings/W-SHAPE-imported-portrait`, `warnings/W-VARIANT-view-one-off`,
+  `warnings/W-VARIANT-view-bare-look`, `warnings/W-VARIANT-view-family-not-slug`,
+  `warnings/W-DISPLAY-NAME` and `warnings/W-ORPHAN-location`; for `PROJECT.md` and the page,
+  `valid/locations-no-key`, `valid/locations-no-project`, `valid/locations-index-elsewhere`,
+  `valid/locations-page-current`, `valid/locations-page-out-of-date`,
+  `errors/E-CAST-project-yaml`, `errors/E-CAST-project-locations-type`,
+  `errors/E-CAST-project-locations-absolute`, `errors/E-CAST-project-locations-outside`,
+  `errors/E-CAST-locations-yaml`, `errors/E-CAST-locations-type`,
+  `warnings/W-POINTER-locations-missing` and `warnings/W-POINTER-locations-directory`. A fixture
+  project with locations has a `PROJECT.md` naming its index, and `conformance.json` gains
+  `locationsTemplateVersion`, `locationsTemplateSha256` and `locationsPage`. No 2.0.0 fixture
+  changed.
+
 ## Format 2.0.0 (2026-11-12)
 
 Format 2 is released. The changes since rc.8:

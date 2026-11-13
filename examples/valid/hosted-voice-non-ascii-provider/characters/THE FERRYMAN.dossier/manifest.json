@@ -1,0 +1,134 @@
+{
+  "assets": [
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "kind": "description",
+      "path": "CHARACTER.md",
+      "provenance": {
+        "provider": "manual"
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "derivedFrom": [
+        {
+          "path": "images/portrait-108deaf9.png",
+          "role": "portrait",
+          "sha256": "108deaf992d40183ec3f119e9d2eba9cabac8c6a55b8f4c3157c43bd7db51ff0"
+        }
+      ],
+      "kind": "face",
+      "path": "images/face-3f84b78e.png",
+      "provenance": {
+        "artStyle": "flat placeholder shapes",
+        "box": {
+          "height": 100,
+          "width": 80,
+          "x": 50,
+          "y": 60
+        },
+        "engine": "fixture",
+        "provider": "personaje"
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "kind": "portrait",
+      "path": "images/portrait-108deaf9.png",
+      "provenance": {
+        "artStyle": "flat placeholder shapes",
+        "engine": "fixture",
+        "provider": "vinetas"
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "derivedFrom": [
+        {
+          "provider": "vöx",
+          "role": "voice",
+          "voiceId": "FIXTURE0VOICE0000001"
+        }
+      ],
+      "kind": "voiceSample",
+      "language": "en-US",
+      "model": "fixture-hosted-tts",
+      "path": "voice/sample-neutral.m4a",
+      "provenance": {
+        "instruct": "[calm]",
+        "instructApplied": "unverified",
+        "instructMethod": "audio-tag",
+        "model": "fixture-hosted-tts",
+        "provider": "diga",
+        "source": "sampleLine"
+      },
+      "sampleText": "Line three is open. Go ahead.",
+      "status": "selected",
+      "variant": "neutral"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "derivedFrom": [
+        {
+          "provider": "vöx",
+          "role": "voice",
+          "voiceId": "FIXTURE0VOICE0000001"
+        }
+      ],
+      "kind": "voiceSample",
+      "language": "en-US",
+      "model": "fixture-hosted-tts",
+      "path": "voice/sample-wry.m4a",
+      "provenance": {
+        "instruct": "Dry, a little amused.",
+        "instructApplied": "yes",
+        "instructMethod": "parameter",
+        "model": "fixture-hosted-tts",
+        "provider": "diga",
+        "source": "sampleLine"
+      },
+      "sampleText": "Nobody calls at this hour to say hello.",
+      "status": "selected",
+      "variant": "wry"
+    }
+  ],
+  "character": "THE FERRYMAN",
+  "files": [
+    {
+      "path": "CHARACTER.md",
+      "sha256": "3879a33cee0a3f1a62a02c6cc22aa2a6f3ab567e0dc27e5261e308ba1df46a6f",
+      "sizeBytes": 435
+    },
+    {
+      "path": "images/face-3f84b78e.png",
+      "sha256": "3f84b78e2ecc955210c6cdcbfaae6fe700b7249d1d0e3b2289e0281007e70dff",
+      "sizeBytes": 704
+    },
+    {
+      "path": "images/portrait-108deaf9.png",
+      "sha256": "108deaf992d40183ec3f119e9d2eba9cabac8c6a55b8f4c3157c43bd7db51ff0",
+      "sizeBytes": 940
+    },
+    {
+      "path": "voice/sample-neutral.m4a",
+      "sha256": "4174c9e12dcb15013aa749afedabe4668548c0f6da3250e5c7f8f649ec8f7b36",
+      "sizeBytes": 4124
+    },
+    {
+      "path": "voice/sample-wry.m4a",
+      "sha256": "4174c9e12dcb15013aa749afedabe4668548c0f6da3250e5c7f8f649ec8f7b36",
+      "sizeBytes": 4124
+    }
+  ],
+  "generator": {
+    "name": "dossier-format fixtures",
+    "version": "1"
+  },
+  "manifestChecksum": "8da96fd6dc965fd55e8539dd36b3f2864b6fa3003ed6852cd7501854237c4a57",
+  "manifestVersion": 2,
+  "role": "background",
+  "updatedAt": "2026-10-31T12:00:00Z"
+}

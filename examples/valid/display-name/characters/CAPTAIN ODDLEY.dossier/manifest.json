@@ -1,0 +1,75 @@
+{
+  "assets": [
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "kind": "description",
+      "path": "CHARACTER.md",
+      "provenance": {
+        "provider": "manual"
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "derivedFrom": [
+        {
+          "path": "images/portrait-73533563.png",
+          "role": "portrait",
+          "sha256": "735335637a63ff3f1c39ef9acb0c7923707a578680bb96a8dd7bc16360c7cda4"
+        }
+      ],
+      "kind": "face",
+      "path": "images/face-57761510.png",
+      "provenance": {
+        "artStyle": "flat placeholder shapes",
+        "box": {
+          "height": 100,
+          "width": 80,
+          "x": 50,
+          "y": 60
+        },
+        "engine": "fixture",
+        "provider": "personaje"
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "kind": "portrait",
+      "path": "images/portrait-73533563.png",
+      "provenance": {
+        "artStyle": "flat placeholder shapes",
+        "engine": "fixture",
+        "provider": "vinetas"
+      },
+      "status": "selected"
+    }
+  ],
+  "character": "CAPTAIN ODDLEY",
+  "displayName": "the captain",
+  "files": [
+    {
+      "path": "CHARACTER.md",
+      "sha256": "83406503c1ac7260bb63068591f26b4302a79453c233ef5bf4829d1c5408780a",
+      "sizeBytes": 439
+    },
+    {
+      "path": "images/face-57761510.png",
+      "sha256": "57761510b7d6265f89dd4c9dbaced4f0724884ff4dd259453b7c2f26471a5f73",
+      "sizeBytes": 703
+    },
+    {
+      "path": "images/portrait-73533563.png",
+      "sha256": "735335637a63ff3f1c39ef9acb0c7923707a578680bb96a8dd7bc16360c7cda4",
+      "sizeBytes": 938
+    }
+  ],
+  "generator": {
+    "name": "dossier-format fixtures",
+    "version": "1"
+  },
+  "manifestChecksum": "7c8868acf2f2cc0bf1c7f64236936eda8a363f79cf6181c88bd474dc973bc5cd",
+  "manifestVersion": 2,
+  "role": "background",
+  "updatedAt": "2026-10-31T12:00:00Z"
+}

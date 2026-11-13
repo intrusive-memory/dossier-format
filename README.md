@@ -25,14 +25,18 @@ A tool showing a dossier doesn't need the page to exist or to be current: it bui
 changes when the manifest does, and shows the stored one while the key still matches
 ([§11.1](docs/DOSSIER-FORMAT.md#111-the-preview-df-68-to-df-74)).
 
-> **Status: 2.0.0, released 2026-11-12.** Implementations pin the tag `v2.0.0`; what
-> changed in each release is in [CHANGELOG.md](CHANGELOG.md). The specification is
+> **Status: 2.1.0, released 2026-11-12.** Implementations pin the tag `v2.1.0`; what
+> changed in each release is in [CHANGELOG.md](CHANGELOG.md). 2.1.0
+> adds **location bundles**: a place's description and its plates, declared in `PROJECT.md`,
+> indexed in `LOCATIONS.md` and shown together on one synthesized LOCATIONS page
+> ([§16](docs/DOSSIER-FORMAT.md#16-location-bundles-df-79-to-df-84-df-96-to-df-99)). The specification is
 > [docs/DOSSIER-FORMAT.md](docs/DOSSIER-FORMAT.md) (format version 2), with
 > JSON Schemas in [schemas/](schemas) and the tier table in
 > [data/tiers.json](data/tiers.json). Conformance fixtures are in
 > [examples/](examples). Every property and the decision behind it is in
 > [docs/PROPERTY-INVENTORY.md](docs/PROPERTY-INVENTORY.md). The page template is in
-> [template/](template); the field list and design tokens are in [data/](data). Requirements:
+> [template/](template), and the LOCATIONS page template in [template-locations/](template-locations);
+> the field list and design tokens are in [data/](data). Requirements:
 > [REQUIREMENTS.md](REQUIREMENTS.md).
 
 ## Purpose

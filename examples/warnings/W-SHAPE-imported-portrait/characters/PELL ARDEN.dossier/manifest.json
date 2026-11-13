@@ -1,0 +1,46 @@
+{
+  "assets": [
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "kind": "description",
+      "path": "CHARACTER.md",
+      "provenance": {
+        "provider": "manual"
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "kind": "portrait",
+      "path": "images/portrait-6e2ea8ad.png",
+      "provenance": {
+        "copiedFrom": "references/pell-arden.png",
+        "copiedFromSha256": "6e2ea8ad30d0fa88a61d97b46050a4fa8c8dd0b8906ef5e7cccb10b9edb86980",
+        "provider": "import",
+        "source": "references/pell-arden.png"
+      },
+      "status": "selected"
+    }
+  ],
+  "character": "PELL ARDEN",
+  "files": [
+    {
+      "path": "CHARACTER.md",
+      "sha256": "68977816de73c9862cfa1dbf9db62346221ec1c10eff5269d22073f34e480d5c",
+      "sizeBytes": 431
+    },
+    {
+      "path": "images/portrait-6e2ea8ad.png",
+      "sha256": "6e2ea8ad30d0fa88a61d97b46050a4fa8c8dd0b8906ef5e7cccb10b9edb86980",
+      "sizeBytes": 702
+    }
+  ],
+  "generator": {
+    "name": "dossier-format fixtures",
+    "version": "1"
+  },
+  "manifestChecksum": "7f556634b53350aae26ef0cd6780d89ae2d4bd4a98d276d7f20a7f63603ba7a0",
+  "manifestVersion": 2,
+  "role": "background",
+  "updatedAt": "2026-10-31T12:00:00Z"
+}
