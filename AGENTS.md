@@ -1,7 +1,7 @@
 ---
 type: doc
 title: dossier-format — Agent Instructions
-updated: 2026-11-12
+updated: 2026-11-21
 ---
 
 # AGENTS.md
@@ -66,7 +66,8 @@ filled from that template. [REQUIREMENTS.md](REQUIREMENTS.md) is what the standa
 say (DF-1 to DF-100), with the deliverables and the open questions. 2.1.0 adds location bundles (§16), declared in
 `PROJECT.md` and shown on one synthesized LOCATIONS page whose template is
 `template-locations/` (version 0.1.0), and the fields a production's bundles already
-use (DF-79 to DF-99).
+use (DF-79 to DF-99). 2.2.0, on `development` and not yet released, adds accepting a
+stale asset (`accepted`, §7, DF-100).
 
 ## Rules for working here
 

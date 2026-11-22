@@ -1,6 +1,6 @@
 ---
 type: doc
-updated: 2026-11-12
+updated: 2026-11-21
 status: released
 ---
 
@@ -29,7 +29,8 @@ changes when the manifest does, and shows the stored one while the key still mat
 > changed in each release is in [CHANGELOG.md](CHANGELOG.md). 2.1.0
 > adds **location bundles**: a place's description and its plates, declared in `PROJECT.md`,
 > indexed in `LOCATIONS.md` and shown together on one synthesized LOCATIONS page
-> ([§16](docs/DOSSIER-FORMAT.md#16-location-bundles-df-79-to-df-84-df-96-to-df-99)). The specification is
+> ([§16](docs/DOSSIER-FORMAT.md#16-location-bundles-df-79-to-df-84-df-96-to-df-99)). 2.2.0, in
+> development, lets an author accept a stale asset in the manifest (§7, DF-100). The specification is
 > [docs/DOSSIER-FORMAT.md](docs/DOSSIER-FORMAT.md) (format version 2), with
 > JSON Schemas in [schemas/](schemas) and the tier table in
 > [data/tiers.json](data/tiers.json). Conformance fixtures are in
