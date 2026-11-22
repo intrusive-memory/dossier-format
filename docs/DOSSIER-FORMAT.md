@@ -2,7 +2,7 @@
 type: specification
 state: released
 formatVersion: 2
-updated: 2026-11-12
+updated: 2026-11-21
 ---
 
 # The dossier format, version 2
@@ -331,6 +331,7 @@ list. An asset whose `path` has no `files` entry is `E-ASSET-NO-FILE`.
 | `createdAt` | yes | timestamp | When the file was made (a generator's own time where known), not when it was added. |
 | `provenance` | yes | object (§6) | How it was made. |
 | `derivedFrom` | on derived kinds | array (§7) | Its inputs. |
+| `accepted` | no | array (§7) | Mismatches the author accepted, so they don't make the asset stale. Not on a `dossier`. [DF-100] |
 | `review` | no | object | `{passed: [id], failed: [id], notes, reviewedAt}`; IDs from [`data/review.json`](../data/review.json). Advisory: never blocks selection. |
 | `model` | `voiceSample` | `1.7b`, `0.6b`, … | The model size the sample was rendered with. |
 | `language` | no | BCP 47 | On a `voiceSample`. Default: the character's first `languages` entry. |
@@ -555,7 +556,7 @@ moves it to `postProcess`, with `tool` as an object, `{"name": "<the tool string
 | `role` | no | Why it was sent: `portrait`, `face`, `view:<variant>`, `expression:<variant>`, `plate:<variant>` (§16.4), or a tool's own word. |
 | `originalWidth`, `originalHeight`, `effectiveWidth`, `effectiveHeight` | no | As the engine reports them. |
 
-## 7. `derivedFrom` and staleness [DF-27, DF-46, DF-76, DF-77, DF-93, DF-94, D4]
+## 7. `derivedFrom` and staleness [DF-27, DF-46, DF-76, DF-77, DF-93, DF-94, DF-100, D4]
 
 `derivedFrom` is an array of input records. Each is one of:
 
@@ -659,13 +660,13 @@ and the hash `bf956f8fe4278f30b800f8899b3a634ef1ac15ad101796b31e9d592fa0b73168`.
 A `selected` asset is **stale** when any input's `sha256` differs from the current
 selected asset of that role, read from its `files` entry (or the current member,
 bundle, template), or when that role has no selected asset, or when a `voice` input
-(below) is stale. A `candidate` or `rejected` asset is never reported, and neither is an
-imported asset (above).
+(below) is stale, unless the asset has accepted that mismatch (below). A `candidate` or
+`rejected` asset is never reported, and neither is an imported asset (above).
 The current template is defined in §11. Changing the character's `artStyle` (§9.1)
 also makes its images stale: a selected image with a `provenance.artStyle` that differs from the current
-front-matter `artStyle` is stale. An image with no `provenance.artStyle` isn't
-compared. No other character is affected. Stale assets are
-flagged (`W-STALE`), never deleted or demoted.
+front-matter `artStyle` is stale, unless it has accepted that `artStyle` (below). An image
+with no `provenance.artStyle` isn't compared. No other character is affected. Stale assets
+are flagged (`W-STALE`), never deleted or demoted.
 
 **An input that has left the bundle.** An input's `sha256`, and a reference's (§6), is
 the hash of the bytes actually sent. When a required input's bytes are no longer in
@@ -727,6 +728,96 @@ holds `FIXTURE0VOICE0000001`, so the input is current. When the member is change
 `voices: {}` (`examples/warnings/W-STALE-input-voice-provider-absent`), there is no
 `vocalsmith` key, so it is stale too. Opened without a `CAST.md`, the same bundle has no
 member, the input isn't checked, and the sample isn't stale.
+
+**Accepting a stale asset** [DF-100]. A person may judge that a stale asset is still right:
+the portrait was reselected, and the front view made from the old one still fits. An input's
+`sha256` is the hash of the bytes sent (above), so rewriting `derivedFrom` to the new
+selection would record something that never happened. Instead, a selected asset's optional
+`accepted` array records the judgement, one entry per accepted mismatch. Accepting never
+changes `derivedFrom` or `provenance`, and it deletes and demotes nothing. (This isn't
+*refresh* accepting a changed file, §5.6, which changes `files`.)
+
+| Entry | Accepts |
+|-------|---------|
+| `{"role": "<role>", "sha256": "<hash>", "acceptedAt": "<timestamp>"}` | The inputs of that role. `role` is `portrait`, `face`, `vox` or `description`. `sha256` is the hash of that role's selected asset, from its `files` entry, when the acceptance was made. |
+| `{"artStyle": "<style>", "acceptedAt": "<timestamp>"}` | The `artStyle` comparison. `artStyle` is the front-matter `artStyle` (§9.1) when the acceptance was made, a non-empty string. |
+
+`acceptedAt` is a timestamp (§1): when the person accepted. Neither shape has any other key.
+
+When the staleness of a selected asset is computed:
+
+1. An input of role R whose `sha256` differs from R's current selection is treated as
+   current when the asset has an entry with role R whose `sha256` equals the current
+   selection's hash. A role with no selected asset has no current hash, so no entry
+   matches it.
+2. A `provenance.artStyle` that differs from the front-matter `artStyle` is treated as
+   current when the asset has an entry whose `artStyle` equals the front-matter `artStyle`.
+   Both compare exactly, as strings. With no front-matter `artStyle`, no entry matches.
+3. Nothing else changes. An entry only ever makes a mismatch current: an entry that matches
+   nothing has no effect, and an entry never makes an asset stale.
+
+So an acceptance is of a value, not of a change. When the selection or the front matter
+changes again, the entry no longer matches, and the asset is stale again until it is
+accepted again.
+
+**What can't be accepted.** There is no entry for a `castMember`, `bundle`, `template` or
+`voice` input, and an entry of any other shape or role is `E-SCHEMA`. The first three are a
+page's inputs: a page is a render, made again from the bundle (§11), so its staleness is a
+reason to render, not a judgement to record. A `voice` input names the voice a sample *is*:
+the member no longer naming it means the sample is of another voice, and whether the voice is
+hosted (§8.3) reads that comparison. A `dossier` asset MUST NOT have `accepted`
+(`E-SCHEMA`).
+
+**Where it applies.** Only a `selected` asset's entries are read. A `candidate` or `rejected`
+asset is never stale, and an imported asset (above) or a plate (§16.4) never is either, so
+their entries have no effect and aren't an error. A writer keeps an asset's entries when it
+demotes the asset, so selecting it again restores the acceptance while the entries still
+match.
+
+**Writers.** Acceptance is the author's judgement. A writer MUST NOT add an entry except at
+a person's request. To accept a stale asset, it adds one entry for each role whose inputs
+make the asset stale, with the current selection's hash, and one `artStyle` entry when the
+`artStyle` comparison does, each with the time of the request as `acceptedAt`. A writer MAY
+drop an entry that no longer matches, and MUST otherwise preserve the entries. The order of
+the entries has no meaning. Accepting changes only `manifest.json`, which isn't in `files`, so
+it doesn't change the `bundle` input of the page (§11).
+
+**Validators.** An accepted mismatch isn't a finding: the asset isn't stale, and no `W-STALE`
+is reported for it. There is no code for an acceptance. A tool MAY show that a selected asset
+stands by acceptance, from the manifest. A reader of a version before 2.2.0 ignores `accepted`
+as an unknown asset key (§5.4) and reports the asset `W-STALE`, as it did before.
+
+Worked example (`examples/valid/accepted-stale-view` and
+`examples/warnings/W-STALE-accepted-older-portrait`). A front view was made from the
+portrait `images/portrait-f65b324c.png`, which is now a candidate. The selected portrait is
+`images/portrait-3d7967cf.png`, with the `files` hash
+`3d7967cf98c8f532ba194c4bb1d9ba6a641b2fb7c84f8de9e427f8651086c394`. The view's input differs,
+so the view is stale, and the author accepts it. Its entry is now
+
+```json
+{
+  "accepted": [
+    {"acceptedAt": "2026-11-20T09:30:00Z", "role": "portrait", "sha256": "3d7967cf98c8f532ba194c4bb1d9ba6a641b2fb7c84f8de9e427f8651086c394"}
+  ],
+  "derivedFrom": [
+    {"path": "images/portrait-f65b324c.png", "role": "portrait", "sha256": "f65b324c40943eced863282c9f4c8eda7433c4d71d4416e7353fab242ea506d4"}
+  ],
+  "kind": "view",
+  "variant": "front"
+}
+```
+
+(other keys left out). The entry's role is `portrait` and its hash is the selected portrait's,
+so the input is treated as current, and the view isn't stale. Later a third portrait,
+`images/portrait-cfe63dbc.png`, is selected. Its hash,
+`cfe63dbcb1a796828def1a5a1bad79d2546ca4b4833ecb979de568f23bf17a97`, is neither the input's nor
+the entry's, so the view is stale again (`W-STALE`).
+
+Likewise for the art style (`examples/valid/accepted-art-style`): the images were made in
+`flat placeholder shapes`, the front matter now says `woodcut`, and each image has the entry
+`{"artStyle": "woodcut", "acceptedAt": "2026-11-20T09:30:00Z"}`, so neither is stale. Change
+the front matter to `linocut` (`examples/warnings/W-STALE-accepted-art-style-changed-again`)
+and the entries match nothing.
 
 ## 8. Kinds
 
@@ -1235,7 +1326,7 @@ storyboard panel recording its references) records their `sha256`, and finds the
 by `sha256` through the manifest. A recorded hash names those bytes, so after refresh
 accepts a change to the file, that hash no longer finds it.
 
-## 14. Validation [DF-54 to DF-57, DF-80, DF-88, DF-96]
+## 14. Validation [DF-54 to DF-57, DF-80, DF-88, DF-96, DF-100]
 
 A validator never changes anything. Each finding has a stable code. A fault
 that a specific code below names may also break the schema; the specific code
@@ -1261,7 +1352,7 @@ MUST be reported and `E-SCHEMA` MAY be reported with it.
 | `E-KIND-RETIRED` | error | A retired kind in a version 2 manifest |
 | `E-SCHEMA` | error | The manifest fails its schema |
 | `W-UNCLASSIFIED` | warning | A file with no asset entry |
-| `W-STALE` | warning | A derived asset's inputs changed, or the member no longer names its hosted voice (§7) |
+| `W-STALE` | warning | A derived asset's inputs changed, or the member no longer names its hosted voice, and the change isn't accepted (§7) |
 | `W-SHAPE` | warning | Wrong aspect ratio for the kind, on an asset that isn't imported (§8.1) |
 | `W-VARIANT` | warning | An `expression` variant outside the standard set, or a `view` variant outside the standard set and its families (§8.1) |
 | `W-SIDECAR` | warning | A `.json` sidecar in `images/` |
@@ -1298,7 +1389,8 @@ invalid is a new version. The dossier template and the LOCATIONS page template
 listed in `CHANGELOG.md`. A minor release (2.1.0) adds only what is optional, so a
 2.0.0 reader still opens every 2.1.0 character bundle that uses nothing new; it reports a
 location bundle's plates as `E-SCHEMA`, which is why §16 marks location bundles with
-`dossierType`.
+`dossierType`. Likewise 2.2.0 adds `accepted` (§7), which an older reader ignores, so it
+reports an accepted asset as `W-STALE`.
 
 ## 16. Location bundles [DF-79 to DF-84, DF-96 to DF-99]
 

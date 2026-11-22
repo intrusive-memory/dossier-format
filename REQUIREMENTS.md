@@ -1,7 +1,7 @@
 ---
 type: requirements
 state: draft
-updated: 2026-11-12
+updated: 2026-11-21
 sequence: 1 — first on the critical path of the Personaje effort
 ---
 
@@ -138,6 +138,7 @@ characters/<CHARACTER>.dossier/
 | DF-93 | **Lowercase is Unicode's default full lowercase mapping,** in the member's normal form and in a `voice` record's `provider`. A `provider` is lowercase when lowercasing it changes nothing; `vÖx` isn't. The schema states this as a generated pattern, exact for Unicode 17.0; the text decides for later code points. |
 | DF-94 | **A malformed `voice` record is stale.** A `voice` record with no `provider` or `voiceId`, with either not a non-empty string, or with a `provider` that isn't lowercase is `E-SCHEMA`, and, when there is a member, its asset is also `W-STALE`, because it can't match the member's `voices`. It never makes a voice hosted. |
 | DF-95 | **Project-relative sources.** `provenance.source` is allowed on any kind: on a `voiceSample` the line's `file:line` or `sampleLine`, as before, and on another kind the project-relative path the content came from. A `references` entry may carry `source`, the project-relative path of an image sent that isn't in the bundle. Both are informational. |
+| DF-100 | **Accepting a stale asset.** A selected asset may carry `accepted`, an array of entries, each recording one mismatch the author accepted: `{role, sha256, acceptedAt}` for a `portrait`, `face`, `vox` or `description` input, with the hash of that role's selection at the time, or `{artStyle, acceptedAt}` for the front-matter `artStyle` at the time. Computing staleness, an input that differs from its role's current selection is current when an entry for that role has the current selection's hash, and a differing `provenance.artStyle` is current when an entry has the current front-matter `artStyle`. A later change no longer matches, and the asset is stale again. Accepting never changes `derivedFrom` or `provenance`, and deletes or demotes nothing. `castMember`, `bundle`, `template` and `voice` inputs can't be accepted, and a `dossier` asset can't have `accepted` (`E-SCHEMA`). Only a selected asset's entries are read. A writer adds entries only at a person's request and MAY drop one that no longer matches. An accepted mismatch is no finding: no `W-STALE`, and no code of its own. Requested 2026-11-21 by the user, for an editing app's "accept as is". |
 
 ## 7. Asset kinds and tiers
 

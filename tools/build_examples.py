@@ -828,6 +828,29 @@ HOSTED = "vocalsmith"  # An invented hosted provider; its key, as CAST.md writes
 HOSTED_VOICE = "FIXTURE0VOICE0000001"  # Invented: no service has this voice.
 
 
+def reselected(older=0):
+    """§7, DF-100: the portrait was reselected after the front view was made from an earlier one.
+
+    The view's input is the first portrait, now a candidate. With `older`, that many more
+    portraits came between, each a candidate now. The face was cut again from the selected one.
+    Returns the bundle and the portraits' bytes, oldest first."""
+    b = Bundle(PELL, "background")
+    b.put("CHARACTER.md", short_description(PELL, "background"), "description")
+    portraits = [png(180, 320, PELL + f"portrait {n}") for n in range(older + 2)]
+    for data in portraits[:-1]:
+        b.image("portrait", data, status="candidate")
+    b.image("portrait", portraits[-1])
+    b.image("face", face_crop(portraits[-1]), derivedFrom=[b.input("portrait")],
+            provenance={"provider": "personaje", "box": {"x": 50, "y": 60, "width": 80, "height": 100}})
+    first = portraits[0]
+    b.image("view", png(180, 320, PELL + "front"), "front",
+            derivedFrom=[{"role": "portrait", "path": f"images/portrait-{sha(first)[:8]}.png", "sha256": sha(first)}])
+    return b, portraits
+
+
+ACCEPTED = "2026-11-20T09:30:00Z"  # When the fixtures' acceptances were made (§7, DF-100).
+
+
 def hosted_voice_bundle(name, voice_id=HOSTED_VOICE, b=None):
     """§7, DF-76: samples made with a hosted voice, named by the member as a bare voice ID. No vox."""
     b = b or base(name)
@@ -1549,6 +1572,23 @@ Said the way it's spelled.[^one]
             note="The member's key is VÖX; Unicode's full lowercase mapping gives vöx, which is the records' provider, so they are current and lowercase.")
 
 
+    # --- 2.2.0 ---
+
+    # §7, DF-100: the author accepted the stale front view against the current portrait.
+    b, portraits = reselected()
+    b.selected("view", "front")["accepted"] = [{"role": "portrait", "sha256": sha(portraits[-1]), "acceptedAt": ACCEPTED}]
+    fixture("valid", "accepted-stale-view", [b], [member(b)], complete=True,
+            note="The front view's portrait input is the earlier portrait, now a candidate, so it would be W-STALE. Its accepted entry has the selected portrait's hash, so the input is treated as current. derivedFrom still records the portrait that was sent.")
+
+    # §7, DF-100: the art style changed, and the author kept the images.
+    b = base(description=short_description(PELL, "background", art="woodcut"))
+    for asset in b.assets:
+        if asset["kind"] in ("portrait", "face"):
+            asset["accepted"] = [{"artStyle": "woodcut", "acceptedAt": ACCEPTED}]
+    fixture("valid", "accepted-art-style", [b], [member(b)], complete=True,
+            note="warnings/W-STALE-art-style with each image accepting the front matter's woodcut. provenance.artStyle still records the style the images were made in.")
+
+
 # --- errors ------------------------------------------------------------------
 
 def errors():
@@ -1769,6 +1809,22 @@ def errors():
     fixture("errors", "E-NAME-MISMATCH-location", [loc], [], ["E-NAME-MISMATCH"], locations=[location_entry(loc)],
             note="LOCATION.md's location is HARBOR LIGHT; the bundle is HARBOR-LIGHT.")
 
+
+    # --- 2.2.0 ---
+
+    # §7, DF-100: a page is a render, so it can't be accepted.
+    b = base(); m = member(b); b.page(m)
+    b.selected("dossier")["accepted"] = [{"role": "description", "sha256": b.input("description")["sha256"], "acceptedAt": ACCEPTED}]
+    err("E-SCHEMA-accepted-on-dossier", b, members=[m], codes=["E-SCHEMA"],
+        note="The page has an accepted entry. A dossier asset can't have one; its entry would match nothing anyway, since the page is current.")
+
+    # §7, DF-100: a hosted voice can't be accepted, and the sample stays stale.
+    b = hosted_voice_bundle("THE NIGHT CALLER")
+    for asset in b.assets:
+        if asset["kind"] == "voiceSample":
+            asset["accepted"] = [{"role": "voice", "provider": HOSTED, "voiceId": "FIXTURE0VOICE0000002", "acceptedAt": ACCEPTED}]
+    err("E-SCHEMA-accepted-voice", b, members=[hosted_member(b, "FIXTURE0VOICE0000002")], codes=["E-SCHEMA", "W-STALE"],
+        note="warnings/W-STALE-input-voice with each sample trying to accept the member's new voice ID. There is no entry for a voice input, so the entries are E-SCHEMA and the samples are still W-STALE.")
 
 # --- warnings ----------------------------------------------------------------
 
@@ -1998,6 +2054,23 @@ def warnings():
     loc = location_bundle()
     fixture("warnings", "W-POINTER-locations-directory", [loc], [], ["W-POINTER"], project_text=project_md("locations"), bundle_path=loc.dir,
             note="PROJECT.md's locations reaches a directory, not a file.")
+
+
+    # --- 2.2.0 ---
+
+    # §7, DF-100: the acceptance is of an earlier selection, and the portrait has changed again since.
+    b, portraits = reselected(older=1)
+    b.selected("view", "front")["accepted"] = [{"role": "portrait", "sha256": sha(portraits[1]), "acceptedAt": ACCEPTED}]
+    warn("W-STALE-accepted-older-portrait", b, codes=["W-STALE"],
+         note="The view was made from the first portrait and accepted against the second. The third is selected now, so the entry matches nothing and the view is stale again.")
+
+    # §7, DF-100: the art style was accepted, then changed again.
+    b = base(description=short_description(PELL, "background", art="linocut"))
+    for asset in b.assets:
+        if asset["kind"] in ("portrait", "face"):
+            asset["accepted"] = [{"artStyle": "woodcut", "acceptedAt": ACCEPTED}]
+    warn("W-STALE-accepted-art-style-changed-again", b, codes=["W-STALE"],
+         note="The images accepted woodcut; the front matter now says linocut, so the entries match nothing.")
 
 
 # --- data --------------------------------------------------------------------
