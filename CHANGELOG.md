@@ -1,9 +1,33 @@
 ---
 type: changelog
-updated: 2026-11-12
+updated: 2026-11-23
 ---
 
 # Changelog
+
+## Format 2.2.0 (2026-11-23)
+
+Templates unchanged: `template/` 0.1.1, `template-locations/` 0.1.0. A minor release: the one
+addition is optional, so `manifestVersion` stays 2 and no 2.1.0 fixture's result changes.
+
+- **§7, §5.4, §14, DF-100: accepting a stale asset.** A selected asset may carry `accepted`,
+  the mismatches its author judged fine, so they don't make it stale. Each entry accepts one:
+  `{role, sha256, acceptedAt}` for a `portrait`, `face`, `vox` or `description` input, with the
+  hash of that role's selection when it was accepted, or `{artStyle, acceptedAt}` for the
+  front-matter `artStyle` then. When staleness is computed, an input that differs from its role's
+  current selection is current if an entry for that role has the current selection's hash, and a
+  differing `provenance.artStyle` is current if an entry has the current front-matter `artStyle`.
+  A later change no longer matches, so the asset is stale again. `derivedFrom` and `provenance`
+  still record what was sent: accepting changes neither, and deletes or demotes nothing.
+  `castMember`, `bundle`, `template` and `voice` inputs can't be accepted, and a `dossier` asset
+  can't have `accepted` (`E-SCHEMA`). Only a selected asset's entries are read. A writer adds
+  entries only at a person's request and MAY drop one that no longer matches. An accepted
+  mismatch isn't reported: no `W-STALE`, and no new code. An older reader ignores `accepted` as
+  an unknown asset key and reports `W-STALE`, as before. Schema: `accepted` in
+  `schemas/manifest-v2.schema.json`. Fixtures: `valid/accepted-stale-view`,
+  `valid/accepted-art-style`, `warnings/W-STALE-accepted-older-portrait`,
+  `warnings/W-STALE-accepted-art-style-changed-again`, `errors/E-SCHEMA-accepted-on-dossier`,
+  `errors/E-SCHEMA-accepted-voice`.
 
 ## Format 2.1.0 (2026-11-12)
 

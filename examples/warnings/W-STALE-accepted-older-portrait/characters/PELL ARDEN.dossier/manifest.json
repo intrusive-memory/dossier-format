@@ -1,0 +1,137 @@
+{
+  "assets": [
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "kind": "description",
+      "path": "CHARACTER.md",
+      "provenance": {
+        "provider": "manual"
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "derivedFrom": [
+        {
+          "path": "images/portrait-cfe63dbc.png",
+          "role": "portrait",
+          "sha256": "cfe63dbcb1a796828def1a5a1bad79d2546ca4b4833ecb979de568f23bf17a97"
+        }
+      ],
+      "kind": "face",
+      "path": "images/face-f4d3962e.png",
+      "provenance": {
+        "artStyle": "flat placeholder shapes",
+        "box": {
+          "height": 100,
+          "width": 80,
+          "x": 50,
+          "y": 60
+        },
+        "engine": "fixture",
+        "provider": "personaje"
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "kind": "portrait",
+      "path": "images/portrait-3d7967cf.png",
+      "provenance": {
+        "artStyle": "flat placeholder shapes",
+        "engine": "fixture",
+        "provider": "vinetas"
+      },
+      "status": "candidate"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "kind": "portrait",
+      "path": "images/portrait-cfe63dbc.png",
+      "provenance": {
+        "artStyle": "flat placeholder shapes",
+        "engine": "fixture",
+        "provider": "vinetas"
+      },
+      "status": "selected"
+    },
+    {
+      "createdAt": "2026-10-31T11:00:00Z",
+      "kind": "portrait",
+      "path": "images/portrait-f65b324c.png",
+      "provenance": {
+        "artStyle": "flat placeholder shapes",
+        "engine": "fixture",
+        "provider": "vinetas"
+      },
+      "status": "candidate"
+    },
+    {
+      "accepted": [
+        {
+          "acceptedAt": "2026-11-20T09:30:00Z",
+          "role": "portrait",
+          "sha256": "3d7967cf98c8f532ba194c4bb1d9ba6a641b2fb7c84f8de9e427f8651086c394"
+        }
+      ],
+      "createdAt": "2026-10-31T11:00:00Z",
+      "derivedFrom": [
+        {
+          "path": "images/portrait-f65b324c.png",
+          "role": "portrait",
+          "sha256": "f65b324c40943eced863282c9f4c8eda7433c4d71d4416e7353fab242ea506d4"
+        }
+      ],
+      "kind": "view",
+      "path": "images/view-front-b31b46b8.png",
+      "provenance": {
+        "artStyle": "flat placeholder shapes",
+        "engine": "fixture",
+        "provider": "vinetas"
+      },
+      "status": "selected",
+      "variant": "front"
+    }
+  ],
+  "character": "PELL ARDEN",
+  "files": [
+    {
+      "path": "CHARACTER.md",
+      "sha256": "68977816de73c9862cfa1dbf9db62346221ec1c10eff5269d22073f34e480d5c",
+      "sizeBytes": 431
+    },
+    {
+      "path": "images/face-f4d3962e.png",
+      "sha256": "f4d3962ee1bd626ce6022ef4f493672ab049a619301bf93be12788b141bacb1c",
+      "sizeBytes": 707
+    },
+    {
+      "path": "images/portrait-3d7967cf.png",
+      "sha256": "3d7967cf98c8f532ba194c4bb1d9ba6a641b2fb7c84f8de9e427f8651086c394",
+      "sizeBytes": 941
+    },
+    {
+      "path": "images/portrait-cfe63dbc.png",
+      "sha256": "cfe63dbcb1a796828def1a5a1bad79d2546ca4b4833ecb979de568f23bf17a97",
+      "sizeBytes": 942
+    },
+    {
+      "path": "images/portrait-f65b324c.png",
+      "sha256": "f65b324c40943eced863282c9f4c8eda7433c4d71d4416e7353fab242ea506d4",
+      "sizeBytes": 939
+    },
+    {
+      "path": "images/view-front-b31b46b8.png",
+      "sha256": "b31b46b8f43dc5e3fb5c49e2204321e0017659b7e3942c448770ce1f46bda11c",
+      "sizeBytes": 939
+    }
+  ],
+  "generator": {
+    "name": "dossier-format fixtures",
+    "version": "1"
+  },
+  "manifestChecksum": "4eb2e68600413e6f85385eb724db4529f0ff68cd95fc58ec8204eaae3b4e3e0c",
+  "manifestVersion": 2,
+  "role": "background",
+  "updatedAt": "2026-10-31T12:00:00Z"
+}

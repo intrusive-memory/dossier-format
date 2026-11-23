@@ -353,6 +353,26 @@
       "note": "The member's key is VÖX; Unicode's full lowercase mapping gives vöx, which is the records' provider, so they are current and lowercase."
     },
     {
+      "path": "valid/accepted-stale-view",
+      "bundle": "characters/PELL ARDEN.dossier",
+      "verdict": "valid",
+      "codes": [],
+      "mayAlso": [],
+      "complete": true,
+      "missingRequired": [],
+      "note": "The front view's portrait input is the earlier portrait, now a candidate, so it would be W-STALE. Its accepted entry has the selected portrait's hash, so the input is treated as current. derivedFrom still records the portrait that was sent."
+    },
+    {
+      "path": "valid/accepted-art-style",
+      "bundle": "characters/PELL ARDEN.dossier",
+      "verdict": "valid",
+      "codes": [],
+      "mayAlso": [],
+      "complete": true,
+      "missingRequired": [],
+      "note": "warnings/W-STALE-art-style with each image accepting the front matter's woodcut. provenance.artStyle still records the style the images were made in."
+    },
+    {
       "path": "errors/E-VERSION",
       "bundle": "characters/PELL ARDEN.dossier",
       "verdict": "invalid",
@@ -997,6 +1017,27 @@
       ],
       "mayAlso": [],
       "note": "LOCATION.md's location is HARBOR LIGHT; the bundle is HARBOR-LIGHT."
+    },
+    {
+      "path": "errors/E-SCHEMA-accepted-on-dossier",
+      "bundle": "characters/PELL ARDEN.dossier",
+      "verdict": "invalid",
+      "codes": [
+        "E-SCHEMA"
+      ],
+      "mayAlso": [],
+      "note": "The page has an accepted entry. A dossier asset can't have one; its entry would match nothing anyway, since the page is current."
+    },
+    {
+      "path": "errors/E-SCHEMA-accepted-voice",
+      "bundle": "characters/THE NIGHT CALLER.dossier",
+      "verdict": "invalid",
+      "codes": [
+        "E-SCHEMA",
+        "W-STALE"
+      ],
+      "mayAlso": [],
+      "note": "warnings/W-STALE-input-voice with each sample trying to accept the member's new voice ID. There is no entry for a voice input, so the entries are E-SCHEMA and the samples are still W-STALE."
     },
     {
       "path": "warnings/W-UNCLASSIFIED",
@@ -1719,6 +1760,30 @@
       ],
       "mayAlso": [],
       "note": "PROJECT.md's locations reaches a directory, not a file."
+    },
+    {
+      "path": "warnings/W-STALE-accepted-older-portrait",
+      "bundle": "characters/PELL ARDEN.dossier",
+      "verdict": "warnings",
+      "codes": [
+        "W-STALE"
+      ],
+      "mayAlso": [],
+      "complete": true,
+      "missingRequired": [],
+      "note": "The view was made from the first portrait and accepted against the second. The third is selected now, so the entry matches nothing and the view is stale again."
+    },
+    {
+      "path": "warnings/W-STALE-accepted-art-style-changed-again",
+      "bundle": "characters/PELL ARDEN.dossier",
+      "verdict": "warnings",
+      "codes": [
+        "W-STALE"
+      ],
+      "mayAlso": [],
+      "complete": true,
+      "missingRequired": [],
+      "note": "The images accepted woodcut; the front matter now says linocut, so the entries match nothing."
     }
   ]
 }
