@@ -1,7 +1,7 @@
 ---
 type: doc
 title: dossier-format — Agent Instructions
-updated: 2026-11-21
+updated: 2026-11-23
 ---
 
 # AGENTS.md
@@ -59,14 +59,14 @@ The standard, and only the standard:
 
 ## Status
 
-Version 2.1.0, released 2026-11-12. Written: the specification (`docs/DOSSIER-FORMAT.md`), the schemas, the
+Version 2.2.0, released 2026-11-23. Written: the specification (`docs/DOSSIER-FORMAT.md`), the schemas, the
 data files (`data/`), the conformance fixtures (`examples/`) and the page template
 (`template/`, version 0.1.1), whose rules §11 makes normative. The fixture pages are
 filled from that template. [REQUIREMENTS.md](REQUIREMENTS.md) is what the standard must
 say (DF-1 to DF-100), with the deliverables and the open questions. 2.1.0 adds location bundles (§16), declared in
 `PROJECT.md` and shown on one synthesized LOCATIONS page whose template is
 `template-locations/` (version 0.1.0), and the fields a production's bundles already
-use (DF-79 to DF-99). 2.2.0, on `development` and not yet released, adds accepting a
+use (DF-79 to DF-99). 2.2.0 adds accepting a
 stale asset (`accepted`, §7, DF-100).
 
 ## Rules for working here

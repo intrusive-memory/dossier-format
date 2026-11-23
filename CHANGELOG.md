@@ -1,11 +1,11 @@
 ---
 type: changelog
-updated: 2026-11-21
+updated: 2026-11-23
 ---
 
 # Changelog
 
-## Format 2.2.0 (unreleased)
+## Format 2.2.0 (2026-11-23)
 
 Templates unchanged: `template/` 0.1.1, `template-locations/` 0.1.0. A minor release: the one
 addition is optional, so `manifestVersion` stays 2 and no 2.1.0 fixture's result changes.
